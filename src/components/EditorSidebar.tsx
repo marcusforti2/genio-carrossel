@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Plus, Trash2, GripVertical, User } from "lucide-react";
 
 interface SlideEditorPanelProps {
   slide: SlideData;
@@ -131,6 +131,18 @@ const EditorSidebar = ({
 
         {tab === "profile" && (
           <div className="space-y-4 animate-fade-in">
+            {/* Avatar preview */}
+            <div className="flex items-center gap-3 pb-2">
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-border bg-secondary flex items-center justify-center">
+                {carousel.avatarUrl ? (
+                  <img src={carousel.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-5 h-5 text-muted-foreground" />
+                )}
+              </div>
+              <p className="text-[10px] text-muted-foreground">Foto vem do seu perfil</p>
+            </div>
+
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Nome</Label>
               <Input

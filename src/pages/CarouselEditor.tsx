@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
 import GenerateDialog from "@/components/GenerateDialog";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Sparkles, User, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Sparkles, User, LogOut, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CarouselEditor = () => {
@@ -14,8 +15,34 @@ const CarouselEditor = () => {
   const [selectedSlide, setSelectedSlide] = useState(0);
   const [generateOpen, setGenerateOpen] = useState(false);
   const [caption, setCaption] = useState("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
+
+  // Auto-load profile data
+  useEffect(() => {
+    if (!user || profileLoaded) return;
+    const loadProfile = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data) {
+        setCarousel((prev) => ({
+          ...prev,
+          profileName: data.display_name || prev.profileName,
+          profileHandle: data.handle || prev.profileHandle,
+          brandingText: data.branding_text || prev.brandingText,
+          brandingSubtext: data.branding_subtext || prev.brandingSubtext,
+          avatarUrl: data.avatar_url || "",
+        }));
+      }
+      setProfileLoaded(true);
+    };
+    loadProfile();
+  }, [user, profileLoaded]);
 
   const updateSlide = (index: number, slide: SlideData) => {
     const newSlides = [...carousel.slides];
@@ -99,7 +126,6 @@ const CarouselEditor = () => {
 
         {/* Canvas */}
         <div className="flex-1 flex items-center justify-center relative bg-background">
-          {/* Slide preview */}
           <div className="relative" style={{ width: "340px" }}>
             <AnimatePresence mode="wait">
               <motion.div
@@ -160,7 +186,7 @@ const CarouselEditor = () => {
           </div>
         </div>
       </div>
-      {/* Caption display */}
+
       {caption && (
         <div className="border-t border-border px-5 py-3 max-h-32 overflow-y-auto">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Legenda gerada</p>

@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, Loader2, Sparkles, Wand2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ interface ProfileData {
   beliefs: string;
   tone_of_voice: string;
   value_proposition: string;
+  avatar_url: string;
 }
 
 const ProfilePage = () => {
@@ -28,7 +29,9 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [parsing, setParsing] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [rawText, setRawText] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<ProfileData>({
     display_name: "",
     handle: "",
@@ -40,6 +43,7 @@ const ProfilePage = () => {
     beliefs: "",
     tone_of_voice: "",
     value_proposition: "",
+    avatar_url: "",
   });
 
   useEffect(() => {
@@ -63,12 +67,59 @@ const ProfilePage = () => {
           beliefs: data.beliefs || "",
           tone_of_voice: data.tone_of_voice || "",
           value_proposition: data.value_proposition || "",
+          avatar_url: data.avatar_url || "",
         });
       }
       setLoading(false);
     };
     fetchProfile();
   }, [user]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Selecione uma imagem válida");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 2MB)");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      setProfile((prev) => ({ ...prev, avatar_url: avatarUrl }));
+
+      // Save immediately
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: avatarUrl })
+        .eq("user_id", user.id);
+
+      toast.success("Foto atualizada!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao enviar foto");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -105,8 +156,8 @@ const ProfilePage = () => {
         return;
       }
 
-      // Merge AI results into profile
       setProfile((prev) => ({
+        ...prev,
         display_name: data.display_name || prev.display_name,
         handle: data.handle || prev.handle,
         branding_text: data.branding_text || prev.branding_text,
@@ -142,7 +193,6 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="h-14 border-b border-border flex items-center justify-between px-5">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1.5 text-xs">
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -156,6 +206,47 @@ const ProfilePage = () => {
       </header>
 
       <div className="max-w-2xl mx-auto p-6 space-y-8">
+        {/* Avatar Section */}
+        <section className="flex items-center gap-5">
+          <div className="relative group">
+            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border bg-secondary flex items-center justify-center">
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-8 h-8 text-muted-foreground" />
+              )}
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute inset-0 rounded-full bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            >
+              {uploading ? (
+                <Loader2 className="w-5 h-5 animate-spin text-foreground" />
+              ) : (
+                <Camera className="w-5 h-5 text-foreground" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
+          </div>
+          <div>
+            <p className="text-sm font-bold font-display">{profile.display_name || "Seu nome"}</p>
+            <p className="text-xs text-muted-foreground">{profile.handle || "@seuhandle"}</p>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="text-[10px] text-primary hover:underline mt-1"
+            >
+              Alterar foto
+            </button>
+          </div>
+        </section>
+
         {/* AI Auto-fill Section */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
@@ -170,7 +261,7 @@ const ProfilePage = () => {
             <Textarea
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
-              placeholder={"Cole aqui qualquer texto sobre seu negócio...\n\nEx: Eu sou Marcus Forti, mentor de aceleração empresarial. Meu público são empreendedores que estão cansados de trabalhar sem resultado. Eu combato o amadorismo no mundo dos negócios. Meu tom é direto, sem rodeios, provocativo. Acredito que negócio bom é negócio que dá lucro e liberdade..."}
+              placeholder={"Cole aqui qualquer texto sobre seu negócio...\n\nEx: Eu sou Marcus Forti, mentor de aceleração empresarial. Meu público são empreendedores que estão cansados de trabalhar sem resultado..."}
               rows={6}
               className="bg-secondary border-border/50 resize-none text-sm"
             />
@@ -213,7 +304,7 @@ const ProfilePage = () => {
           <div className="space-y-4">
             <Field label="Nicho" value={profile.niche} onChange={(v) => updateField("niche", v)} placeholder="Marketing digital, coaching, etc." />
             <FieldArea label="Público-alvo" value={profile.target_audience} onChange={(v) => updateField("target_audience", v)} placeholder="Quem é seu público? O que eles sentem, pensam e querem?" />
-            <FieldArea label="Inimigo em comum" value={profile.common_enemy} onChange={(v) => updateField("common_enemy", v)} placeholder="O que vocês dois (você e seu público) combatem? Ex: cultura tóxica de produtividade..." />
+            <FieldArea label="Inimigo em comum" value={profile.common_enemy} onChange={(v) => updateField("common_enemy", v)} placeholder="O que vocês dois (você e seu público) combatem?" />
             <FieldArea label="Crenças e valores" value={profile.beliefs} onChange={(v) => updateField("beliefs", v)} placeholder="Quais são suas crenças fortes sobre seu mercado?" />
             <FieldArea label="Tom de voz" value={profile.tone_of_voice} onChange={(v) => updateField("tone_of_voice", v)} placeholder="Ex: Provocativo, direto, sem rodeios, com ironia inteligente..." />
             <FieldArea label="Proposta de valor" value={profile.value_proposition} onChange={(v) => updateField("value_proposition", v)} placeholder="O que você entrega de único? Qual a transformação?" />

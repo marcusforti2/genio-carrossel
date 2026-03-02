@@ -13,15 +13,17 @@ export interface CarouselData {
   profileHandle: string;
   brandingText: string;
   brandingSubtext: string;
+  avatarUrl: string;
   slides: SlideData[];
 }
 
 export const createDefaultCarousel = (): CarouselData => ({
   id: crypto.randomUUID(),
-  profileName: "Leo Baltazar",
-  profileHandle: "@leobrf_",
-  brandingText: "Marketing Insider",
-  brandingSubtext: "Conteúdo com IA",
+  profileName: "",
+  profileHandle: "",
+  brandingText: "",
+  brandingSubtext: "",
+  avatarUrl: "",
   slides: [
     {
       id: crypto.randomUUID(),
