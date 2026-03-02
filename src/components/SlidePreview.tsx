@@ -1,4 +1,5 @@
 import { SlideData, CarouselData } from "@/types/carousel";
+import { User } from "lucide-react";
 
 interface SlidePreviewProps {
   slide: SlideData;
@@ -9,6 +10,16 @@ interface SlidePreviewProps {
 
 const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreviewProps) => {
   const isCover = slide.type === "cover";
+
+  const Avatar = () => (
+    carousel.avatarUrl ? (
+      <img src={carousel.avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover border border-primary/50" />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-primary/30 border border-primary/50 flex items-center justify-center">
+        <User className="w-4 h-4 text-primary/70" />
+      </div>
+    )
+  );
 
   return (
     <div
@@ -31,18 +42,14 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       </div>
 
       {isCover ? (
-        /* COVER SLIDE */
         <div className="flex flex-col justify-end h-full relative">
-          {/* Background image placeholder */}
           {slide.hasImage && (
             <div className="absolute inset-0 bg-gradient-to-b from-muted/40 to-slide-bg/95" />
           )}
 
-          {/* Profile + Title */}
           <div className="relative z-10 p-6 pb-8 text-center space-y-3">
-            {/* Avatar */}
             <div className="flex items-center justify-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-primary/30 border border-primary/50" />
+              <Avatar />
               <div>
                 <p className="text-[11px] font-bold text-slide-title">
                   {carousel.profileName}{" "}
@@ -58,7 +65,6 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           </div>
         </div>
       ) : (
-        /* CONTENT SLIDE */
         <div className="flex flex-col h-full p-6 pt-14">
           <div className="flex-1 flex flex-col">
             <h2 className="text-base font-black leading-tight text-slide-title mb-3">
@@ -68,7 +74,6 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
               {slide.body}
             </p>
 
-            {/* Image area */}
             {slide.hasImage && (
               <div className="mt-auto pt-3">
                 <div className="w-full rounded-md bg-muted/30 border border-border/30"
@@ -78,7 +83,6 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
             )}
           </div>
 
-          {/* Tags bottom */}
           <div className="flex items-center gap-2 mt-4">
             <span className="bg-slide-tag-bg text-slide-tag-fg text-[7px] font-semibold px-2 py-0.5 rounded-full">
               @novaordem.hub
