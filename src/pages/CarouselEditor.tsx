@@ -3,12 +3,16 @@ import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Sparkles, User, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CarouselEditor = () => {
   const [carousel, setCarousel] = useState<CarouselData>(createDefaultCarousel());
   const [selectedSlide, setSelectedSlide] = useState(0);
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const updateSlide = (index: number, slide: SlideData) => {
     const newSlides = [...carousel.slides];
@@ -52,6 +56,10 @@ const CarouselEditor = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/profile")} className="text-xs gap-1.5 text-muted-foreground">
+            <User className="w-3.5 h-3.5" />
+            Perfil
+          </Button>
           <Button variant="outline" size="sm" className="text-xs gap-1.5">
             <Download className="w-3.5 h-3.5" />
             Exportar
@@ -59,6 +67,9 @@ const CarouselEditor = () => {
           <Button size="sm" className="text-xs gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
             Gerar com IA
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={signOut}>
+            <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>
       </header>
