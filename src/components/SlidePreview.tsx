@@ -105,35 +105,73 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       ) : (
         <div className="flex flex-col h-full p-6 pt-14">
           <div className="flex-1 flex flex-col">
-            <h2 className="text-base font-black leading-tight mb-3" style={{ color: styles.title }}>
-              {slide.title}
-            </h2>
-            <p className="text-[10px] leading-relaxed flex-shrink-0" style={{ color: styles.body }}>
-              {slide.body}
-            </p>
-
-            {slide.hasImage && (
-              <div className="mt-auto pt-3">
-                {slide.imageLoading ? (
-                  <div
-                    className="w-full rounded-md flex items-center justify-center"
-                    style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
-                  >
-                    <Loader2 className="w-5 h-5 animate-spin" style={{ color: styles.accent }} />
-                  </div>
-                ) : slide.imageUrl ? (
-                  <img
-                    src={slide.imageUrl}
-                    alt=""
-                    className="w-full rounded-md object-cover"
-                    style={{ aspectRatio: "16/10" }}
-                  />
-                ) : (
-                  <div
-                    className="w-full rounded-md"
-                    style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
-                  />
-                )}
+            {slide.hasImage && slide.imageUrl ? (
+              <>
+                <h2 className="text-base font-black leading-tight mb-3" style={{ color: styles.title }}>
+                  {slide.title}
+                </h2>
+                <p className="text-[10px] leading-relaxed flex-shrink-0" style={{ color: styles.body }}>
+                  {slide.body}
+                </p>
+                <div className="mt-auto pt-3">
+                  {slide.imageLoading ? (
+                    <div
+                      className="w-full rounded-md flex items-center justify-center"
+                      style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
+                    >
+                      <Loader2 className="w-5 h-5 animate-spin" style={{ color: styles.accent }} />
+                    </div>
+                  ) : (
+                    <img
+                      src={slide.imageUrl}
+                      alt=""
+                      className="w-full rounded-md object-cover"
+                      style={{ aspectRatio: "16/10" }}
+                    />
+                  )}
+                </div>
+              </>
+            ) : slide.hasImage && !slide.imageUrl ? (
+              <>
+                <h2 className="text-base font-black leading-tight mb-3" style={{ color: styles.title }}>
+                  {slide.title}
+                </h2>
+                <p className="text-[10px] leading-relaxed flex-shrink-0" style={{ color: styles.body }}>
+                  {slide.body}
+                </p>
+                <div className="mt-auto pt-3">
+                  {slide.imageLoading ? (
+                    <div
+                      className="w-full rounded-md flex items-center justify-center"
+                      style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
+                    >
+                      <Loader2 className="w-5 h-5 animate-spin" style={{ color: styles.accent }} />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full rounded-md"
+                      style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
+                    />
+                  )}
+                </div>
+              </>
+            ) : (
+              /* No-image layout: text-focused, centered, bigger typography */
+              <div className="flex-1 flex flex-col justify-center items-center text-center px-2">
+                <div
+                  className="w-10 h-1 rounded-full mb-5"
+                  style={{ background: styles.accent }}
+                />
+                <h2 className="text-xl font-black leading-tight mb-4" style={{ color: styles.title }}>
+                  {slide.title}
+                </h2>
+                <p className="text-xs leading-relaxed" style={{ color: styles.body }}>
+                  {slide.body}
+                </p>
+                <div
+                  className="w-10 h-1 rounded-full mt-5"
+                  style={{ background: styles.accent }}
+                />
               </div>
             )}
           </div>

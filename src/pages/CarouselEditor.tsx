@@ -3,8 +3,9 @@ import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
 import GenerateDialog from "@/components/GenerateDialog";
+import ExportButtons from "@/components/ExportButtons";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Download, Sparkles, User, LogOut, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,10 +97,7 @@ const CarouselEditor = () => {
             <User className="w-3.5 h-3.5" />
             Perfil
           </Button>
-          <Button variant="outline" size="sm" className="text-xs gap-1.5">
-            <Download className="w-3.5 h-3.5" />
-            Exportar
-          </Button>
+          <ExportButtons carousel={carousel} />
           <Button size="sm" className="text-xs gap-1.5" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
             Gerar com IA

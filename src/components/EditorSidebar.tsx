@@ -59,7 +59,12 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     setShowSearch(true);
     try {
       const { data, error } = await supabase.functions.invoke("search-pexels", {
-        body: { query: q, perPage: 6 },
+        body: { 
+          query: q, 
+          perPage: 6,
+          topic: carousel.brandingText || carousel.profileName || "",
+          bgMode: carousel.theme?.bgMode || "dark",
+        },
       });
       if (error) throw error;
       if (data?.error) { toast.error(data.error); return; }
