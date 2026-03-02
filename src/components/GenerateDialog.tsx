@@ -17,12 +17,26 @@ interface GenerateDialogProps {
   onGenerated: (slides: SlideData[], caption: string) => void;
 }
 
+const fetchPexelsImage = async (query: string, topic: string): Promise<string | undefined> => {
+  try {
+    const { data, error } = await supabase.functions.invoke("search-pexels", {
+      body: { query, perPage: 3, topic },
+    });
+    if (error || data?.error || !data?.photos?.length) return undefined;
+    const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
+    return photo.url;
+  } catch {
+    return undefined;
+  }
+};
+
 const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps) => {
   const { user } = useAuth();
   const [topic, setTopic] = useState("");
   const [style, setStyle] = useState("tribunal");
   const [slideCount, setSlideCount] = useState([6]);
   const [loading, setLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState("");
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -32,9 +46,9 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
     if (!user) return;
 
     setLoading(true);
+    setLoadingStatus("Gerando conteúdo com IA...");
 
     try {
-      // Fetch profile
       const { data: profile } = await supabase
         .from("profiles")
         .select("*")
@@ -56,7 +70,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
         return;
       }
 
-      const slides: SlideData[] = data.slides.map((s: any, i: number) => ({
+      const slides: SlideData[] = data.slides.map((s: any) => ({
         id: crypto.randomUUID(),
         type: s.type === "cover" ? "cover" : "content",
         title: s.title || "",
@@ -64,8 +78,20 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
         hasImage: true,
       }));
 
-      onGenerated(slides, data.caption || "");
-      toast.success("Carrossel gerado!");
+      // Auto-fetch Pexels images for all slides
+      setLoadingStatus("Buscando imagens reais...");
+      const imagePromises = slides.map((slide) =>
+        fetchPexelsImage(slide.title, topic.trim())
+      );
+      const images = await Promise.all(imagePromises);
+
+      const slidesWithImages = slides.map((slide, i) => ({
+        ...slide,
+        imageUrl: images[i] || undefined,
+      }));
+
+      onGenerated(slidesWithImages, data.caption || "");
+      toast.success("Carrossel gerado com imagens!");
       onOpenChange(false);
       setTopic("");
     } catch (e: any) {
@@ -73,6 +99,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
       toast.error("Erro ao gerar carrossel. Tente novamente.");
     } finally {
       setLoading(false);
+      setLoadingStatus("");
     }
   };
 
@@ -135,7 +162,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Gerando...
+                {loadingStatus || "Gerando..."}
               </>
             ) : (
               <>
@@ -146,7 +173,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
           </Button>
 
           <p className="text-[10px] text-muted-foreground/60 text-center">
-            A IA usa os dados do seu perfil para personalizar o conteúdo.
+            A IA gera o conteúdo e busca fotos reais automaticamente.
           </p>
         </div>
       </DialogContent>

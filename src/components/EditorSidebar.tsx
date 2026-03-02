@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X } from "lucide-react";
+import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -179,6 +179,40 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
             <p className="text-[8px] text-muted-foreground/60 text-center">Fotos por Pexels</p>
           </div>
         )}
+      </div>
+
+      {/* Upload manual */}
+      <div>
+        <input
+          type="file"
+          accept="image/*"
+          id={`upload-${slide.id}`}
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+              toast.error("Imagem muito grande (máx 5MB)");
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+              onUpdate({ ...slide, imageUrl: reader.result as string, hasImage: true });
+              toast.success("Imagem carregada!");
+            };
+            reader.readAsDataURL(file);
+            e.target.value = "";
+          }}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full gap-2 text-xs"
+          onClick={() => document.getElementById(`upload-${slide.id}`)?.click()}
+        >
+          <Upload className="w-3.5 h-3.5" />
+          Subir imagem manual
+        </Button>
       </div>
 
       {/* AI Image button */}
