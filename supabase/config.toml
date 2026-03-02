@@ -2,3 +2,6 @@ project_id = "qvxzgxckwbbcdigmzxck"
 
 [functions.generate-carousel]
 verify_jwt = false
+
+[functions.parse-profile]
+verify_jwt = false
