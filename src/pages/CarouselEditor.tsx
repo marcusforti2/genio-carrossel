@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
+import GenerateDialog from "@/components/GenerateDialog";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Download, Sparkles, User, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 const CarouselEditor = () => {
   const [carousel, setCarousel] = useState<CarouselData>(createDefaultCarousel());
   const [selectedSlide, setSelectedSlide] = useState(0);
+  const [generateOpen, setGenerateOpen] = useState(false);
+  const [caption, setCaption] = useState("");
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
@@ -39,6 +42,12 @@ const CarouselEditor = () => {
     setSelectedSlide(carousel.slides.length);
   };
 
+  const handleAIGenerated = (slides: SlideData[], newCaption: string) => {
+    setCarousel({ ...carousel, slides });
+    setSelectedSlide(0);
+    setCaption(newCaption);
+  };
+
   const goToSlide = (dir: -1 | 1) => {
     const next = selectedSlide + dir;
     if (next >= 0 && next < carousel.slides.length) setSelectedSlide(next);
@@ -64,7 +73,7 @@ const CarouselEditor = () => {
             <Download className="w-3.5 h-3.5" />
             Exportar
           </Button>
-          <Button size="sm" className="text-xs gap-1.5">
+          <Button size="sm" className="text-xs gap-1.5" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
             Gerar com IA
           </Button>
@@ -151,6 +160,19 @@ const CarouselEditor = () => {
           </div>
         </div>
       </div>
+      {/* Caption display */}
+      {caption && (
+        <div className="border-t border-border px-5 py-3 max-h-32 overflow-y-auto">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Legenda gerada</p>
+          <p className="text-xs text-foreground/80 whitespace-pre-wrap">{caption}</p>
+        </div>
+      )}
+
+      <GenerateDialog
+        open={generateOpen}
+        onOpenChange={setGenerateOpen}
+        onGenerated={handleAIGenerated}
+      />
     </div>
   );
 };
