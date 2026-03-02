@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sparkles, Wand2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -27,6 +27,8 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const [rawText, setRawText] = useState("");
   const [profile, setProfile] = useState<ProfileData>({
     display_name: "",
     handle: "",
@@ -85,6 +87,47 @@ const ProfilePage = () => {
     setSaving(false);
   };
 
+  const handleParseWithAI = async () => {
+    if (!rawText.trim() || rawText.trim().length < 10) {
+      toast.error("Cole mais texto sobre seu negócio (mínimo 10 caracteres)");
+      return;
+    }
+    setParsing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("parse-profile", {
+        body: { rawText: rawText.trim() },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      // Merge AI results into profile
+      setProfile((prev) => ({
+        display_name: data.display_name || prev.display_name,
+        handle: data.handle || prev.handle,
+        branding_text: data.branding_text || prev.branding_text,
+        branding_subtext: data.branding_subtext || prev.branding_subtext,
+        niche: data.niche || prev.niche,
+        target_audience: data.target_audience || prev.target_audience,
+        common_enemy: data.common_enemy || prev.common_enemy,
+        beliefs: data.beliefs || prev.beliefs,
+        tone_of_voice: data.tone_of_voice || prev.tone_of_voice,
+        value_proposition: data.value_proposition || prev.value_proposition,
+      }));
+
+      toast.success("Perfil preenchido pela IA! Revise e salve.");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Erro ao processar texto. Tente novamente.");
+    } finally {
+      setParsing(false);
+    }
+  };
+
   const updateField = (field: keyof ProfileData, value: string) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
@@ -113,7 +156,45 @@ const ProfilePage = () => {
       </header>
 
       <div className="max-w-2xl mx-auto p-6 space-y-8">
-        {/* Basic */}
+        {/* AI Auto-fill Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Wand2 className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold font-display">Preenchimento Inteligente</h2>
+          </div>
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+            <p className="text-xs text-muted-foreground">
+              Cole aqui tudo sobre seu negócio — quem você é, o que faz, seu público, suas crenças, tom de voz, qualquer texto. 
+              A IA vai ler, interpretar e preencher todos os campos automaticamente.
+            </p>
+            <Textarea
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              placeholder={"Cole aqui qualquer texto sobre seu negócio...\n\nEx: Eu sou Marcus Forti, mentor de aceleração empresarial. Meu público são empreendedores que estão cansados de trabalhar sem resultado. Eu combato o amadorismo no mundo dos negócios. Meu tom é direto, sem rodeios, provocativo. Acredito que negócio bom é negócio que dá lucro e liberdade..."}
+              rows={6}
+              className="bg-secondary border-border/50 resize-none text-sm"
+            />
+            <Button
+              onClick={handleParseWithAI}
+              disabled={parsing || rawText.trim().length < 10}
+              className="w-full gap-2"
+            >
+              {parsing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Analisando seu texto...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Preencher perfil com IA
+                </>
+              )}
+            </Button>
+          </div>
+        </section>
+
+        {/* Visual Identity */}
         <section className="space-y-4">
           <h2 className="text-lg font-bold font-display border-b border-border pb-2">Identidade Visual</h2>
           <p className="text-xs text-muted-foreground">Essas informações aparecem nos seus carrosséis.</p>
