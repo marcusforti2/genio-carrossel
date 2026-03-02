@@ -11,7 +11,7 @@ interface SlidePreviewProps {
 
 const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreviewProps) => {
   const isCover = slide.type === "cover";
-  const { theme } = carousel;
+  const theme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
 
   const styles = useMemo(() => {
     const isDark = theme.bgMode === "dark";
