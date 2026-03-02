@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon } from "lucide-react";
+import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -19,6 +19,10 @@ interface SlideEditorPanelProps {
 
 const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: SlideEditorPanelProps) => {
   const [imgLoading, setImgLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ id: number; url: string; thumbnail: string; photographer: string; alt: string }>>([]);
+  const [searching, setSearching] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   const generateImage = async () => {
     setImgLoading(true);
@@ -46,6 +50,34 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     } finally {
       setImgLoading(false);
     }
+  };
+
+  const searchPexels = async (query?: string) => {
+    const q = query || searchQuery || slide.title;
+    if (!q.trim()) return;
+    setSearching(true);
+    setShowSearch(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("search-pexels", {
+        body: { query: q, perPage: 6 },
+      });
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); return; }
+      setSearchResults(data?.photos || []);
+      if (!data?.photos?.length) toast.info("Nenhuma imagem encontrada");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Erro ao buscar imagens");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const selectPhoto = (photo: { url: string; photographer: string }) => {
+    onUpdate({ ...slide, imageUrl: photo.url, hasImage: true });
+    setShowSearch(false);
+    setSearchResults([]);
+    toast.success(`Foto de ${photo.photographer} aplicada!`);
   };
 
   return (
@@ -93,6 +125,55 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
           checked={slide.hasImage}
           onCheckedChange={(checked) => onUpdate({ ...slide, hasImage: checked })}
         />
+      </div>
+
+      {/* Pexels search */}
+      <div className="space-y-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full gap-2 text-xs"
+          disabled={searching}
+          onClick={() => searchPexels(slide.title)}
+        >
+          {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+          {searching ? "Buscando..." : "Buscar foto real (Pexels)"}
+        </Button>
+
+        {showSearch && (
+          <div className="space-y-2">
+            <div className="flex gap-1.5">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar por tema..."
+                className="bg-secondary border-border/50 text-xs h-8"
+                onKeyDown={(e) => e.key === "Enter" && searchPexels()}
+              />
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => { setShowSearch(false); setSearchResults([]); }}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto">
+                {searchResults.map((photo) => (
+                  <button
+                    key={photo.id}
+                    onClick={() => selectPhoto(photo)}
+                    className="rounded-md overflow-hidden border border-border hover:border-primary transition-colors relative group"
+                  >
+                    <img src={photo.thumbnail} alt={photo.alt} className="w-full h-16 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-[8px] text-white font-medium">Usar</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-[8px] text-muted-foreground/60 text-center">Fotos por Pexels</p>
+          </div>
+        )}
       </div>
 
       {/* AI Image button */}

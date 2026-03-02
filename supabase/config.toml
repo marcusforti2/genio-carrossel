@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.generate-slide-image]
 verify_jwt = false
+
+[functions.search-pexels]
+verify_jwt = false
