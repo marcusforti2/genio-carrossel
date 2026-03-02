@@ -61,7 +61,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
         type: s.type === "cover" ? "cover" : "content",
         title: s.title || "",
         body: s.body || "",
-        hasImage: i === 0,
+        hasImage: true,
       }));
 
       onGenerated(slides, data.caption || "");

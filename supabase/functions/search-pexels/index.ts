@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { query, perPage = 5 } = await req.json();
+    const { query, perPage = 5, topic, bgMode } = await req.json();
     const PEXELS_API_KEY = Deno.env.get("PEXELS_API_KEY");
     if (!PEXELS_API_KEY) throw new Error("PEXELS_API_KEY is not configured");
 
@@ -19,7 +19,21 @@ serve(async (req) => {
       });
     }
 
-    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=landscape`;
+    // Build a smarter search query using context
+    const contextWords = [];
+    if (topic) contextWords.push(topic);
+    // Extract key concepts from the slide title
+    const cleanQuery = query
+      .replace(/[.,!?;:"""''()]/g, "")
+      .split(" ")
+      .filter((w: string) => w.length > 3)
+      .slice(0, 4)
+      .join(" ");
+    contextWords.push(cleanQuery);
+    
+    const searchTerm = contextWords.join(" ").trim().substring(0, 100);
+
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(searchTerm)}&per_page=${perPage}&orientation=landscape`;
     const response = await fetch(url, {
       headers: { Authorization: PEXELS_API_KEY },
     });
