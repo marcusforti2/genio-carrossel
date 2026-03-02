@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.parse-profile]
 verify_jwt = false
+
+[functions.generate-slide-image]
+verify_jwt = false

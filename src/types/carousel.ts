@@ -5,6 +5,14 @@ export interface SlideData {
   body: string;
   hasImage: boolean;
   imageUrl?: string;
+  imagePrompt?: string;
+  imageLoading?: boolean;
+}
+
+export interface CarouselTheme {
+  bgMode: "dark" | "light";
+  accentColor: string; // HSL string like "1 83% 55%"
+  accentName: string;
 }
 
 export interface CarouselData {
@@ -15,7 +23,19 @@ export interface CarouselData {
   brandingSubtext: string;
   avatarUrl: string;
   slides: SlideData[];
+  theme: CarouselTheme;
 }
+
+export const ACCENT_PRESETS = [
+  { name: "Vermelho", color: "1 83% 55%" },
+  { name: "Laranja", color: "25 95% 53%" },
+  { name: "Amarelo", color: "45 93% 47%" },
+  { name: "Verde", color: "142 71% 45%" },
+  { name: "Azul", color: "217 91% 60%" },
+  { name: "Roxo", color: "263 70% 50%" },
+  { name: "Rosa", color: "330 81% 60%" },
+  { name: "Branco", color: "0 0% 90%" },
+];
 
 export const createDefaultCarousel = (): CarouselData => ({
   id: crypto.randomUUID(),
@@ -24,6 +44,11 @@ export const createDefaultCarousel = (): CarouselData => ({
   brandingText: "",
   brandingSubtext: "",
   avatarUrl: "",
+  theme: {
+    bgMode: "dark",
+    accentColor: "1 83% 55%",
+    accentName: "Vermelho",
+  },
   slides: [
     {
       id: crypto.randomUUID(),
