@@ -7,7 +7,7 @@ import ExportButtons from "@/components/ExportButtons";
 import CanvasView from "@/components/CanvasView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft, Pencil, Palette, UserCircle, Type } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectAutosave, Project } from "@/hooks/useProjectAutosave";
@@ -25,6 +25,7 @@ const CarouselEditor = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<"editor" | "canvas">("editor");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"slide" | "design" | "profile" | "footer">("slide");
   const [initialLoading, setInitialLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -154,6 +155,11 @@ const CarouselEditor = () => {
     setViewMode("editor");
   };
 
+  const openMobileTab = (tab: "slide" | "design" | "profile" | "footer") => {
+    setMobileTab(tab);
+    setMobileSidebarOpen(true);
+  };
+
   const SaveStatusIndicator = () => (
     <span className="text-[10px] text-muted-foreground flex items-center gap-1">
       {saveStatus === "saving" && <><Loader className="w-3 h-3 animate-spin" /> Salvando...</>}
@@ -171,6 +177,7 @@ const CarouselEditor = () => {
       onDeleteSlide={deleteSlide}
       onAddSlide={addSlide}
       onUpdateCarousel={setCarousel}
+      initialTab={isMobile ? mobileTab : undefined}
     />
   );
 
@@ -179,11 +186,6 @@ const CarouselEditor = () => {
       {/* Header */}
       <header className="h-12 sm:h-14 border-b border-border flex items-center justify-between px-3 sm:px-5 gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          {isMobile && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => setMobileSidebarOpen(true)}>
-              <Menu className="w-4 h-4" />
-            </Button>
-          )}
           <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => navigate("/")}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
@@ -226,7 +228,7 @@ const CarouselEditor = () => {
             <Sparkles className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Gerar com IA</span>
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={signOut}>
+          <Button variant="ghost" size="icon" className="hidden sm:flex h-8 w-8 text-muted-foreground" onClick={signOut}>
             <LogOut className="w-3.5 h-3.5" />
           </Button>
         </div>
@@ -240,10 +242,11 @@ const CarouselEditor = () => {
           </div>
         )}
 
-        {/* Mobile Sidebar Sheet */}
+        {/* Mobile Bottom Sheet */}
         {isMobile && (
           <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-            <SheetContent side="left" className="w-[85vw] p-0 bg-card border-border">
+            <SheetContent side="bottom" className="h-[75vh] p-0 bg-card border-border rounded-t-2xl">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mt-2 mb-1" />
               {sidebarContent}
             </SheetContent>
           </Sheet>
@@ -258,7 +261,7 @@ const CarouselEditor = () => {
           />
         ) : (
           <div className="flex-1 flex items-center justify-center relative bg-background px-4">
-            <div className="relative w-full" style={{ maxWidth: isMobile ? "280px" : "340px" }}>
+            <div className="relative w-full" style={{ maxWidth: isMobile ? "55vw" : "340px" }}>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={carousel.slides[selectedSlide]?.id}
@@ -301,33 +304,20 @@ const CarouselEditor = () => {
                 </Button>
               </div>
 
-              {/* Dots */}
-              <div className="flex items-center justify-center gap-1.5 mt-4 sm:mt-6">
-                {carousel.slides.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedSlide(i)}
-                    className={`rounded-full transition-all duration-200 ${
-                      i === selectedSlide
-                        ? "w-6 h-1.5 bg-primary"
-                        : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Mobile: view mode toggle */}
-              {isMobile && (
-                <div className="flex justify-center mt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-[10px] gap-1 h-7"
-                    onClick={() => setViewMode("canvas")}
-                  >
-                    <LayoutGrid className="w-3 h-3" />
-                    Ver todos
-                  </Button>
+              {/* Dots - desktop only */}
+              {!isMobile && (
+                <div className="flex items-center justify-center gap-1.5 mt-6">
+                  {carousel.slides.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedSlide(i)}
+                      className={`rounded-full transition-all duration-200 ${
+                        i === selectedSlide
+                          ? "w-6 h-1.5 bg-primary"
+                          : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                      }`}
+                    />
+                  ))}
                 </div>
               )}
             </div>
@@ -335,7 +325,63 @@ const CarouselEditor = () => {
         )}
       </div>
 
-      {caption && (
+      {/* Mobile bottom bar: slide thumbnails + tab buttons */}
+      {isMobile && (
+        <div className="border-t border-border bg-card">
+          {/* Slide thumbnails */}
+          <div className="px-3 pt-2 pb-1.5">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+              {carousel.slides.map((slide, i) => (
+                <button
+                  key={slide.id}
+                  onClick={() => setSelectedSlide(i)}
+                  className={`flex-shrink-0 w-9 h-11 rounded-md border-2 transition-all text-[9px] font-bold flex items-center justify-center ${
+                    i === selectedSlide
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-secondary text-muted-foreground"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                onClick={addSlide}
+                className="flex-shrink-0 w-9 h-11 rounded-md border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground flex items-center justify-center"
+              >
+                <span className="text-lg leading-none">+</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Action tabs */}
+          <div className="flex border-t border-border/50">
+            {([
+              { id: "slide" as const, icon: Pencil, label: "Slide" },
+              { id: "design" as const, icon: Palette, label: "Design" },
+              { id: "profile" as const, icon: UserCircle, label: "Perfil" },
+              { id: "footer" as const, icon: Type, label: "Rodapé" },
+            ]).map((t) => (
+              <button
+                key={t.id}
+                onClick={() => openMobileTab(t.id)}
+                className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+              >
+                <t.icon className="w-4 h-4" />
+                <span className="text-[9px] font-medium">{t.label}</span>
+              </button>
+            ))}
+            <button
+              onClick={() => setViewMode(viewMode === "canvas" ? "editor" : "canvas")}
+              className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span className="text-[9px] font-medium">Todos</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {caption && !isMobile && (
         <div className="border-t border-border px-3 sm:px-5 py-2 sm:py-3 max-h-28 sm:max-h-32 overflow-y-auto">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Legenda gerada</p>
           <p className="text-xs text-foreground/80 whitespace-pre-wrap">{caption}</p>
