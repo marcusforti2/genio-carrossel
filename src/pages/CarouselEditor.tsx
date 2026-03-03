@@ -119,8 +119,8 @@ const CarouselEditor = () => {
     setSelectedSlide(carousel.slides.length);
   };
 
-  const handleAIGenerated = (slides: SlideData[], newCaption: string) => {
-    setCarousel({ ...carousel, slides });
+  const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any) => {
+    setCarousel({ ...carousel, slides, ...(designStyle ? { designStyle } : {}) });
     setSelectedSlide(0);
     setCaption(newCaption);
   };
@@ -346,6 +346,7 @@ const CarouselEditor = () => {
         open={generateOpen}
         onOpenChange={setGenerateOpen}
         onGenerated={handleAIGenerated}
+        currentDesignStyle={carousel.designStyle}
       />
     </div>
   );
