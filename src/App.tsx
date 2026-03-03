@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import CarouselEditor from "./pages/CarouselEditor";
+import DashboardPage from "./pages/DashboardPage";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
@@ -43,7 +44,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
-            <Route path="/" element={<ProtectedRoute><CarouselEditor /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/editor" element={<ProtectedRoute><CarouselEditor /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
