@@ -61,7 +61,15 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     wrapper.style.left = "-9999px";
     wrapper.style.top = "0";
     wrapper.style.width = "1080px";
+    wrapper.style.height = "1350px";
     wrapper.style.zIndex = "-1";
+    wrapper.style.overflow = "hidden";
+
+    // Copy all stylesheets to ensure Tailwind classes work
+    const styleSheets = document.querySelectorAll('style, link[rel="stylesheet"]');
+    styleSheets.forEach((sheet) => {
+      wrapper.appendChild(sheet.cloneNode(true));
+    });
 
     // Copy CSS variables from document
     const rootStyles = getComputedStyle(document.documentElement);
@@ -78,11 +86,16 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     document.body.appendChild(wrapper);
 
     const { createRoot } = await import("react-dom/client");
-    const root = createRoot(wrapper);
+    const renderTarget = document.createElement("div");
+    renderTarget.style.width = "1080px";
+    renderTarget.style.height = "1350px";
+    wrapper.appendChild(renderTarget);
+
+    const root = createRoot(renderTarget);
 
     await new Promise<void>((resolve) => {
       root.render(
-        <div style={{ width: 1080, fontFamily: "'Inter', 'Space Grotesk', sans-serif" }}>
+        <div style={{ width: 1080, height: 1350, fontFamily: "'Inter', 'Space Grotesk', sans-serif" }}>
           <SlidePreview
             slide={preparedCarousel.slides[slideIndex]}
             carousel={preparedCarousel}
@@ -91,7 +104,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
           />
         </div>
       );
-      setTimeout(resolve, 300);
+      setTimeout(resolve, 500);
     });
 
     // Wait for fonts
@@ -111,18 +124,18 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     );
 
     // Extra safety delay
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => setTimeout(r, 300));
 
-    const slide = preparedCarousel.slides[slideIndex];
     const isDark = preparedCarousel.theme?.bgMode === "dark";
     const bgColor = isDark ? "#111" : "#f5f5f5";
 
-    const dataUrl = await toPng(wrapper, {
+    const dataUrl = await toPng(renderTarget, {
       width: 1080,
       height: 1350,
       pixelRatio: 2,
       cacheBust: true,
       backgroundColor: bgColor,
+      skipAutoScale: true,
     });
 
     root.unmount();
