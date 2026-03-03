@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { CarouselData } from "@/types/carousel";
@@ -12,49 +12,117 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExportButtonsProps {
   carousel: CarouselData;
 }
 
+// Convert external URL to base64 data URL via proxy
+const proxyImageToBase64 = async (url: string): Promise<string> => {
+  if (!url || url.startsWith("data:")) return url;
+  try {
+    const { data, error } = await supabase.functions.invoke("proxy-image", {
+      body: { url },
+    });
+    if (error || data?.error) return url;
+    return data?.dataUrl || url;
+  } catch {
+    return url;
+  }
+};
+
+// Pre-process carousel: convert all external images to base64
+const prepareCarouselForExport = async (carousel: CarouselData): Promise<CarouselData> => {
+  const slides = await Promise.all(
+    carousel.slides.map(async (slide) => {
+      if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
+        const base64Url = await proxyImageToBase64(slide.imageUrl);
+        return { ...slide, imageUrl: base64Url };
+      }
+      return slide;
+    })
+  );
+
+  let avatarUrl = carousel.avatarUrl;
+  if (avatarUrl && !avatarUrl.startsWith("data:")) {
+    avatarUrl = await proxyImageToBase64(avatarUrl);
+  }
+
+  return { ...carousel, slides, avatarUrl };
+};
+
 const ExportButtons = ({ carousel }: ExportButtonsProps) => {
   const [exporting, setExporting] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  const renderSlideToBlob = useCallback(async (slideIndex: number): Promise<Blob> => {
-    // Create an off-screen element to render the slide
+  const renderSlideToBlob = useCallback(async (preparedCarousel: CarouselData, slideIndex: number): Promise<Blob> => {
     const wrapper = document.createElement("div");
     wrapper.style.position = "fixed";
     wrapper.style.left = "-9999px";
     wrapper.style.top = "0";
     wrapper.style.width = "1080px";
     wrapper.style.zIndex = "-1";
+
+    // Copy CSS variables from document
+    const rootStyles = getComputedStyle(document.documentElement);
+    const cssVars = [
+      "--background", "--foreground", "--card", "--card-foreground",
+      "--primary", "--primary-foreground", "--secondary", "--secondary-foreground",
+      "--muted", "--muted-foreground", "--accent", "--accent-foreground",
+      "--border", "--ring", "--radius",
+    ];
+    cssVars.forEach((v) => {
+      wrapper.style.setProperty(v, rootStyles.getPropertyValue(v));
+    });
+
     document.body.appendChild(wrapper);
 
-    // Use ReactDOM to render
     const { createRoot } = await import("react-dom/client");
     const root = createRoot(wrapper);
 
     await new Promise<void>((resolve) => {
       root.render(
-        <div style={{ width: 1080 }}>
+        <div style={{ width: 1080, fontFamily: "'Inter', 'Space Grotesk', sans-serif" }}>
           <SlidePreview
-            slide={carousel.slides[slideIndex]}
-            carousel={carousel}
+            slide={preparedCarousel.slides[slideIndex]}
+            carousel={preparedCarousel}
             slideIndex={slideIndex}
-            totalSlides={carousel.slides.length}
+            totalSlides={preparedCarousel.slides.length}
           />
         </div>
       );
-      // Wait for render + images to load
-      setTimeout(resolve, 500);
+      setTimeout(resolve, 300);
     });
+
+    // Wait for fonts
+    await document.fonts.ready;
+
+    // Wait for all images to load
+    const images = wrapper.querySelectorAll("img");
+    await Promise.all(
+      Array.from(images).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if (img.complete) { resolve(); return; }
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          })
+      )
+    );
+
+    // Extra safety delay
+    await new Promise((r) => setTimeout(r, 200));
+
+    const slide = preparedCarousel.slides[slideIndex];
+    const isDark = preparedCarousel.theme?.bgMode === "dark";
+    const bgColor = isDark ? "#111" : "#f5f5f5";
 
     const dataUrl = await toPng(wrapper, {
       width: 1080,
       height: 1350,
       pixelRatio: 2,
       cacheBust: true,
+      backgroundColor: bgColor,
     });
 
     root.unmount();
@@ -62,12 +130,14 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
 
     const res = await fetch(dataUrl);
     return res.blob();
-  }, [carousel]);
+  }, []);
 
   const downloadSingle = async (slideIndex: number) => {
     setExporting(true);
     try {
-      const blob = await renderSlideToBlob(slideIndex);
+      toast.info("Preparando imagens...");
+      const prepared = await prepareCarouselForExport(carousel);
+      const blob = await renderSlideToBlob(prepared, slideIndex);
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -86,10 +156,12 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
   const downloadAll = async () => {
     setExporting(true);
     try {
+      toast.info("Preparando imagens para export...");
+      const prepared = await prepareCarouselForExport(carousel);
       const zip = new JSZip();
-      for (let i = 0; i < carousel.slides.length; i++) {
-        toast.info(`Exportando slide ${i + 1}/${carousel.slides.length}...`);
-        const blob = await renderSlideToBlob(i);
+      for (let i = 0; i < prepared.slides.length; i++) {
+        toast.info(`Exportando slide ${i + 1}/${prepared.slides.length}...`);
+        const blob = await renderSlideToBlob(prepared, i);
         zip.file(`slide-${i + 1}.png`, blob);
       }
       const content = await zip.generateAsync({ type: "blob" });
@@ -108,16 +180,12 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     }
   };
 
-  const downloadCurrentSlide = async (index: number) => {
-    await downloadSingle(index);
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="text-xs gap-1.5" disabled={exporting}>
           {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-          Exportar
+          <span className="hidden sm:inline">Exportar</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">

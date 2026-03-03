@@ -17,10 +17,10 @@ interface GenerateDialogProps {
   onGenerated: (slides: SlideData[], caption: string) => void;
 }
 
-const fetchPexelsImage = async (query: string, topic: string): Promise<string | undefined> => {
+const fetchPexelsImage = async (query: string, topic: string, imageQuery?: string): Promise<string | undefined> => {
   try {
     const { data, error } = await supabase.functions.invoke("search-pexels", {
-      body: { query, perPage: 3, topic },
+      body: { query, perPage: 3, topic, imageQuery },
     });
     if (error || data?.error || !data?.photos?.length) return undefined;
     const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
@@ -76,19 +76,20 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
         title: s.title || "",
         body: s.body || "",
         hasImage: true,
+        _imageQuery: s.imageQuery || undefined, // temp field for Pexels
       }));
 
-      // Auto-fetch Pexels images for all slides
+      // Auto-fetch Pexels images using AI-generated imageQuery
       setLoadingStatus("Buscando imagens reais...");
-      const imagePromises = slides.map((slide) =>
-        fetchPexelsImage(slide.title, topic.trim())
+      const imagePromises = slides.map((slide: any) =>
+        fetchPexelsImage(slide.title, topic.trim(), slide._imageQuery)
       );
       const images = await Promise.all(imagePromises);
 
-      const slidesWithImages = slides.map((slide, i) => ({
-        ...slide,
-        imageUrl: images[i] || undefined,
-      }));
+      const slidesWithImages: SlideData[] = slides.map((slide: any, i: number) => {
+        const { _imageQuery, ...clean } = slide;
+        return { ...clean, imageUrl: images[i] || undefined };
+      });
 
       onGenerated(slidesWithImages, data.caption || "");
       toast.success("Carrossel gerado com imagens!");
@@ -105,9 +106,9 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated }: GenerateDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-md">
+      <DialogContent className="bg-card border-border sm:max-w-md max-w-[95vw]">
         <DialogHeader>
-          <DialogTitle className="font-display flex items-center gap-2">
+          <DialogTitle className="font-display flex items-center gap-2 text-sm sm:text-base">
             <Sparkles className="w-5 h-5 text-primary" />
             Gerar Carrossel com IA
           </DialogTitle>
