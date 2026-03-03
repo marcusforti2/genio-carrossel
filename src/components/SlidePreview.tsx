@@ -88,8 +88,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
             }}
           />
 
-          <div className="relative z-10 p-6 pb-8 text-center space-y-3">
-            <div className="flex items-center justify-center gap-2">
+          <div className="relative z-10 p-6 pb-8 text-left space-y-3">
+            <div className="flex items-center gap-2">
               <Avatar />
               <div>
                 <p className="text-[11px] font-bold" style={{ color: styles.title }}>
@@ -159,7 +159,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex flex-col justify-center items-center text-center px-2">
+              <div className="flex-1 flex flex-col justify-center items-start text-left px-2">
                 <div
                   className="w-10 h-1 rounded-full mb-5"
                   style={{ background: styles.accent }}
