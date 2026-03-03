@@ -79,22 +79,21 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle }:
 
       const slides: SlideData[] = data.slides.map((s: any) => ({
         id: crypto.randomUUID(),
-        type: s.type === "cover" ? "cover" : s.type === "cta" ? "content" : "content",
+        type: s.type === "cover" ? "cover" : s.type === "cta" ? "cta" : "content",
         title: s.title || "",
         body: s.body || "",
         hasImage: s.type !== "cta",
         _imageQuery: s.type !== "cta" ? (s.imageQuery || undefined) : undefined,
-        _isCta: s.type === "cta",
       }));
 
       setLoadingStatus("Buscando imagens reais...");
       const imagePromises = slides.map((slide: any) =>
-        slide._isCta ? Promise.resolve(undefined) : fetchPexelsImage(slide.title, topic.trim(), slide._imageQuery)
+        slide.type === "cta" ? Promise.resolve(undefined) : fetchPexelsImage(slide.title, topic.trim(), slide._imageQuery)
       );
       const images = await Promise.all(imagePromises);
 
       const slidesWithImages: SlideData[] = slides.map((slide: any, i: number) => {
-        const { _imageQuery, _isCta, ...clean } = slide;
+        const { _imageQuery, ...clean } = slide;
         return { ...clean, imageUrl: images[i] || undefined };
       });
 
