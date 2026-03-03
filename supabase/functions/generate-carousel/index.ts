@@ -42,11 +42,19 @@ REGRAS:
 6. Fale diretamente com o público-alvo
 7. Seja provocativo mas autêntico
 
+IMPORTANTE - PARA CADA SLIDE, inclua um campo "imageQuery" com uma busca em inglês para o Pexels de 2 a 5 palavras.
+Regras para imageQuery:
+- Deve ser em INGLÊS (Pexels funciona melhor em inglês)
+- Deve descrever uma CENA VISUAL concreta, não conceitos abstratos
+- Use substantivos + contexto visual (ex: "tired office worker desk", "confident speaker stage", "team meeting whiteboard")
+- NUNCA use palavras abstratas sozinhas como "success", "growth", "power"
+- Pense em qual foto ficaria boa como fundo do slide
+
 RESPONDA APENAS com JSON válido, sem markdown, no formato:
 {
   "slides": [
-    { "type": "cover", "title": "texto do gancho da capa" },
-    { "type": "content", "title": "Título bold.", "body": "Corpo do texto desenvolvendo o argumento..." },
+    { "type": "cover", "title": "texto do gancho da capa", "imageQuery": "dramatic spotlight microphone stage" },
+    { "type": "content", "title": "Título bold.", "body": "Corpo do texto...", "imageQuery": "person stressed computer late night" },
     ...
   ],
   "caption": "Legenda para o post do Instagram com hashtags relevantes"
@@ -88,7 +96,6 @@ RESPONDA APENAS com JSON válido, sem markdown, no formato:
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    // Parse JSON from response (handle potential markdown wrapping)
     let parsed;
     try {
       const jsonStr = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();

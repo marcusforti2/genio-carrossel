@@ -59,11 +59,12 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     setShowSearch(true);
     try {
       const { data, error } = await supabase.functions.invoke("search-pexels", {
-        body: { 
-          query: q, 
+        body: {
+          query: q,
           perPage: 6,
           topic: carousel.brandingText || carousel.profileName || "",
           bgMode: carousel.theme?.bgMode || "dark",
+          niche: "",
         },
       });
       if (error) throw error;
@@ -263,7 +264,7 @@ const EditorSidebar = ({
   onAddSlide,
   onUpdateCarousel,
 }: EditorSidebarProps) => {
-  const [tab, setTab] = useState<"slide" | "design" | "profile">("slide");
+  const [tab, setTab] = useState<"slide" | "design" | "profile" | "footer">("slide");
   const selectedSlide = carousel.slides[selectedSlideIndex];
 
   const updateTheme = (partial: Partial<CarouselData["theme"]>) => {
@@ -273,16 +274,16 @@ const EditorSidebar = ({
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
       {/* Tabs */}
-      <div className="flex border-b border-border">
-        {(["slide", "design", "profile"] as const).map((t) => (
+      <div className="flex border-b border-border overflow-x-auto">
+        {(["slide", "design", "profile", "footer"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-colors ${
+            className={`flex-1 py-3 text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap px-2 ${
               tab === t ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t === "slide" ? "Slide" : t === "design" ? "Design" : "Perfil"}
+            {t === "slide" ? "Slide" : t === "design" ? "Design" : t === "profile" ? "Perfil" : "Rodapé"}
           </button>
         ))}
       </div>
@@ -390,13 +391,45 @@ const EditorSidebar = ({
               <Label className="text-xs text-muted-foreground">Handle</Label>
               <Input value={carousel.profileHandle} onChange={(e) => onUpdateCarousel({ ...carousel, profileHandle: e.target.value })} className="bg-secondary border-border/50" />
             </div>
+          </div>
+        )}
+
+        {tab === "footer" && (
+          <div className="space-y-4 animate-fade-in">
+            <p className="text-[10px] text-muted-foreground">
+              Edite aqui e aplique em todos os slides automaticamente.
+            </p>
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Branding</Label>
-              <Input value={carousel.brandingText} onChange={(e) => onUpdateCarousel({ ...carousel, brandingText: e.target.value })} className="bg-secondary border-border/50" />
+              <Label className="text-xs text-muted-foreground">Texto do branding</Label>
+              <Input
+                value={carousel.brandingText}
+                onChange={(e) => onUpdateCarousel({ ...carousel, brandingText: e.target.value })}
+                placeholder="Ex: @suamarca"
+                className="bg-secondary border-border/50"
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Sub-branding</Label>
-              <Input value={carousel.brandingSubtext} onChange={(e) => onUpdateCarousel({ ...carousel, brandingSubtext: e.target.value })} className="bg-secondary border-border/50" />
+              <Input
+                value={carousel.brandingSubtext}
+                onChange={(e) => onUpdateCarousel({ ...carousel, brandingSubtext: e.target.value })}
+                placeholder="Ex: Marketing Digital"
+                className="bg-secondary border-border/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">@Handle (rodapé dos slides)</Label>
+              <Input
+                value={carousel.profileHandle}
+                onChange={(e) => onUpdateCarousel({ ...carousel, profileHandle: e.target.value })}
+                placeholder="@seuhandle"
+                className="bg-secondary border-border/50"
+              />
+            </div>
+            <div className="rounded-lg bg-secondary/50 border border-border p-3">
+              <p className="text-[10px] text-muted-foreground">
+                ✓ Todas as alterações aqui são aplicadas em todos os slides simultaneamente.
+              </p>
             </div>
           </div>
         )}

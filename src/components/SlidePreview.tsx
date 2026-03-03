@@ -50,6 +50,9 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       </div>
     );
 
+  const footerHandle = carousel.profileHandle || "";
+  const footerBranding = carousel.brandingText || "";
+
   return (
     <div
       className="relative w-full overflow-hidden font-display"
@@ -93,7 +96,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
                   {carousel.profileName}{" "}
                   <span style={{ color: styles.accent }}>✓</span>
                 </p>
-                <p className="text-[9px]" style={{ color: styles.body }}>{carousel.profileHandle}</p>
+                <p className="text-[9px]" style={{ color: styles.body }}>{footerHandle}</p>
               </div>
             </div>
 
@@ -156,7 +159,6 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
                 </div>
               </>
             ) : (
-              /* No-image layout: text-focused, centered, bigger typography */
               <div className="flex-1 flex flex-col justify-center items-center text-center px-2">
                 <div
                   className="w-10 h-1 rounded-full mb-5"
@@ -177,22 +179,26 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           </div>
 
           <div className="flex items-center gap-2 mt-4">
-            <span
-              className="text-[7px] font-semibold px-2 py-0.5 rounded-full"
-              style={{ background: styles.tagBg, color: styles.tagFg }}
-            >
-              @novaordem.hub
-            </span>
-            <span
-              className="text-[7px] font-medium px-2 py-0.5 rounded-full"
-              style={{
-                background: styles.handleBg,
-                color: `${styles.title}b3`,
-                border: `1px solid ${styles.borderLight}`,
-              }}
-            >
-              {carousel.profileHandle}
-            </span>
+            {footerBranding && (
+              <span
+                className="text-[7px] font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: styles.tagBg, color: styles.tagFg }}
+              >
+                {footerBranding}
+              </span>
+            )}
+            {footerHandle && (
+              <span
+                className="text-[7px] font-medium px-2 py-0.5 rounded-full"
+                style={{
+                  background: styles.handleBg,
+                  color: `${styles.title}b3`,
+                  border: `1px solid ${styles.borderLight}`,
+                }}
+              >
+                {footerHandle}
+              </span>
+            )}
             <span className="ml-auto text-[7px]" style={{ color: `${styles.body}80` }}>
               Arrasta para o lado &gt;
             </span>
