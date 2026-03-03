@@ -106,11 +106,14 @@ const DashboardPage = () => {
       {/* Header */}
       <header className="border-b border-border">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-14">
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
+            </div>
             <h1 className="text-sm font-bold tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
               Carousel Spark
             </h1>
+            <span className="text-[9px] font-medium text-muted-foreground border border-border rounded px-1.5 py-0.5 uppercase tracking-wider">by Forti</span>
           </div>
           <div className="flex items-center gap-2">
             <Button

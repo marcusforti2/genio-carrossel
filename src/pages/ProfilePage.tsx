@@ -194,7 +194,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="h-14 border-b border-border flex items-center justify-between px-5">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1.5 text-xs">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="gap-1.5 text-xs">
           <ArrowLeft className="w-3.5 h-3.5" />
           Voltar
         </Button>
