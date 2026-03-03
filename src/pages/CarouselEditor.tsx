@@ -4,18 +4,18 @@ import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
 import GenerateDialog from "@/components/GenerateDialog";
 import ExportButtons from "@/components/ExportButtons";
-import ProjectsSheet from "@/components/ProjectsSheet";
 import CanvasView from "@/components/CanvasView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectAutosave, Project } from "@/hooks/useProjectAutosave";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { toast } from "sonner";
 
 const CarouselEditor = () => {
   const [carousel, setCarousel] = useState<CarouselData>(createDefaultCarousel());
@@ -25,7 +25,9 @@ const CarouselEditor = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<"editor" | "canvas">("editor");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
 
@@ -62,6 +64,35 @@ const CarouselEditor = () => {
     };
     loadProfile();
   }, [user, profileLoaded]);
+
+  // Load project from URL
+  useEffect(() => {
+    const projectParam = searchParams.get("project");
+    if (projectParam && user) {
+      (async () => {
+        const { data, error } = await supabase
+          .from("projects")
+          .select("*")
+          .eq("id", projectParam)
+          .single();
+        if (data && !error) {
+          const project: Project = {
+            id: data.id,
+            title: data.title,
+            data: data.data as any,
+            created_at: data.created_at,
+            updated_at: data.updated_at,
+          };
+          handleLoadProject(project);
+        } else {
+          toast.error("Projeto não encontrado");
+        }
+        setInitialLoading(false);
+      })();
+    } else {
+      setInitialLoading(false);
+    }
+  }, [user]);
 
   const updateSlide = (index: number, slide: SlideData) => {
     const newSlides = [...carousel.slides];
@@ -153,11 +184,9 @@ const CarouselEditor = () => {
               <Menu className="w-4 h-4" />
             </Button>
           )}
-          <ProjectsSheet
-            onLoadProject={handleLoadProject}
-            onNewProject={handleNewProject}
-            currentProjectId={projectId}
-          />
+          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => navigate("/")}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
           <Input
             value={projectTitle}
             onChange={(e) => setProjectTitle(e.target.value)}
