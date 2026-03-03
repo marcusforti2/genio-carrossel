@@ -29,8 +29,21 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   }, []);
 
   const isCover = slide.type === "cover";
-  const theme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
-  const ds: DesignStyle = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
+  const globalTheme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
+  const globalDs: DesignStyle = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
+
+  // Merge per-slide overrides
+  const so = slide.styleOverride || {};
+  const theme = {
+    bgMode: so.bgMode ?? globalTheme.bgMode,
+    accentColor: so.accentColor ?? globalTheme.accentColor,
+    accentName: so.accentName ?? globalTheme.accentName,
+  };
+  const ds: DesignStyle = {
+    template: so.template ?? globalDs.template,
+    fontFamily: so.fontFamily ?? globalDs.fontFamily,
+    titleSize: so.titleSize ?? globalDs.titleSize,
+  };
 
   const fontFam = ds.fontFamily === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif";
   const titleScale = ds.titleSize === "impacto" ? 1.35 : ds.titleSize === "grande" ? 1.15 : 1;
@@ -53,8 +66,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       borderLight: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
       handleBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
     };
-  }, [theme]);
-
+  }, [theme.bgMode, theme.accentColor]);
   const Avatar = () =>
     carousel.avatarUrl ? (
       <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 80, height: 80, border: `3px solid ${styles.accent}` }} />

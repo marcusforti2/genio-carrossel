@@ -1,3 +1,12 @@
+export interface SlideStyleOverride {
+  template?: DesignTemplate;
+  fontFamily?: FontFamily;
+  titleSize?: TitleSize;
+  bgMode?: "dark" | "light";
+  accentColor?: string;
+  accentName?: string;
+}
+
 export interface SlideData {
   id: string;
   type: "cover" | "content";
@@ -7,6 +16,7 @@ export interface SlideData {
   imageUrl?: string;
   imagePrompt?: string;
   imageLoading?: boolean;
+  styleOverride?: SlideStyleOverride;
 }
 
 export type DesignTemplate = "editorial" | "moderno" | "bold";
