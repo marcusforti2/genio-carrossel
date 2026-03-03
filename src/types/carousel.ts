@@ -15,6 +15,13 @@ export interface CarouselTheme {
   accentName: string;
 }
 
+export interface FooterConfig {
+  showBranding: boolean;
+  showHandle: boolean;
+  showCta: boolean;
+  ctaText: string;
+}
+
 export interface CarouselData {
   id: string;
   profileName: string;
@@ -24,6 +31,7 @@ export interface CarouselData {
   avatarUrl: string;
   slides: SlideData[];
   theme: CarouselTheme;
+  footer: FooterConfig;
 }
 
 export const ACCENT_PRESETS = [
@@ -48,6 +56,12 @@ export const createDefaultCarousel = (): CarouselData => ({
     bgMode: "dark",
     accentColor: "1 83% 55%",
     accentName: "Vermelho",
+  },
+  footer: {
+    showBranding: true,
+    showHandle: true,
+    showCta: true,
+    ctaText: "Arrasta para o lado >",
   },
   slides: [
     {
