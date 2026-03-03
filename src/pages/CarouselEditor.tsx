@@ -307,17 +307,24 @@ const CarouselEditor = () => {
               {/* Dots - desktop only */}
               {!isMobile && (
                 <div className="flex items-center justify-center gap-1.5 mt-6">
-                  {carousel.slides.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedSlide(i)}
-                      className={`rounded-full transition-all duration-200 ${
-                        i === selectedSlide
-                          ? "w-6 h-1.5 bg-primary"
-                          : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-                      }`}
-                    />
-                  ))}
+                  {carousel.slides.map((s, i) => {
+                    const hasOverride = s.styleOverride && Object.keys(s.styleOverride).length > 0;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedSlide(i)}
+                        className={`rounded-full transition-all duration-200 relative ${
+                          i === selectedSlide
+                            ? "w-6 h-1.5 bg-primary"
+                            : "w-1.5 h-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                        }`}
+                      >
+                        {hasOverride && (
+                          <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent-foreground" style={{ background: `hsl(${s.styleOverride?.accentColor || carousel.theme.accentColor})` }} />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -331,19 +338,25 @@ const CarouselEditor = () => {
           {/* Slide thumbnails */}
           <div className="px-3 pt-2 pb-1.5">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-              {carousel.slides.map((slide, i) => (
-                <button
-                  key={slide.id}
-                  onClick={() => setSelectedSlide(i)}
-                  className={`flex-shrink-0 w-9 h-11 rounded-md border-2 transition-all text-[9px] font-bold flex items-center justify-center ${
-                    i === selectedSlide
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              {carousel.slides.map((slide, i) => {
+                const hasOverride = slide.styleOverride && Object.keys(slide.styleOverride).length > 0;
+                return (
+                  <button
+                    key={slide.id}
+                    onClick={() => setSelectedSlide(i)}
+                    className={`relative flex-shrink-0 w-9 h-11 rounded-md border-2 transition-all text-[9px] font-bold flex items-center justify-center ${
+                      i === selectedSlide
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary text-muted-foreground"
+                    }`}
+                  >
+                    {i + 1}
+                    {hasOverride && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full border border-card" style={{ background: `hsl(${slide.styleOverride?.accentColor || carousel.theme.accentColor})` }} />
+                    )}
+                  </button>
+                );
+              })}
               <button
                 onClick={addSlide}
                 className="flex-shrink-0 w-9 h-11 rounded-md border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground flex items-center justify-center"
