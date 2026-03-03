@@ -9,9 +9,36 @@ export interface SlideData {
   imageLoading?: boolean;
 }
 
+export type DesignTemplate = "editorial" | "moderno" | "bold";
+export type FontFamily = "serif" | "sans";
+export type TitleSize = "normal" | "grande" | "impacto";
+
+export interface DesignStyle {
+  template: DesignTemplate;
+  fontFamily: FontFamily;
+  titleSize: TitleSize;
+}
+
+export const DESIGN_TEMPLATES: { id: DesignTemplate; name: string; description: string }[] = [
+  { id: "editorial", name: "Editorial", description: "Títulos grandes em serif, layout texto + imagem separados. Estilo profissional." },
+  { id: "moderno", name: "Moderno", description: "Sans-serif clean, layout equilibrado com cards sofisticados." },
+  { id: "bold", name: "Bold", description: "Texto gigante que preenche o slide. Máximo impacto visual." },
+];
+
+export const FONT_FAMILIES: { id: FontFamily; name: string; preview: string }[] = [
+  { id: "serif", name: "Serif", preview: "Playfair Display" },
+  { id: "sans", name: "Sans-serif", preview: "Inter" },
+];
+
+export const TITLE_SIZES: { id: TitleSize; name: string }[] = [
+  { id: "normal", name: "Normal" },
+  { id: "grande", name: "Grande" },
+  { id: "impacto", name: "Impacto" },
+];
+
 export interface CarouselTheme {
   bgMode: "dark" | "light";
-  accentColor: string; // HSL string like "1 83% 55%"
+  accentColor: string;
   accentName: string;
 }
 
@@ -32,6 +59,7 @@ export interface CarouselData {
   slides: SlideData[];
   theme: CarouselTheme;
   footer: FooterConfig;
+  designStyle: DesignStyle;
 }
 
 export const ACCENT_PRESETS = [
@@ -62,6 +90,11 @@ export const createDefaultCarousel = (): CarouselData => ({
     showHandle: true,
     showCta: true,
     ctaText: "Arrasta para o lado >",
+  },
+  designStyle: {
+    template: "editorial",
+    fontFamily: "serif",
+    titleSize: "grande",
   },
   slides: [
     {
