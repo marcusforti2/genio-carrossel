@@ -179,7 +179,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           </div>
 
           <div className="flex items-center gap-2 mt-4">
-            {footerBranding && (
+            {carousel.footer?.showBranding !== false && footerBranding && (
               <span
                 className="text-[7px] font-semibold px-2 py-0.5 rounded-full"
                 style={{ background: styles.tagBg, color: styles.tagFg }}
@@ -187,7 +187,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
                 {footerBranding}
               </span>
             )}
-            {footerHandle && (
+            {carousel.footer?.showHandle !== false && footerHandle && (
               <span
                 className="text-[7px] font-medium px-2 py-0.5 rounded-full"
                 style={{
@@ -199,9 +199,11 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
                 {footerHandle}
               </span>
             )}
-            <span className="ml-auto text-[7px]" style={{ color: `${styles.body}80` }}>
-              Arrasta para o lado &gt;
-            </span>
+            {carousel.footer?.showCta !== false && (
+              <span className="ml-auto text-[7px]" style={{ color: `${styles.body}80` }}>
+                {carousel.footer?.ctaText || "Arrasta para o lado >"}
+              </span>
+            )}
           </div>
         </div>
       )}

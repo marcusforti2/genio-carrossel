@@ -399,33 +399,110 @@ const EditorSidebar = ({
             <p className="text-[10px] text-muted-foreground">
               Edite aqui e aplique em todos os slides automaticamente.
             </p>
+
+            {/* Branding text */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Texto do branding</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">Texto do branding</Label>
+                <Switch
+                  checked={carousel.footer?.showBranding !== false}
+                  onCheckedChange={(checked) => onUpdateCarousel({ ...carousel, footer: { ...carousel.footer, showBranding: checked } })}
+                />
+              </div>
               <Input
                 value={carousel.brandingText}
                 onChange={(e) => onUpdateCarousel({ ...carousel, brandingText: e.target.value })}
-                placeholder="Ex: @suamarca"
+                placeholder="Ex: Governo de Negócios"
                 className="bg-secondary border-border/50"
+                disabled={carousel.footer?.showBranding === false}
               />
             </div>
+
+            {/* Sub-branding */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Sub-branding</Label>
+              <Label className="text-xs text-muted-foreground">Sub-branding (topo)</Label>
               <Input
                 value={carousel.brandingSubtext}
                 onChange={(e) => onUpdateCarousel({ ...carousel, brandingSubtext: e.target.value })}
-                placeholder="Ex: Marketing Digital"
+                placeholder="Ex: Aceleração Forti"
                 className="bg-secondary border-border/50"
               />
             </div>
+
+            {/* Handle */}
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">@Handle (rodapé dos slides)</Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">@Handle</Label>
+                <Switch
+                  checked={carousel.footer?.showHandle !== false}
+                  onCheckedChange={(checked) => onUpdateCarousel({ ...carousel, footer: { ...carousel.footer, showHandle: checked } })}
+                />
+              </div>
               <Input
                 value={carousel.profileHandle}
                 onChange={(e) => onUpdateCarousel({ ...carousel, profileHandle: e.target.value })}
                 placeholder="@seuhandle"
                 className="bg-secondary border-border/50"
+                disabled={carousel.footer?.showHandle === false}
               />
             </div>
+
+            {/* CTA */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">Texto CTA</Label>
+                <Switch
+                  checked={carousel.footer?.showCta !== false}
+                  onCheckedChange={(checked) => onUpdateCarousel({ ...carousel, footer: { ...carousel.footer, showCta: checked } })}
+                />
+              </div>
+              <Input
+                value={carousel.footer?.ctaText || "Arrasta para o lado >"}
+                onChange={(e) => onUpdateCarousel({ ...carousel, footer: { ...carousel.footer, ctaText: e.target.value } })}
+                placeholder="Ex: Arrasta para o lado >"
+                className="bg-secondary border-border/50"
+                disabled={carousel.footer?.showCta === false}
+              />
+            </div>
+
+            {/* Footer live preview */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Preview do rodapé</Label>
+              <div
+                className="rounded-lg p-3 flex items-center gap-2"
+                style={{ background: carousel.theme.bgMode === "dark" ? "hsl(0 0% 6.5%)" : "hsl(0 0% 96%)" }}
+              >
+                {carousel.footer?.showBranding !== false && carousel.brandingText && (
+                  <span
+                    className="text-[8px] font-semibold px-2 py-0.5 rounded-full"
+                    style={{ background: `hsl(${carousel.theme.accentColor})`, color: "#fff" }}
+                  >
+                    {carousel.brandingText}
+                  </span>
+                )}
+                {carousel.footer?.showHandle !== false && carousel.profileHandle && (
+                  <span
+                    className="text-[8px] font-medium px-2 py-0.5 rounded-full"
+                    style={{
+                      background: carousel.theme.bgMode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                      color: carousel.theme.bgMode === "dark" ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
+                      border: `1px solid ${carousel.theme.bgMode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                    }}
+                  >
+                    {carousel.profileHandle}
+                  </span>
+                )}
+                {carousel.footer?.showCta !== false && (
+                  <span className="ml-auto text-[8px]" style={{ color: carousel.theme.bgMode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)" }}>
+                    {carousel.footer?.ctaText || "Arrasta para o lado >"}
+                  </span>
+                )}
+                {!carousel.footer?.showBranding && !carousel.footer?.showHandle && !carousel.footer?.showCta && (
+                  <span className="text-[8px] text-muted-foreground italic">Rodapé oculto</span>
+                )}
+              </div>
+            </div>
+
             <div className="rounded-lg bg-secondary/50 border border-border p-3">
               <p className="text-[10px] text-muted-foreground">
                 ✓ Todas as alterações aqui são aplicadas em todos os slides simultaneamente.
