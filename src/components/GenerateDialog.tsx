@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Sparkles, Loader2, LayoutTemplate, Type, ALargeSmall } from "lucide-react";
+import MiniSlidePreview from "@/components/MiniSlidePreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { SlideData, DesignStyle, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignTemplate, FontFamily, TitleSize } from "@/types/carousel";
@@ -159,10 +160,18 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle }:
 
           {/* Design section divider */}
           <div className="border-t border-border pt-4">
-            <p className="text-xs font-bold text-foreground mb-4 flex items-center gap-1.5">
-              <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
-              Design do Carrossel
-            </p>
+            <div className="flex items-start gap-4 mb-4">
+              <div className="flex-1">
+                <p className="text-xs font-bold text-foreground mb-1 flex items-center gap-1.5">
+                  <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
+                  Design do Carrossel
+                </p>
+                <p className="text-[10px] text-muted-foreground">Escolha o estilo visual</p>
+              </div>
+              <div className="w-20 shrink-0">
+                <MiniSlidePreview template={template} fontFamily={fontFamily} titleSize={titleSize} />
+              </div>
+            </div>
 
             {/* Template */}
             <div className="space-y-2 mb-4">
