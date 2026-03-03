@@ -36,14 +36,18 @@ Estilos disponíveis:
 REGRAS:
 1. O primeiro slide é SEMPRE a capa com um gancho irresistível (uma frase CURTA, máximo 12 palavras, provocativa)
 2. Cada slide de conteúdo tem um TÍTULO BOLD (máximo 6 palavras) e um CORPO de texto com 2 a 4 frases (entre 150 e 280 caracteres). O corpo deve desenvolver a ideia do título com contexto, exemplos ou provocações.
-3. O último slide pode ser um CTA ou conclusão forte
+3. O ÚLTIMO SLIDE é SEMPRE um CTA (type: "cta") SEM IMAGEM. Ele deve:
+   - Ter um título curto e direto pedindo para seguir o perfil (ex: "Segue pra mais conteúdo assim")
+   - No corpo, pedir para o lead comentar UMA PALAVRA-CHAVE específica relacionada ao tema do post, dizendo que você vai chamar no direct. Ex: "Comenta 'ACORDEI' aqui embaixo que eu te mando um material exclusivo no direct."
+   - A palavra-chave deve ser uma única palavra em CAIXA ALTA, marcante e relacionada ao tema
+   - NÃO incluir imageQuery no slide CTA
 4. O texto precisa caber em um card vertical de Instagram. Seja direto mas com substância.
-4. Use o tom de voz do criador
-5. Ataque o inimigo em comum quando relevante
-6. Fale diretamente com o público-alvo
-7. Seja provocativo mas autêntico
+5. Use o tom de voz do criador
+6. Ataque o inimigo em comum quando relevante
+7. Fale diretamente com o público-alvo
+8. Seja provocativo mas autêntico
 
-IMPORTANTE - PARA CADA SLIDE, inclua um campo "imageQuery" com uma busca em inglês para o Pexels de 2 a 5 palavras.
+IMPORTANTE - PARA CADA SLIDE (exceto o CTA final), inclua um campo "imageQuery" com uma busca em inglês para o Pexels de 2 a 5 palavras.
 Regras para imageQuery:
 - Deve ser em INGLÊS (Pexels funciona melhor em inglês)
 - Deve descrever uma CENA VISUAL concreta, não conceitos abstratos
@@ -57,6 +61,7 @@ RESPONDA APENAS com JSON válido, sem markdown, no formato:
     { "type": "cover", "title": "texto do gancho da capa", "imageQuery": "dramatic spotlight microphone stage" },
     { "type": "content", "title": "Título bold.", "body": "Corpo do texto...", "imageQuery": "person stressed computer late night" },
     ...
+    { "type": "cta", "title": "Segue pra não perder nada", "body": "Comenta 'PALAVRA' aqui embaixo que eu te chamo no direct com um conteúdo exclusivo." }
   ],
   "caption": "Legenda para o post do Instagram com hashtags relevantes"
 }`;
