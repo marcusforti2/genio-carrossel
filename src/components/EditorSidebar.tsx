@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { SlideData, CarouselData, ACCENT_PRESETS } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload } from "lucide-react";
+import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload, Type, LayoutTemplate, ALargeSmall } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -271,6 +271,13 @@ const EditorSidebar = ({
     onUpdateCarousel({ ...carousel, theme: { ...carousel.theme, ...partial } });
   };
 
+  const updateDesignStyle = (partial: Partial<DesignStyle>) => {
+    const current = carousel.designStyle || { template: "editorial" as const, fontFamily: "serif" as const, titleSize: "grande" as const };
+    onUpdateCarousel({ ...carousel, designStyle: { ...current, ...partial } });
+  };
+
+  const ds = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
+
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
       {/* Tabs */}
@@ -302,6 +309,79 @@ const EditorSidebar = ({
 
         {tab === "design" && (
           <div className="space-y-6 animate-fade-in">
+            {/* Design Template */}
+            <div className="space-y-3">
+              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <LayoutTemplate className="w-3.5 h-3.5" /> Template
+              </Label>
+              <div className="space-y-2">
+                {DESIGN_TEMPLATES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => updateDesignStyle({ template: t.id })}
+                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                      ds.template === t.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-secondary hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    <p className={`text-xs font-bold ${ds.template === t.id ? "text-primary" : "text-foreground"}`}>{t.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{t.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Font Family */}
+            <div className="space-y-3">
+              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Type className="w-3.5 h-3.5" /> Fonte
+              </Label>
+              <div className="flex gap-2">
+                {FONT_FAMILIES.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => updateDesignStyle({ fontFamily: f.id })}
+                    className={`flex-1 py-3 rounded-lg border-2 transition-all text-center ${
+                      ds.fontFamily === f.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-secondary hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    <p
+                      className="text-sm font-bold"
+                      style={{ fontFamily: f.id === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif", color: ds.fontFamily === f.id ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}
+                    >
+                      Aa
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{f.name}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Title Size */}
+            <div className="space-y-3">
+              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <ALargeSmall className="w-3.5 h-3.5" /> Tamanho do título
+              </Label>
+              <div className="flex gap-2">
+                {TITLE_SIZES.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => updateDesignStyle({ titleSize: s.id })}
+                    className={`flex-1 py-2.5 rounded-lg border-2 transition-all text-xs font-semibold ${
+                      ds.titleSize === s.id
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* BG mode */}
             <div className="space-y-3">
               <Label className="text-xs text-muted-foreground">Fundo do slide</Label>
@@ -314,8 +394,7 @@ const EditorSidebar = ({
                       : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/50"
                   }`}
                 >
-                  <Moon className="w-4 h-4" />
-                  Escuro
+                  <Moon className="w-4 h-4" /> Escuro
                 </button>
                 <button
                   onClick={() => updateTheme({ bgMode: "light" })}
@@ -325,8 +404,7 @@ const EditorSidebar = ({
                       : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/50"
                   }`}
                 >
-                  <Sun className="w-4 h-4" />
-                  Claro
+                  <Sun className="w-4 h-4" /> Claro
                 </button>
               </div>
             </div>
@@ -345,26 +423,10 @@ const EditorSidebar = ({
                         : "border-border hover:border-muted-foreground/30"
                     }`}
                   >
-                    <div
-                      className="w-6 h-6 rounded-full border border-border/50"
-                      style={{ background: `hsl(${preset.color})` }}
-                    />
+                    <div className="w-6 h-6 rounded-full border border-border/50" style={{ background: `hsl(${preset.color})` }} />
                     <span className="text-[9px] text-muted-foreground">{preset.name}</span>
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Preview swatch */}
-            <div className="rounded-lg p-4 space-y-2" style={{ background: carousel.theme.bgMode === "dark" ? "hsl(0 0% 6.5%)" : "hsl(0 0% 96%)" }}>
-              <p className="text-[10px] font-bold" style={{ color: carousel.theme.bgMode === "dark" ? "#fff" : "#111" }}>
-                Preview do tema
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-2 rounded-full" style={{ background: `hsl(${carousel.theme.accentColor})` }} />
-                <span className="text-[9px]" style={{ color: carousel.theme.bgMode === "dark" ? "#999" : "#666" }}>
-                  {carousel.theme.accentName} • {carousel.theme.bgMode === "dark" ? "Escuro" : "Claro"}
-                </span>
               </div>
             </div>
           </div>

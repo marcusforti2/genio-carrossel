@@ -1,4 +1,4 @@
-import { SlideData, CarouselData } from "@/types/carousel";
+import { SlideData, CarouselData, DesignStyle } from "@/types/carousel";
 import { User, Loader2 } from "lucide-react";
 import { useMemo } from "react";
 
@@ -12,6 +12,12 @@ interface SlidePreviewProps {
 const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreviewProps) => {
   const isCover = slide.type === "cover";
   const theme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
+  const ds: DesignStyle = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
+
+  const fontFam = ds.fontFamily === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif";
+
+  // Title size multipliers per titleSize option
+  const titleScale = ds.titleSize === "impacto" ? 1.35 : ds.titleSize === "grande" ? 1.15 : 1;
 
   const styles = useMemo(() => {
     const isDark = theme.bgMode === "dark";
@@ -30,22 +36,15 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       mutedBg: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
       borderLight: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
       handleBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+      accentBg: isDark ? `hsla(${theme.accentColor} / 0.12)` : `hsla(${theme.accentColor} / 0.08)`,
     };
   }, [theme]);
 
   const Avatar = () =>
     carousel.avatarUrl ? (
-      <img
-        src={carousel.avatarUrl}
-        alt="Avatar"
-        className="w-10 h-10 rounded-full object-cover"
-        style={{ border: `2px solid ${styles.accent}` }}
-      />
+      <img src={carousel.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover" style={{ border: `2px solid ${styles.accent}` }} />
     ) : (
-      <div
-        className="w-10 h-10 rounded-full flex items-center justify-center"
-        style={{ background: `${styles.accent}33`, border: `2px solid ${styles.accent}55` }}
-      >
+      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${styles.accent}33`, border: `2px solid ${styles.accent}55` }}>
         <User className="w-5 h-5" style={{ color: `${styles.accent}aa` }} />
       </div>
     );
@@ -53,193 +52,245 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const footerHandle = carousel.profileHandle || "";
   const footerBranding = carousel.brandingText || "";
 
-  return (
-    <div
-      className="relative w-full overflow-hidden font-display"
-      style={{ aspectRatio: "4/5", background: styles.bg }}
-    >
-      {/* Branding top-left */}
-      <div className="absolute top-[5%] left-[5.5%] z-10">
-        <p className="text-[3.2%] font-bold tracking-wider uppercase leading-tight" style={{ color: styles.branding }}>
-          {carousel.brandingText}
-        </p>
-        <p className="text-[2.4%] leading-tight mt-[2px]" style={{ color: `${styles.branding}b3` }}>
-          {carousel.brandingSubtext}
-        </p>
-      </div>
+  const shared = { slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding };
 
-      {/* Slide counter top-right */}
-      <div className="absolute top-[5%] right-[5.5%] z-10">
-        <div
-          className="backdrop-blur-sm rounded-full px-[3%] py-[1%] text-[2.8%] font-medium"
-          style={{ background: styles.counterBg, color: styles.counterText }}
-        >
+  return (
+    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5", background: styles.bg, fontFamily: fontFam }}>
+      {/* Header bar */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-[5.5%] pt-[4%]">
+        <p className="text-[2.6%] font-bold tracking-wider uppercase leading-tight" style={{ color: styles.branding }}>
+          {carousel.brandingSubtext || carousel.brandingText}
+        </p>
+        <p className="text-[2.6%] leading-tight" style={{ color: styles.branding }}>
+          {footerHandle}
+        </p>
+        <div className="backdrop-blur-sm rounded-full px-[2.5%] py-[0.6%] text-[2.4%] font-medium" style={{ background: styles.counterBg, color: styles.counterText }}>
           {slideIndex + 1}/{totalSlides}
         </div>
       </div>
 
       {isCover ? (
-        <CoverSlide slide={slide} carousel={carousel} styles={styles} Avatar={Avatar} footerHandle={footerHandle} />
+        <CoverSlide {...shared} />
+      ) : ds.template === "editorial" ? (
+        <EditorialContent {...shared} />
+      ) : ds.template === "bold" ? (
+        <BoldContent {...shared} />
       ) : (
-        <ContentSlide
-          slide={slide}
-          carousel={carousel}
-          styles={styles}
-          footerHandle={footerHandle}
-          footerBranding={footerBranding}
-        />
+        <ModernoContent {...shared} />
       )}
     </div>
   );
 };
 
-/* ── Cover Slide ── */
-interface CoverProps {
+/* ── Shared props ── */
+interface TemplateProps {
   slide: SlideData;
   carousel: CarouselData;
   styles: Record<string, string>;
+  fontFam: string;
+  titleScale: number;
   Avatar: React.FC;
   footerHandle: string;
+  footerBranding: string;
 }
 
-const CoverSlide = ({ slide, carousel, styles, Avatar, footerHandle }: CoverProps) => (
+/* ═══════════════════════════════════════════
+   COVER SLIDE (shared across all templates)
+   ═══════════════════════════════════════════ */
+const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle }: TemplateProps) => (
   <div className="flex flex-col justify-end h-full relative">
-    {slide.imageUrl && (
-      <img src={slide.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
-    )}
-    <div
-      className="absolute inset-0"
-      style={{
-        background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})`,
-      }}
-    />
-
+    {slide.imageUrl && <img src={slide.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+    <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
     <div className="relative z-10 p-[7%] pb-[10%] text-left space-y-[4%]">
       <div className="flex items-center gap-[3%]">
         <Avatar />
         <div>
           <p className="text-[3.4%] font-bold leading-tight" style={{ color: styles.title }}>
-            {carousel.profileName}{" "}
-            <span style={{ color: styles.accent }}>✓</span>
+            {carousel.profileName} <span style={{ color: styles.accent }}>✓</span>
           </p>
-          <p className="text-[2.8%] leading-tight mt-[2px]" style={{ color: styles.body }}>
-            {footerHandle}
-          </p>
+          <p className="text-[2.8%] leading-tight mt-[2px]" style={{ color: styles.body }}>{footerHandle}</p>
         </div>
       </div>
-
-      <h1 className="text-[6.5%] font-black leading-[1.15] line-clamp-3" style={{ color: styles.title }}>
+      <h1
+        className="font-black leading-[1.1] line-clamp-4"
+        style={{ color: styles.title, fontSize: `${6.5 * titleScale}%`, fontFamily: fontFam }}
+      >
         {slide.title}
       </h1>
-    </div>
-  </div>
-);
-
-/* ── Content Slide ── */
-interface ContentProps {
-  slide: SlideData;
-  carousel: CarouselData;
-  styles: Record<string, string>;
-  footerHandle: string;
-  footerBranding: string;
-}
-
-const ContentSlide = ({ slide, carousel, styles, footerHandle, footerBranding }: ContentProps) => (
-  <div className="flex flex-col h-full p-[7%] pt-[14%] overflow-hidden">
-    <div className="flex-1 flex flex-col min-h-0">
-      {slide.hasImage && (slide.imageUrl || slide.imageLoading) ? (
-        <SlideWithImage slide={slide} styles={styles} />
-      ) : slide.hasImage ? (
-        <SlideWithImagePlaceholder slide={slide} styles={styles} />
-      ) : (
-        <SlideTextOnly slide={slide} styles={styles} />
+      {slide.body && (
+        <p className="text-[3.2%] leading-[1.5] line-clamp-3" style={{ color: styles.body }}>
+          {slide.body}
+        </p>
       )}
     </div>
-
-    <SlideFooter
-      carousel={carousel}
-      styles={styles}
-      footerHandle={footerHandle}
-      footerBranding={footerBranding}
-    />
   </div>
 );
 
-/* ── Slide with Image ── */
-const SlideWithImage = ({ slide, styles }: { slide: SlideData; styles: Record<string, string> }) => (
-  <>
-    <h2 className="text-[5%] font-black leading-[1.2] mb-[3%] line-clamp-2" style={{ color: styles.title }}>
-      {slide.title}
-    </h2>
-    <p className="text-[3.2%] leading-[1.6] flex-shrink-0 line-clamp-3" style={{ color: styles.body }}>
-      {slide.body}
-    </p>
-    <div className="mt-auto pt-[4%]">
-      {slide.imageLoading ? (
-        <div
-          className="w-full rounded-lg flex items-center justify-center"
-          style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
+/* ═══════════════════════════════════════════
+   EDITORIAL TEMPLATE
+   Like brandsdecoded: title top, image middle, body bottom
+   ═══════════════════════════════════════════ */
+const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
+  const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const titleFontSize = hasImg ? 5.5 * titleScale : 7 * titleScale;
+  const bodyFontSize = hasImg ? 3.4 : 3.8;
+
+  return (
+    <div className="flex flex-col h-full px-[6%] pt-[13%] pb-[5%] overflow-hidden">
+      {/* Title — always on top, large and bold */}
+      <h2
+        className="font-black leading-[1.12] line-clamp-5 flex-shrink-0"
+        style={{ color: styles.title, fontSize: `${titleFontSize}%`, fontFamily: fontFam }}
+      >
+        {slide.title}
+      </h2>
+
+      {/* Body text — accent colored if no image, below title */}
+      {slide.body && !hasImg && (
+        <p
+          className="leading-[1.5] mt-[4%] line-clamp-4 flex-shrink-0"
+          style={{ color: styles.accent, fontSize: `${bodyFontSize}%`, fontFamily: fontFam }}
         >
-          <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
-        </div>
-      ) : (
-        <img
-          src={slide.imageUrl}
-          alt=""
-          className="w-full rounded-lg object-cover"
-          style={{ aspectRatio: "16/10" }}
-        />
+          {slide.body}
+        </p>
       )}
-    </div>
-  </>
-);
 
-/* ── Slide with Image Placeholder ── */
-const SlideWithImagePlaceholder = ({ slide, styles }: { slide: SlideData; styles: Record<string, string> }) => (
-  <>
-    <h2 className="text-[5%] font-black leading-[1.2] mb-[3%] line-clamp-2" style={{ color: styles.title }}>
-      {slide.title}
-    </h2>
-    <p className="text-[3.2%] leading-[1.6] flex-shrink-0 line-clamp-3" style={{ color: styles.body }}>
-      {slide.body}
-    </p>
-    <div className="mt-auto pt-[4%]">
-      {slide.imageLoading ? (
-        <div
-          className="w-full rounded-lg flex items-center justify-center"
-          style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
+      {/* Image */}
+      {hasImg && (
+        <div className="mt-auto pt-[4%] flex-shrink-0">
+          {slide.imageLoading ? (
+            <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}>
+              <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
+            </div>
+          ) : (
+            <img src={slide.imageUrl} alt="" className="w-full rounded-lg object-cover" style={{ aspectRatio: "16/9" }} />
+          )}
+        </div>
+      )}
+
+      {/* Body text below image */}
+      {slide.body && hasImg && (
+        <p
+          className="leading-[1.45] mt-[4%] font-bold line-clamp-4 flex-shrink-0"
+          style={{ color: styles.title, fontSize: `${bodyFontSize}%`, fontFamily: fontFam }}
         >
-          <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
-        </div>
-      ) : (
-        <div
-          className="w-full rounded-lg"
-          style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}
-        />
+          {slide.body}
+        </p>
       )}
-    </div>
-  </>
-);
 
-/* ── Text Only Slide ── */
-const SlideTextOnly = ({ slide, styles }: { slide: SlideData; styles: Record<string, string> }) => (
-  <div className="flex-1 flex flex-col justify-center items-start text-left px-[2%]">
-    <div
-      className="w-[12%] h-[1%] rounded-full mb-[5%]"
-      style={{ background: styles.accent }}
-    />
-    <h2 className="text-[6%] font-black leading-[1.15] mb-[4%] line-clamp-3" style={{ color: styles.title }}>
+      {/* Text-only: big title fills space, body at bottom */}
+      {!hasImg && !slide.body && (
+        <div className="flex-1" />
+      )}
+
+      {/* Spacer if no image and no body to push footer down */}
+      {!hasImg && <div className="flex-1" />}
+
+      {/* Footer */}
+      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   MODERNO TEMPLATE
+   Current style refined: title + body top, image bottom
+   ═══════════════════════════════════════════ */
+const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => (
+  <div className="flex flex-col h-full px-[7%] pt-[14%] pb-[5%] overflow-hidden">
+    <h2
+      className="font-extrabold leading-[1.18] mb-[3%] line-clamp-3 flex-shrink-0"
+      style={{ color: styles.title, fontSize: `${5 * titleScale}%`, fontFamily: fontFam }}
+    >
       {slide.title}
     </h2>
-    <p className="text-[3.6%] leading-[1.7] line-clamp-5" style={{ color: styles.body }}>
-      {slide.body}
-    </p>
-    <div
-      className="w-[12%] h-[1%] rounded-full mt-[5%]"
-      style={{ background: styles.accent }}
-    />
+
+    {slide.body && (
+      <p className="leading-[1.6] flex-shrink-0 line-clamp-3" style={{ color: styles.body, fontSize: "3.2%", fontFamily: fontFam }}>
+        {slide.body}
+      </p>
+    )}
+
+    {slide.hasImage && (slide.imageUrl || slide.imageLoading) && (
+      <div className="mt-auto pt-[4%]">
+        {slide.imageLoading ? (
+          <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}>
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
+          </div>
+        ) : (
+          <img src={slide.imageUrl} alt="" className="w-full rounded-lg object-cover" style={{ aspectRatio: "16/10" }} />
+        )}
+      </div>
+    )}
+
+    {!slide.hasImage && !slide.imageUrl && (
+      <div className="flex-1 flex flex-col justify-center items-start">
+        <div className="w-[12%] h-[1%] rounded-full my-[3%]" style={{ background: styles.accent }} />
+      </div>
+    )}
+
+    <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
   </div>
 );
+
+/* ═══════════════════════════════════════════
+   BOLD TEMPLATE
+   Giant text fills the space, minimal imagery
+   ═══════════════════════════════════════════ */
+const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
+  const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const isTextOnly = !hasImg;
+
+  return (
+    <div className="flex flex-col h-full px-[6%] pt-[13%] pb-[5%] overflow-hidden" style={{ background: isTextOnly ? styles.accent : styles.bg }}>
+      <div className="flex-1 flex flex-col justify-center">
+        <h2
+          className="font-black leading-[1.08] line-clamp-6"
+          style={{
+            color: isTextOnly ? styles.tagFg : styles.title,
+            fontSize: `${(isTextOnly ? 8 : 6) * titleScale}%`,
+            fontFamily: fontFam,
+          }}
+        >
+          {slide.title}
+        </h2>
+
+        {slide.body && (
+          <p
+            className="leading-[1.5] mt-[5%] line-clamp-4 font-medium"
+            style={{
+              color: isTextOnly ? `${styles.tagFg}cc` : styles.body,
+              fontSize: `${isTextOnly ? 3.8 : 3.4}%`,
+              fontFamily: fontFam,
+            }}
+          >
+            {slide.body}
+          </p>
+        )}
+      </div>
+
+      {hasImg && (
+        <div className="flex-shrink-0 pt-[3%]">
+          {slide.imageLoading ? (
+            <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}>
+              <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
+            </div>
+          ) : (
+            <img src={slide.imageUrl} alt="" className="w-full rounded-lg object-cover" style={{ aspectRatio: "16/9" }} />
+          )}
+        </div>
+      )}
+
+      <SlideFooter
+        carousel={carousel}
+        styles={styles}
+        footerHandle={footerHandle}
+        footerBranding={footerBranding}
+        invertColors={isTextOnly}
+      />
+    </div>
+  );
+};
 
 /* ── Footer ── */
 interface FooterProps {
@@ -247,14 +298,18 @@ interface FooterProps {
   styles: Record<string, string>;
   footerHandle: string;
   footerBranding: string;
+  invertColors?: boolean;
 }
 
-const SlideFooter = ({ carousel, styles, footerHandle, footerBranding }: FooterProps) => (
+const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertColors }: FooterProps) => (
   <div className="flex items-center gap-[2%] mt-[4%] flex-shrink-0">
     {carousel.footer?.showBranding !== false && footerBranding && (
       <span
         className="text-[2.6%] font-semibold px-[3%] py-[1%] rounded-full"
-        style={{ background: styles.tagBg, color: styles.tagFg }}
+        style={{
+          background: invertColors ? "rgba(255,255,255,0.2)" : styles.tagBg,
+          color: styles.tagFg,
+        }}
       >
         {footerBranding}
       </span>
@@ -263,16 +318,16 @@ const SlideFooter = ({ carousel, styles, footerHandle, footerBranding }: FooterP
       <span
         className="text-[2.6%] font-medium px-[3%] py-[1%] rounded-full"
         style={{
-          background: styles.handleBg,
-          color: `${styles.title}b3`,
-          border: `1px solid ${styles.borderLight}`,
+          background: invertColors ? "rgba(255,255,255,0.15)" : styles.handleBg,
+          color: invertColors ? "rgba(255,255,255,0.8)" : `${styles.title}b3`,
+          border: `1px solid ${invertColors ? "rgba(255,255,255,0.2)" : styles.borderLight}`,
         }}
       >
         {footerHandle}
       </span>
     )}
     {carousel.footer?.showCta !== false && (
-      <span className="ml-auto text-[2.6%]" style={{ color: `${styles.body}80` }}>
+      <span className="ml-auto text-[2.6%]" style={{ color: invertColors ? "rgba(255,255,255,0.5)" : `${styles.body}80` }}>
         {carousel.footer?.ctaText || "Arrasta para o lado →"}
       </span>
     )}
