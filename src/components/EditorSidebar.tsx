@@ -733,19 +733,25 @@ const EditorSidebar = ({
       {/* Slide thumbnails */}
       <div className="border-t border-border p-3">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-          {carousel.slides.map((slide, i) => (
-            <button
-              key={slide.id}
-              onClick={() => { onSelectSlide(i); setTab("slide"); }}
-              className={`flex-shrink-0 w-10 h-12 rounded-md border-2 transition-all text-[8px] font-bold flex items-center justify-center ${
-                i === selectedSlideIndex
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/50"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
+          {carousel.slides.map((slide, i) => {
+            const hasOverride = slide.styleOverride && Object.keys(slide.styleOverride).length > 0;
+            return (
+              <button
+                key={slide.id}
+                onClick={() => { onSelectSlide(i); setTab("slide"); }}
+                className={`relative flex-shrink-0 w-10 h-12 rounded-md border-2 transition-all text-[8px] font-bold flex items-center justify-center ${
+                  i === selectedSlideIndex
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/50"
+                }`}
+              >
+                {i + 1}
+                {hasOverride && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-card" style={{ background: `hsl(${slide.styleOverride?.accentColor || carousel.theme.accentColor})` }} />
+                )}
+              </button>
+            );
+          })}
           <button
             onClick={onAddSlide}
             className="flex-shrink-0 w-10 h-12 rounded-md border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground hover:text-primary transition-colors flex items-center justify-center"
