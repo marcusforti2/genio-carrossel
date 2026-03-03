@@ -100,20 +100,20 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
               </div>
             </div>
 
-            <h1 className="text-lg font-black leading-tight" style={{ color: styles.title }}>
+            <h1 className="text-lg font-black leading-tight line-clamp-3" style={{ color: styles.title }}>
               {slide.title}
             </h1>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col h-full p-6 pt-14">
+        <div className="flex flex-col h-full p-6 pt-14 overflow-hidden">
           <div className="flex-1 flex flex-col">
             {slide.hasImage && slide.imageUrl ? (
               <>
-                <h2 className="text-base font-black leading-tight mb-3" style={{ color: styles.title }}>
+                <h2 className="text-base font-black leading-tight mb-3 line-clamp-2" style={{ color: styles.title }}>
                   {slide.title}
                 </h2>
-                <p className="text-[10px] leading-relaxed flex-shrink-0" style={{ color: styles.body }}>
+                <p className="text-[10px] leading-relaxed flex-shrink-0 line-clamp-3" style={{ color: styles.body }}>
                   {slide.body}
                 </p>
                 <div className="mt-auto pt-3">
@@ -136,10 +136,10 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
               </>
             ) : slide.hasImage && !slide.imageUrl ? (
               <>
-                <h2 className="text-base font-black leading-tight mb-3" style={{ color: styles.title }}>
+                <h2 className="text-base font-black leading-tight mb-3 line-clamp-2" style={{ color: styles.title }}>
                   {slide.title}
                 </h2>
-                <p className="text-[10px] leading-relaxed flex-shrink-0" style={{ color: styles.body }}>
+                <p className="text-[10px] leading-relaxed flex-shrink-0 line-clamp-3" style={{ color: styles.body }}>
                   {slide.body}
                 </p>
                 <div className="mt-auto pt-3">
@@ -164,10 +164,10 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
                   className="w-10 h-1 rounded-full mb-5"
                   style={{ background: styles.accent }}
                 />
-                <h2 className="text-xl font-black leading-tight mb-4" style={{ color: styles.title }}>
+                <h2 className="text-xl font-black leading-tight mb-4 line-clamp-3" style={{ color: styles.title }}>
                   {slide.title}
                 </h2>
-                <p className="text-xs leading-relaxed" style={{ color: styles.body }}>
+                <p className="text-xs leading-relaxed line-clamp-5" style={{ color: styles.body }}>
                   {slide.body}
                 </p>
                 <div

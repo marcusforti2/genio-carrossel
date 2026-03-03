@@ -34,9 +34,10 @@ Estilos disponíveis:
 - "sacada": Insights rápidos e poderosos, frases de efeito
 
 REGRAS:
-1. O primeiro slide é SEMPRE a capa com um gancho irresistível (uma frase provocativa que faz a pessoa parar de rolar o feed)
-2. Cada slide de conteúdo tem um TÍTULO BOLD (máximo 5 palavras, impactante) e um CORPO de texto (3-5 linhas, desenvolvendo o argumento)
-3. O último slide pode ser um CTA ou conclusão forte
+1. O primeiro slide é SEMPRE a capa com um gancho irresistível (uma frase CURTA, máximo 12 palavras, provocativa)
+2. Cada slide de conteúdo tem um TÍTULO BOLD (máximo 5 palavras) e um CORPO de texto CURTO (máximo 3 linhas, máximo 120 caracteres no total)
+3. O último slide pode ser um CTA ou conclusão forte (também curto)
+4. NUNCA escreva parágrafos longos. Seja direto e conciso. O texto precisa caber em um card vertical de Instagram sem cortar.
 4. Use o tom de voz do criador
 5. Ataque o inimigo em comum quando relevante
 6. Fale diretamente com o público-alvo
