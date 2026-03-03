@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -395,6 +395,7 @@ interface EditorSidebarProps {
   onDeleteSlide: (index: number) => void;
   onAddSlide: () => void;
   onUpdateCarousel: (carousel: CarouselData) => void;
+  initialTab?: "slide" | "design" | "profile" | "footer";
 }
 
 const EditorSidebar = ({
@@ -405,9 +406,15 @@ const EditorSidebar = ({
   onDeleteSlide,
   onAddSlide,
   onUpdateCarousel,
+  initialTab,
 }: EditorSidebarProps) => {
-  const [tab, setTab] = useState<"slide" | "design" | "profile" | "footer">("slide");
+  const [tab, setTab] = useState<"slide" | "design" | "profile" | "footer">(initialTab || "slide");
   const selectedSlide = carousel.slides[selectedSlideIndex];
+
+  // Sync tab when initialTab changes (mobile tab bar)
+  useEffect(() => {
+    if (initialTab) setTab(initialTab);
+  }, [initialTab]);
 
   const updateTheme = (partial: Partial<CarouselData["theme"]>) => {
     onUpdateCarousel({ ...carousel, theme: { ...carousel.theme, ...partial } });
