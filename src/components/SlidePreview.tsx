@@ -1,6 +1,6 @@
 import { SlideData, CarouselData, DesignStyle } from "@/types/carousel";
 import { User, Loader2 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 interface SlidePreviewProps {
   slide: SlideData;
@@ -9,14 +9,30 @@ interface SlidePreviewProps {
   totalSlides: number;
 }
 
+// Render at fixed 1080x1350 and scale to fit container
+const SLIDE_W = 1080;
+const SLIDE_H = 1350;
+
 const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreviewProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.3);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width;
+      setScale(w / SLIDE_W);
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   const isCover = slide.type === "cover";
   const theme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
   const ds: DesignStyle = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
 
   const fontFam = ds.fontFamily === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif";
-
-  // Title size multipliers per titleSize option
   const titleScale = ds.titleSize === "impacto" ? 1.35 : ds.titleSize === "grande" ? 1.15 : 1;
 
   const styles = useMemo(() => {
@@ -36,16 +52,15 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       mutedBg: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
       borderLight: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
       handleBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-      accentBg: isDark ? `hsla(${theme.accentColor} / 0.12)` : `hsla(${theme.accentColor} / 0.08)`,
     };
   }, [theme]);
 
   const Avatar = () =>
     carousel.avatarUrl ? (
-      <img src={carousel.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover" style={{ border: `2px solid ${styles.accent}` }} />
+      <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 80, height: 80, border: `3px solid ${styles.accent}` }} />
     ) : (
-      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${styles.accent}33`, border: `2px solid ${styles.accent}55` }}>
-        <User className="w-5 h-5" style={{ color: `${styles.accent}aa` }} />
+      <div className="rounded-full flex items-center justify-center" style={{ width: 80, height: 80, background: `${styles.accent}33`, border: `3px solid ${styles.accent}55` }}>
+        <User style={{ width: 36, height: 36, color: `${styles.accent}aa` }} />
       </div>
     );
 
@@ -55,29 +70,41 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const shared = { slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding };
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5", background: styles.bg, fontFamily: fontFam }}>
-      {/* Header bar */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-[5.5%] pt-[4%]">
-        <p className="text-[2.6%] font-bold tracking-wider uppercase leading-tight" style={{ color: styles.branding }}>
-          {carousel.brandingSubtext || carousel.brandingText}
-        </p>
-        <p className="text-[2.6%] leading-tight" style={{ color: styles.branding }}>
-          {footerHandle}
-        </p>
-        <div className="backdrop-blur-sm rounded-full px-[2.5%] py-[0.6%] text-[2.4%] font-medium" style={{ background: styles.counterBg, color: styles.counterText }}>
-          {slideIndex + 1}/{totalSlides}
+    <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
+      <div
+        style={{
+          width: SLIDE_W,
+          height: SLIDE_H,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          background: styles.bg,
+          fontFamily: fontFam,
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+      >
+        {/* Header bar */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "48px 56px 0" }}>
+          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: styles.branding }}>
+            {carousel.brandingSubtext || carousel.brandingText}
+          </p>
+          <p style={{ fontSize: 24, color: styles.branding }}>{footerHandle}</p>
+          <div style={{ background: styles.counterBg, color: styles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
+            {slideIndex + 1}/{totalSlides}
+          </div>
         </div>
-      </div>
 
-      {isCover ? (
-        <CoverSlide {...shared} />
-      ) : ds.template === "editorial" ? (
-        <EditorialContent {...shared} />
-      ) : ds.template === "bold" ? (
-        <BoldContent {...shared} />
-      ) : (
-        <ModernoContent {...shared} />
-      )}
+        {isCover ? (
+          <CoverSlide {...shared} />
+        ) : ds.template === "editorial" ? (
+          <EditorialContent {...shared} />
+        ) : ds.template === "bold" ? (
+          <BoldContent {...shared} />
+        ) : (
+          <ModernoContent {...shared} />
+        )}
+      </div>
     </div>
   );
 };
@@ -95,30 +122,27 @@ interface TemplateProps {
 }
 
 /* ═══════════════════════════════════════════
-   COVER SLIDE (shared across all templates)
+   COVER SLIDE
    ═══════════════════════════════════════════ */
 const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle }: TemplateProps) => (
-  <div className="flex flex-col justify-end h-full relative">
-    {slide.imageUrl && <img src={slide.imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />}
-    <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
-    <div className="relative z-10 p-[7%] pb-[10%] text-left space-y-[4%]">
-      <div className="flex items-center gap-[3%]">
+  <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative" }}>
+    {slide.imageUrl && <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
+    <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
+    <div style={{ position: "relative", zIndex: 10, padding: "0 75px 120px", textAlign: "left" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 40 }}>
         <Avatar />
         <div>
-          <p className="text-[3.4%] font-bold leading-tight" style={{ color: styles.title }}>
+          <p style={{ fontSize: 32, fontWeight: 700, color: styles.title, lineHeight: 1.2 }}>
             {carousel.profileName} <span style={{ color: styles.accent }}>✓</span>
           </p>
-          <p className="text-[2.8%] leading-tight mt-[2px]" style={{ color: styles.body }}>{footerHandle}</p>
+          <p style={{ fontSize: 26, color: styles.body, marginTop: 4 }}>{footerHandle}</p>
         </div>
       </div>
-      <h1
-        className="font-black leading-[1.1] line-clamp-4"
-        style={{ color: styles.title, fontSize: `${6.5 * titleScale}%`, fontFamily: fontFam }}
-      >
+      <h1 style={{ fontSize: 68 * titleScale, fontWeight: 900, lineHeight: 1.1, color: styles.title, fontFamily: fontFam, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         {slide.title}
       </h1>
       {slide.body && (
-        <p className="text-[3.2%] leading-[1.5] line-clamp-3" style={{ color: styles.body }}>
+        <p style={{ fontSize: 32, lineHeight: 1.5, color: styles.body, marginTop: 24, WebkitLineClamp: 3, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.body}
         </p>
       )}
@@ -128,65 +152,44 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
 
 /* ═══════════════════════════════════════════
    EDITORIAL TEMPLATE
-   Like brandsdecoded: title top, image middle, body bottom
    ═══════════════════════════════════════════ */
 const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
   const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
-  const titleFontSize = hasImg ? 5.5 * titleScale : 7 * titleScale;
-  const bodyFontSize = hasImg ? 3.4 : 3.8;
+  const titleFs = hasImg ? 56 * titleScale : 72 * titleScale;
+  const bodyFs = hasImg ? 34 : 38;
 
   return (
-    <div className="flex flex-col h-full px-[6%] pt-[13%] pb-[5%] overflow-hidden">
-      {/* Title — always on top, large and bold */}
-      <h2
-        className="font-black leading-[1.12] line-clamp-5 flex-shrink-0"
-        style={{ color: styles.title, fontSize: `${titleFontSize}%`, fontFamily: fontFam }}
-      >
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden" }}>
+      <h2 style={{ fontSize: titleFs, fontWeight: 900, lineHeight: 1.12, color: styles.title, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 5, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         {slide.title}
       </h2>
 
-      {/* Body text — accent colored if no image, below title */}
       {slide.body && !hasImg && (
-        <p
-          className="leading-[1.5] mt-[4%] line-clamp-4 flex-shrink-0"
-          style={{ color: styles.accent, fontSize: `${bodyFontSize}%`, fontFamily: fontFam }}
-        >
+        <p style={{ fontSize: bodyFs, lineHeight: 1.5, color: styles.accent, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.body}
         </p>
       )}
 
-      {/* Image */}
       {hasImg && (
-        <div className="mt-auto pt-[4%] flex-shrink-0">
+        <div style={{ marginTop: "auto", paddingTop: 40, flexShrink: 0 }}>
           {slide.imageLoading ? (
-            <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}>
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
+            <div style={{ width: "100%", aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" className="w-full rounded-lg object-cover" style={{ aspectRatio: "16/9" }} />
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
 
-      {/* Body text below image */}
       {slide.body && hasImg && (
-        <p
-          className="leading-[1.45] mt-[4%] font-bold line-clamp-4 flex-shrink-0"
-          style={{ color: styles.title, fontSize: `${bodyFontSize}%`, fontFamily: fontFam }}
-        >
+        <p style={{ fontSize: bodyFs, lineHeight: 1.45, fontWeight: 700, color: styles.title, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.body}
         </p>
       )}
 
-      {/* Text-only: big title fills space, body at bottom */}
-      {!hasImg && !slide.body && (
-        <div className="flex-1" />
-      )}
+      {!hasImg && <div style={{ flex: 1 }} />}
 
-      {/* Spacer if no image and no body to push footer down */}
-      {!hasImg && <div className="flex-1" />}
-
-      {/* Footer */}
       <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
     </div>
   );
@@ -194,38 +197,34 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footer
 
 /* ═══════════════════════════════════════════
    MODERNO TEMPLATE
-   Current style refined: title + body top, image bottom
    ═══════════════════════════════════════════ */
 const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => (
-  <div className="flex flex-col h-full px-[7%] pt-[14%] pb-[5%] overflow-hidden">
-    <h2
-      className="font-extrabold leading-[1.18] mb-[3%] line-clamp-3 flex-shrink-0"
-      style={{ color: styles.title, fontSize: `${5 * titleScale}%`, fontFamily: fontFam }}
-    >
+  <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "160px 75px 55px", overflow: "hidden" }}>
+    <h2 style={{ fontSize: 52 * titleScale, fontWeight: 800, lineHeight: 1.18, color: styles.title, fontFamily: fontFam, marginBottom: 28, flexShrink: 0, WebkitLineClamp: 3, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
       {slide.title}
     </h2>
 
     {slide.body && (
-      <p className="leading-[1.6] flex-shrink-0 line-clamp-3" style={{ color: styles.body, fontSize: "3.2%", fontFamily: fontFam }}>
+      <p style={{ fontSize: 32, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 3, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         {slide.body}
       </p>
     )}
 
     {slide.hasImage && (slide.imageUrl || slide.imageLoading) && (
-      <div className="mt-auto pt-[4%]">
+      <div style={{ marginTop: "auto", paddingTop: 40 }}>
         {slide.imageLoading ? (
-          <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}>
-            <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
+          <div style={{ width: "100%", aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
           </div>
         ) : (
-          <img src={slide.imageUrl} alt="" className="w-full rounded-lg object-cover" style={{ aspectRatio: "16/10" }} />
+          <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/10", objectFit: "cover", borderRadius: 12 }} />
         )}
       </div>
     )}
 
     {!slide.hasImage && !slide.imageUrl && (
-      <div className="flex-1 flex flex-col justify-center items-start">
-        <div className="w-[12%] h-[1%] rounded-full my-[3%]" style={{ background: styles.accent }} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ width: 120, height: 8, borderRadius: 999, background: styles.accent }} />
       </div>
     )}
 
@@ -235,59 +234,38 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
 
 /* ═══════════════════════════════════════════
    BOLD TEMPLATE
-   Giant text fills the space, minimal imagery
    ═══════════════════════════════════════════ */
 const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
   const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
+  const bg = isTextOnly ? styles.accent : styles.bg;
 
   return (
-    <div className="flex flex-col h-full px-[6%] pt-[13%] pb-[5%] overflow-hidden" style={{ background: isTextOnly ? styles.accent : styles.bg }}>
-      <div className="flex-1 flex flex-col justify-center">
-        <h2
-          className="font-black leading-[1.08] line-clamp-6"
-          style={{
-            color: isTextOnly ? styles.tagFg : styles.title,
-            fontSize: `${(isTextOnly ? 8 : 6) * titleScale}%`,
-            fontFamily: fontFam,
-          }}
-        >
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden", background: bg }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <h2 style={{ fontSize: (isTextOnly ? 82 : 62) * titleScale, fontWeight: 900, lineHeight: 1.08, color: isTextOnly ? styles.tagFg : styles.title, fontFamily: fontFam, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.title}
         </h2>
-
         {slide.body && (
-          <p
-            className="leading-[1.5] mt-[5%] line-clamp-4 font-medium"
-            style={{
-              color: isTextOnly ? `${styles.tagFg}cc` : styles.body,
-              fontSize: `${isTextOnly ? 3.8 : 3.4}%`,
-              fontFamily: fontFam,
-            }}
-          >
+          <p style={{ fontSize: isTextOnly ? 36 : 32, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: isTextOnly ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {slide.body}
           </p>
         )}
       </div>
 
       {hasImg && (
-        <div className="flex-shrink-0 pt-[3%]">
+        <div style={{ flexShrink: 0, paddingTop: 28 }}>
           {slide.imageLoading ? (
-            <div className="w-full rounded-lg flex items-center justify-center" style={{ aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}` }}>
-              <Loader2 className="w-6 h-6 animate-spin" style={{ color: styles.accent }} />
+            <div style={{ width: "100%", aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" className="w-full rounded-lg object-cover" style={{ aspectRatio: "16/9" }} />
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
 
-      <SlideFooter
-        carousel={carousel}
-        styles={styles}
-        footerHandle={footerHandle}
-        footerBranding={footerBranding}
-        invertColors={isTextOnly}
-      />
+      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors={isTextOnly} />
     </div>
   );
 };
@@ -302,32 +280,19 @@ interface FooterProps {
 }
 
 const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertColors }: FooterProps) => (
-  <div className="flex items-center gap-[2%] mt-[4%] flex-shrink-0">
+  <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 40, flexShrink: 0 }}>
     {carousel.footer?.showBranding !== false && footerBranding && (
-      <span
-        className="text-[2.6%] font-semibold px-[3%] py-[1%] rounded-full"
-        style={{
-          background: invertColors ? "rgba(255,255,255,0.2)" : styles.tagBg,
-          color: styles.tagFg,
-        }}
-      >
+      <span style={{ fontSize: 24, fontWeight: 600, padding: "8px 24px", borderRadius: 999, background: invertColors ? "rgba(255,255,255,0.2)" : styles.tagBg, color: styles.tagFg }}>
         {footerBranding}
       </span>
     )}
     {carousel.footer?.showHandle !== false && footerHandle && (
-      <span
-        className="text-[2.6%] font-medium px-[3%] py-[1%] rounded-full"
-        style={{
-          background: invertColors ? "rgba(255,255,255,0.15)" : styles.handleBg,
-          color: invertColors ? "rgba(255,255,255,0.8)" : `${styles.title}b3`,
-          border: `1px solid ${invertColors ? "rgba(255,255,255,0.2)" : styles.borderLight}`,
-        }}
-      >
+      <span style={{ fontSize: 24, fontWeight: 500, padding: "8px 24px", borderRadius: 999, background: invertColors ? "rgba(255,255,255,0.15)" : styles.handleBg, color: invertColors ? "rgba(255,255,255,0.8)" : `${styles.title}b3`, border: `1px solid ${invertColors ? "rgba(255,255,255,0.2)" : styles.borderLight}` }}>
         {footerHandle}
       </span>
     )}
     {carousel.footer?.showCta !== false && (
-      <span className="ml-auto text-[2.6%]" style={{ color: invertColors ? "rgba(255,255,255,0.5)" : `${styles.body}80` }}>
+      <span style={{ marginLeft: "auto", fontSize: 24, color: invertColors ? "rgba(255,255,255,0.5)" : `${styles.body}80` }}>
         {carousel.footer?.ctaText || "Arrasta para o lado →"}
       </span>
     )}
