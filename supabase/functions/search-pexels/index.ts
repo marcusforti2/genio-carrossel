@@ -5,87 +5,47 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Stop words to filter out generic/abstract terms
-const STOP_WORDS = new Set([
-  "como", "para", "uma", "que", "the", "and", "you", "your", "with", "this",
-  "from", "are", "was", "were", "been", "have", "has", "had", "not", "but",
-  "what", "all", "can", "her", "his", "they", "its", "will", "more", "into",
-  "about", "than", "them", "very", "just", "also", "most", "only", "over",
-  "such", "some", "todo", "toda", "cada", "mais", "essa", "esse", "isso",
-  "está", "são", "seus", "suas", "nosso", "nossa", "você", "quando", "onde",
-  "porque", "ainda", "entre", "depois", "antes", "mesmo", "nunca", "sempre",
-  "outro", "outra", "outros", "outras", "muito", "muita", "muitos", "muitas",
-]);
+async function translateToVisualQuery(text: string, apiKey: string): Promise<string> {
+  try {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          {
+            role: "system",
+            content: `You are a Pexels image search query optimizer. Given any text (often in Portuguese), return ONLY a 2-5 word English search query describing a CONCRETE VISUAL SCENE for a stock photo.
 
-// Map abstract concepts to visual scenes
-const VISUAL_MAPPINGS: Record<string, string[]> = {
-  "linkedin": ["professional workspace laptop", "corporate office desk"],
-  "cansaço": ["tired person desk", "burnout office worker"],
-  "culpa": ["stressed person thinking", "overwhelmed professional"],
-  "sucesso": ["achievement celebration", "business milestone"],
-  "crescimento": ["plant growing sunlight", "climbing mountain peak"],
-  "liderança": ["team meeting leadership", "confident speaker stage"],
-  "vendas": ["sales meeting handshake", "retail store customer"],
-  "marketing": ["creative team brainstorm", "digital marketing screen"],
-  "produtividade": ["focused workspace minimal", "organized desk morning"],
-  "dinheiro": ["financial planning desk", "investment portfolio screen"],
-  "saúde": ["healthy lifestyle morning", "wellness meditation"],
-  "tecnologia": ["modern tech workspace", "coding developer screen"],
-  "empreendedorismo": ["startup founder working", "entrepreneur coffee shop"],
-  "educação": ["learning classroom books", "student studying library"],
-  "carreira": ["career path crossroads", "professional development"],
-  "comparação": ["mirror reflection thinking", "social media phone"],
-  "performance": ["stage spotlight speaker", "athlete training gym"],
-  "identidade": ["person mirror reflection", "unique individual crowd"],
-  "fracasso": ["starting over sunrise", "learning mistake growth"],
-  "descanso": ["peaceful nature retreat", "relaxation calm space"],
-};
+Rules:
+- Output ONLY the search query, nothing else
+- Must be in English
+- Describe a real visual scene (people, objects, places)
+- NEVER use abstract words alone (success, growth, power)
+- Good: "tired office worker laptop", "confident speaker stage", "team brainstorm whiteboard"
+- Bad: "success", "growth mindset", "leadership"`,
+          },
+          { role: "user", content: text },
+        ],
+      }),
+    });
 
-function buildSmartQuery(title: string, topic?: string, niche?: string): string[] {
-  // Extract meaningful words from title
-  const words = title
-    .toLowerCase()
-    .replace(/[.,!?;:"""''()@#]/g, "")
-    .split(/\s+/)
-    .filter((w) => w.length > 3 && !STOP_WORDS.has(w));
-
-  // Check for visual mapping matches
-  const mappedQueries: string[] = [];
-  for (const word of words) {
-    if (VISUAL_MAPPINGS[word]) {
-      mappedQueries.push(...VISUAL_MAPPINGS[word]);
+    if (!response.ok) {
+      console.error("AI translation error:", response.status);
+      return text;
     }
+
+    const data = await response.json();
+    const result = data.choices?.[0]?.message?.content?.trim();
+    console.log(`Translated "${text}" -> "${result}"`);
+    return result || text;
+  } catch (e) {
+    console.error("AI translation failed:", e);
+    return text;
   }
-
-  // Build primary query: 2-4 strongest keywords + visual context
-  const keywords = words.slice(0, 3);
-  
-  // Add niche context if available
-  const nicheContext = niche ? niche.split(/\s+/).slice(0, 1).join(" ") : "";
-
-  const queries: string[] = [];
-  
-  // Primary: mapped visual + keywords
-  if (mappedQueries.length > 0) {
-    queries.push(mappedQueries[0]);
-  }
-
-  // Secondary: keywords combined
-  if (keywords.length >= 2) {
-    queries.push(keywords.slice(0, 3).join(" ") + (nicheContext ? ` ${nicheContext}` : ""));
-  }
-
-  // Fallback: broader terms
-  if (keywords.length >= 1) {
-    queries.push(keywords[0] + " professional");
-  }
-
-  // Topic-based fallback
-  if (topic) {
-    queries.push(topic.split(/\s+/).slice(0, 3).join(" "));
-  }
-
-  return queries.length > 0 ? queries : ["professional workspace"];
 }
 
 async function searchPexels(apiKey: string, query: string, perPage: number): Promise<any[]> {
@@ -121,31 +81,36 @@ serve(async (req) => {
       });
     }
 
-    // If AI provided a specific imageQuery, use it directly
+    // If AI already provided a specific imageQuery (from generate-carousel), use it directly
     if (imageQuery && typeof imageQuery === "string") {
+      console.log("Using AI-provided imageQuery:", imageQuery);
       const photos = await searchPexels(PEXELS_API_KEY, imageQuery, perPage);
       if (photos.length > 0) {
         return new Response(JSON.stringify({ photos }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      // Fall through to smart query if imageQuery returned nothing
     }
 
-    // Build smart queries with fallback chain
-    const queries = buildSmartQuery(query, topic, niche);
-    
-    for (const q of queries) {
-      console.log("Trying Pexels query:", q);
-      const photos = await searchPexels(PEXELS_API_KEY, q, perPage);
-      if (photos.length >= 2) {
-        return new Response(JSON.stringify({ photos }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    // Use AI to translate the query (likely Portuguese) to an optimized English visual query
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    let searchQuery = query;
+
+    if (LOVABLE_API_KEY) {
+      const context = topic ? `${query} (context: ${topic})` : query;
+      searchQuery = await translateToVisualQuery(context, LOVABLE_API_KEY);
     }
 
-    // Last resort fallback
+    console.log("Searching Pexels with:", searchQuery);
+    const photos = await searchPexels(PEXELS_API_KEY, searchQuery, perPage);
+
+    if (photos.length >= 1) {
+      return new Response(JSON.stringify({ photos }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Fallback
     const fallbackPhotos = await searchPexels(PEXELS_API_KEY, "professional workspace", perPage);
     return new Response(JSON.stringify({ photos: fallbackPhotos }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
