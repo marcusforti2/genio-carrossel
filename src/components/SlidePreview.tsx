@@ -109,6 +109,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
         {isCover ? (
           <CoverSlide {...shared} />
+        ) : slide.type === "cta" ? (
+          <CtaSlide {...shared} />
         ) : ds.template === "editorial" ? (
           <EditorialContent {...shared} />
         ) : ds.template === "bold" ? (
@@ -167,20 +169,38 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
    ═══════════════════════════════════════════ */
 const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
   const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
-  const titleFs = hasImg ? 56 * titleScale : 72 * titleScale;
-  const bodyFs = hasImg ? 34 : 38;
+  const isTextOnly = !hasImg;
+  const titleFs = isTextOnly ? 76 * titleScale : 56 * titleScale;
+  const bodyFs = isTextOnly ? 36 : 34;
+
+  if (isTextOnly) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden" }}>
+        {/* Accent bar */}
+        <div style={{ width: 80, height: 8, borderRadius: 999, background: styles.accent, marginBottom: 48, flexShrink: 0 }} />
+
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <h2 style={{ fontSize: titleFs, fontWeight: 900, lineHeight: 1.08, color: styles.title, fontFamily: fontFam, WebkitLineClamp: 5, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            {slide.title}
+          </h2>
+
+          {slide.body && (
+            <p style={{ fontSize: bodyFs, lineHeight: 1.55, color: styles.body, marginTop: 48, fontFamily: fontFam, WebkitLineClamp: 8, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+              {slide.body}
+            </p>
+          )}
+        </div>
+
+        <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden" }}>
       <h2 style={{ fontSize: titleFs, fontWeight: 900, lineHeight: 1.12, color: styles.title, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 5, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         {slide.title}
       </h2>
-
-      {slide.body && !hasImg && (
-        <p style={{ fontSize: bodyFs, lineHeight: 1.5, color: styles.accent, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 8, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {slide.body}
-        </p>
-      )}
 
       {hasImg && (
         <div style={{ marginTop: "auto", paddingTop: 40, flexShrink: 0 }}>
@@ -199,8 +219,6 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footer
           {slide.body}
         </p>
       )}
-
-      {!hasImg && <div style={{ flex: 1 }} />}
 
       <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
     </div>
@@ -278,6 +296,73 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandl
       )}
 
       <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors={isTextOnly} />
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   CTA SLIDE (último slide — sem imagem)
+   ═══════════════════════════════════════════ */
+const CtaSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding }: TemplateProps) => {
+  // Extract keyword in CAPS from body (between quotes or all-caps word)
+  const keywordMatch = slide.body?.match(/'([A-ZÁÉÍÓÚÂÊÔÃÕÇ]+)'/);
+  const keyword = keywordMatch?.[1] || "";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: `hsl(${carousel.theme?.accentColor || "1 83% 55%"})`, position: "relative", overflow: "hidden" }}>
+      {/* Decorative circles */}
+      <div style={{ position: "absolute", top: -200, right: -200, width: 600, height: 600, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
+      <div style={{ position: "absolute", bottom: -150, left: -150, width: 400, height: 400, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
+
+      {/* Content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "150px 80px 40px", position: "relative", zIndex: 2, textAlign: "center" }}>
+        {/* Avatar */}
+        <div style={{ marginBottom: 48 }}>
+          {carousel.avatarUrl ? (
+            <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 120, height: 120, border: "4px solid rgba(255,255,255,0.3)" }} />
+          ) : (
+            <div className="rounded-full flex items-center justify-center" style={{ width: 120, height: 120, background: "rgba(255,255,255,0.15)", border: "4px solid rgba(255,255,255,0.3)" }}>
+              <User style={{ width: 52, height: 52, color: "rgba(255,255,255,0.7)" }} />
+            </div>
+          )}
+        </div>
+
+        {/* Title */}
+        <h2 style={{ fontSize: 64 * titleScale, fontWeight: 900, lineHeight: 1.1, color: "white", fontFamily: fontFam, marginBottom: 48 }}>
+          {slide.title}
+        </h2>
+
+        {/* Keyword badge */}
+        {keyword && (
+          <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", borderRadius: 16, padding: "20px 48px", marginBottom: 40, border: "2px solid rgba(255,255,255,0.25)" }}>
+            <p style={{ fontSize: 22, color: "rgba(255,255,255,0.7)", fontWeight: 500, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
+              Comenta aqui embaixo:
+            </p>
+            <p style={{ fontSize: 56, fontWeight: 900, color: "white", letterSpacing: "0.08em", fontFamily: fontFam }}>
+              "{keyword}"
+            </p>
+          </div>
+        )}
+
+        {/* Body text (without keyword part if extracted) */}
+        <p style={{ fontSize: 32, lineHeight: 1.6, color: "rgba(255,255,255,0.85)", fontWeight: 500, fontFamily: "'Inter', sans-serif", maxWidth: 900 }}>
+          {slide.body}
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding: "0 80px 55px", position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+        {footerBranding && (
+          <span style={{ fontSize: 24, fontWeight: 600, padding: "8px 24px", borderRadius: 999, background: "rgba(255,255,255,0.2)", color: "white" }}>
+            {footerBranding}
+          </span>
+        )}
+        {footerHandle && (
+          <span style={{ fontSize: 24, fontWeight: 500, padding: "8px 24px", borderRadius: 999, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.2)" }}>
+            {footerHandle}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

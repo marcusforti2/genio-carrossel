@@ -9,7 +9,7 @@ export interface SlideStyleOverride {
 
 export interface SlideData {
   id: string;
-  type: "cover" | "content";
+  type: "cover" | "content" | "cta";
   title: string;
   body: string;
   hasImage: boolean;
