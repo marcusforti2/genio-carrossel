@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import CarouselEditor from "./pages/CarouselEditor";
 import DashboardPage from "./pages/DashboardPage";
+import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
@@ -31,7 +32,7 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
       <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
     </div>
   );
-  if (user) return <Navigate to="/" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
@@ -43,8 +44,9 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
             <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
-            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/editor" element={<ProtectedRoute><CarouselEditor /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

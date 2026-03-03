@@ -186,7 +186,7 @@ const CarouselEditor = () => {
       {/* Header */}
       <header className="h-12 sm:h-14 border-b border-border flex items-center justify-between px-3 sm:px-5 gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => navigate("/")}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <Input
