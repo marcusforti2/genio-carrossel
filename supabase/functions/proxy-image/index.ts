@@ -24,7 +24,13 @@ serve(async (req) => {
     }
 
     const buffer = await response.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    const base64 = btoa(binary);
     const contentType = response.headers.get("content-type") || "image/jpeg";
     const dataUrl = `data:${contentType};base64,${base64}`;
 
