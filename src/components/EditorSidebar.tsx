@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -245,6 +245,148 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
   );
 };
 
+/* ── Per-slide design overrides panel ── */
+const SlideDesignOverrides = ({ slide, onUpdate, carousel }: { slide: SlideData; onUpdate: (s: SlideData) => void; carousel: CarouselData }) => {
+  const so = slide.styleOverride || {};
+  const globalDs = carousel.designStyle || { template: "editorial" as const, fontFamily: "serif" as const, titleSize: "grande" as const };
+  const globalTheme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
+
+  const effectiveTemplate = so.template ?? globalDs.template;
+  const effectiveFont = so.fontFamily ?? globalDs.fontFamily;
+  const effectiveSize = so.titleSize ?? globalDs.titleSize;
+  const effectiveBg = so.bgMode ?? globalTheme.bgMode;
+  const effectiveAccent = so.accentColor ?? globalTheme.accentColor;
+
+  const updateOverride = (partial: Partial<SlideStyleOverride>) => {
+    onUpdate({ ...slide, styleOverride: { ...so, ...partial } });
+  };
+
+  const clearOverrides = () => {
+    const { styleOverride, ...rest } = slide;
+    onUpdate(rest as SlideData);
+  };
+
+  const hasOverrides = Object.keys(so).length > 0;
+
+  return (
+    <div className="space-y-4 pt-4 border-t border-border/50">
+      <div className="flex items-center justify-between">
+        <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <LayoutTemplate className="w-3.5 h-3.5" /> Design deste slide
+        </Label>
+        {hasOverrides && (
+          <Button variant="ghost" size="sm" className="text-[10px] h-6 px-2 text-muted-foreground" onClick={clearOverrides}>
+            Resetar
+          </Button>
+        )}
+      </div>
+
+      {/* Template */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] text-muted-foreground/70">Template</Label>
+        <div className="flex gap-1.5">
+          {DESIGN_TEMPLATES.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => updateOverride({ template: t.id })}
+              className={`flex-1 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+                effectiveTemplate === t.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+              } ${so.template === t.id ? "ring-1 ring-primary/50" : ""}`}
+            >
+              {t.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Font */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] text-muted-foreground/70">Fonte</Label>
+        <div className="flex gap-1.5">
+          {FONT_FAMILIES.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => updateOverride({ fontFamily: f.id })}
+              className={`flex-1 py-2 rounded-md border transition-all text-center ${
+                effectiveFont === f.id
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-secondary hover:border-muted-foreground/30"
+              } ${so.fontFamily === f.id ? "ring-1 ring-primary/50" : ""}`}
+            >
+              <p className="text-xs font-bold" style={{ fontFamily: f.id === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif", color: effectiveFont === f.id ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>Aa</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">{f.name}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Title size */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] text-muted-foreground/70">Título</Label>
+        <div className="flex gap-1.5">
+          {TITLE_SIZES.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => updateOverride({ titleSize: s.id })}
+              className={`flex-1 py-1.5 rounded-md border transition-all text-[10px] font-semibold ${
+                effectiveSize === s.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+              } ${so.titleSize === s.id ? "ring-1 ring-primary/50" : ""}`}
+            >
+              {s.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* BG mode */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] text-muted-foreground/70">Fundo</Label>
+        <div className="flex gap-1.5">
+          <button
+            onClick={() => updateOverride({ bgMode: "dark" })}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+              effectiveBg === "dark" ? "border-primary bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground"
+            } ${so.bgMode === "dark" ? "ring-1 ring-primary/50" : ""}`}
+          >
+            <Moon className="w-3 h-3" /> Escuro
+          </button>
+          <button
+            onClick={() => updateOverride({ bgMode: "light" })}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+              effectiveBg === "light" ? "border-primary bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground"
+            } ${so.bgMode === "light" ? "ring-1 ring-primary/50" : ""}`}
+          >
+            <Sun className="w-3 h-3" /> Claro
+          </button>
+        </div>
+      </div>
+
+      {/* Accent color */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] text-muted-foreground/70">Cor destaque</Label>
+        <div className="grid grid-cols-4 gap-1.5">
+          {ACCENT_PRESETS.map((preset) => (
+            <button
+              key={preset.name}
+              onClick={() => updateOverride({ accentColor: preset.color, accentName: preset.name })}
+              className={`flex flex-col items-center gap-1 py-1.5 rounded-md border transition-all ${
+                effectiveAccent === preset.color ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"
+              } ${so.accentColor === preset.color ? "ring-1 ring-primary/50" : ""}`}
+            >
+              <div className="w-5 h-5 rounded-full border border-border/50" style={{ background: `hsl(${preset.color})` }} />
+              <span className="text-[8px] text-muted-foreground">{preset.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface EditorSidebarProps {
   carousel: CarouselData;
   selectedSlideIndex: number;
@@ -297,14 +439,21 @@ const EditorSidebar = ({
 
       <div className="flex-1 overflow-y-auto p-4">
         {tab === "slide" && selectedSlide && (
-          <SlideEditorPanel
-            key={selectedSlide.id}
-            slide={selectedSlide}
-            onUpdate={(s) => onUpdateSlide(selectedSlideIndex, s)}
-            onDelete={() => onDeleteSlide(selectedSlideIndex)}
-            canDelete={carousel.slides.length > 1}
-            carousel={carousel}
-          />
+          <div>
+            <SlideEditorPanel
+              key={selectedSlide.id}
+              slide={selectedSlide}
+              onUpdate={(s) => onUpdateSlide(selectedSlideIndex, s)}
+              onDelete={() => onDeleteSlide(selectedSlideIndex)}
+              canDelete={carousel.slides.length > 1}
+              carousel={carousel}
+            />
+            <SlideDesignOverrides
+              slide={selectedSlide}
+              onUpdate={(s) => onUpdateSlide(selectedSlideIndex, s)}
+              carousel={carousel}
+            />
+          </div>
         )}
 
         {tab === "design" && (
