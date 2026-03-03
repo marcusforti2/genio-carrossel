@@ -165,7 +165,7 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footer
       </h2>
 
       {slide.body && !hasImg && (
-        <p style={{ fontSize: bodyFs, lineHeight: 1.5, color: styles.accent, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        <p style={{ fontSize: bodyFs, lineHeight: 1.5, color: styles.accent, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 8, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.body}
         </p>
       )}
@@ -183,7 +183,7 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footer
       )}
 
       {slide.body && hasImg && (
-        <p style={{ fontSize: bodyFs, lineHeight: 1.45, fontWeight: 700, color: styles.title, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        <p style={{ fontSize: bodyFs, lineHeight: 1.45, fontWeight: 700, color: styles.title, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.body}
         </p>
       )}
@@ -205,7 +205,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
     </h2>
 
     {slide.body && (
-      <p style={{ fontSize: 32, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 3, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+      <p style={{ fontSize: 32, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
         {slide.body}
       </p>
     )}
@@ -247,7 +247,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandl
           {slide.title}
         </h2>
         {slide.body && (
-          <p style={{ fontSize: isTextOnly ? 36 : 32, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: isTextOnly ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 4, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: isTextOnly ? 36 : 32, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: isTextOnly ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {slide.body}
           </p>
         )}
