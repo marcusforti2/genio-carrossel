@@ -225,7 +225,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-4xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="bg-card border-border sm:max-w-4xl max-w-[95vw] max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-0">
         <div className="flex flex-col sm:flex-row">
           {/* Left: Live preview */}
           <div className="hidden sm:flex sm:w-[300px] shrink-0 bg-secondary/30 border-r border-border p-4 flex-col items-center justify-center gap-3">
@@ -244,7 +244,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
           </div>
 
           {/* Right: Form */}
-          <div className="flex-1 p-5 sm:p-6 space-y-5">
+          <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-5">
             <DialogHeader className="p-0">
               <DialogTitle className="font-display flex items-center gap-2 text-sm sm:text-base">
                 <Sparkles className="w-5 h-5 text-primary" />
