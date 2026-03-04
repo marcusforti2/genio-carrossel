@@ -5,11 +5,14 @@ interface MiniSlidePreviewProps {
   template: DesignTemplate;
   fontFamily: FontFamily;
   titleSize: TitleSize;
+  bgMode?: "dark" | "light";
+  accentColor?: string;
 }
 
-const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewProps) => {
+const MiniSlidePreview = ({ template, fontFamily, titleSize, bgMode = "dark", accentColor = "1 83% 55%" }: MiniSlidePreviewProps) => {
   const fontFam = fontFamily === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif";
   const titleScale = titleSize === "impacto" ? 1.4 : titleSize === "grande" ? 1.15 : 1;
+  const isDark = bgMode === "dark";
 
   const config = useMemo(() => {
     switch (template) {
@@ -22,9 +25,23 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
     }
   }, [template]);
 
-  // Internal render at fixed resolution, scale down
-  const W = 270;
-  const H = 337; // 4:5
+  const colors = useMemo(() => ({
+    bg: isDark ? "hsl(0 0% 5%)" : "hsl(0 0% 96%)",
+    title: isDark ? "hsl(0 0% 100%)" : "hsl(0 0% 8%)",
+    body: isDark ? "hsl(0 0% 50%)" : "hsl(0 0% 40%)",
+    footerBorder: isDark ? "hsl(0 0% 12%)" : "hsl(0 0% 85%)",
+    footerText: isDark ? "hsl(0 0% 45%)" : "hsl(0 0% 55%)",
+    avatarBg: isDark ? "linear-gradient(135deg, hsl(0 0% 25%), hsl(0 0% 15%))" : "linear-gradient(135deg, hsl(0 0% 80%), hsl(0 0% 70%))",
+    avatarBorder: isDark ? "hsl(0 0% 20%)" : "hsl(0 0% 75%)",
+    imageBg: isDark ? "linear-gradient(145deg, hsl(0 0% 18%), hsl(0 0% 8%))" : "linear-gradient(145deg, hsl(0 0% 88%), hsl(0 0% 78%))",
+    gridOpacity: isDark ? 0.08 : 0.12,
+    iconBg: isDark ? "hsl(0 0% 20%)" : "hsl(0 0% 82%)",
+    iconBorder: isDark ? "hsl(0 0% 25%)" : "hsl(0 0% 72%)",
+    iconStroke: isDark ? "hsl(0 0% 40%)" : "hsl(0 0% 55%)",
+    cardOverlay: isDark ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.85)",
+    cardText: isDark ? "white" : "hsl(0 0% 10%)",
+    accent: `hsl(${accentColor})`,
+  }), [isDark, accentColor]);
 
   return (
     <div
@@ -33,7 +50,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
         width: "100%",
         aspectRatio: "4/5",
         position: "relative",
-        background: "hsl(0 0% 5%)",
+        background: colors.bg,
       }}
     >
       <div
@@ -50,7 +67,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
           <div
             style={{
               height: config.layout === "split" ? "42%" : "38%",
-              background: "linear-gradient(145deg, hsl(0 0% 18%), hsl(0 0% 8%))",
+              background: colors.imageBg,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -58,12 +75,11 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
               overflow: "hidden",
             }}
           >
-            {/* Decorative grid pattern */}
             <div
               style={{
                 position: "absolute",
                 inset: 0,
-                opacity: 0.08,
+                opacity: colors.gridOpacity,
                 backgroundImage:
                   "linear-gradient(hsl(0 0% 50%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 50%) 1px, transparent 1px)",
                 backgroundSize: "16px 16px",
@@ -74,21 +90,20 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                background: "hsl(0 0% 20%)",
+                background: colors.iconBg,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                border: "1px solid hsl(0 0% 25%)",
+                border: `1px solid ${colors.iconBorder}`,
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="hsl(0 0% 40%)" strokeWidth="1.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={colors.iconStroke} strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="m21 15-5-5L5 21" />
               </svg>
             </div>
 
-            {/* Card overlay for moderno */}
             {config.layout === "card" && (
               <div
                 style={{
@@ -96,7 +111,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
                   bottom: 8,
                   left: 10,
                   right: 10,
-                  background: "rgba(0,0,0,0.7)",
+                  background: colors.cardOverlay,
                   backdropFilter: "blur(8px)",
                   borderRadius: 6,
                   padding: "6px 10px",
@@ -107,7 +122,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
                     fontFamily: fontFam,
                     fontSize: Math.max(9, 12 * titleScale),
                     fontWeight: 700,
-                    color: "white",
+                    color: colors.cardText,
                     lineHeight: 1.2,
                   }}
                 >
@@ -133,7 +148,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
           <div
             style={{
               alignSelf: "flex-start",
-              background: "hsl(var(--primary))",
+              background: colors.accent,
               color: "white",
               fontSize: 6,
               fontWeight: 800,
@@ -154,7 +169,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
                 ? Math.max(18, 22 * titleScale)
                 : Math.max(13, 16 * titleScale),
               fontWeight: template === "bold" ? 900 : 700,
-              color: "hsl(0 0% 100%)",
+              color: colors.title,
               lineHeight: 1.12,
               letterSpacing: template === "bold" ? "-0.03em" : "-0.01em",
             }}
@@ -169,7 +184,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
             <div
               style={{
                 fontSize: 7.5,
-                color: "hsl(0 0% 50%)",
+                color: colors.body,
                 lineHeight: 1.45,
                 marginTop: 2,
               }}
@@ -186,7 +201,7 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
             display: "flex",
             alignItems: "center",
             gap: 6,
-            borderTop: "1px solid hsl(0 0% 12%)",
+            borderTop: `1px solid ${colors.footerBorder}`,
           }}
         >
           <div
@@ -194,11 +209,11 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
               width: 14,
               height: 14,
               borderRadius: "50%",
-              background: "linear-gradient(135deg, hsl(0 0% 25%), hsl(0 0% 15%))",
-              border: "1px solid hsl(0 0% 20%)",
+              background: colors.avatarBg,
+              border: `1px solid ${colors.avatarBorder}`,
             }}
           />
-          <div style={{ fontSize: 7, color: "hsl(0 0% 45%)", fontWeight: 500 }}>
+          <div style={{ fontSize: 7, color: colors.footerText, fontWeight: 500 }}>
             @seuhandle
           </div>
         </div>
