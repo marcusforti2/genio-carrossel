@@ -26,6 +26,15 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
     return JSON.stringify({ ...carousel, _caption: caption });
   }, [carousel, caption]);
 
+  // Sync projectId to URL so refresh reloads the correct project
+  const updateUrlWithProjectId = useCallback((id: string) => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("project") !== id) {
+      url.searchParams.set("project", id);
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
+
   // Autosave with 3s debounce
   useEffect(() => {
     if (!user) return;
@@ -50,7 +59,11 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
             .select("id")
             .single();
           if (error) throw error;
-          if (data) setProjectId((data as any).id);
+          if (data) {
+            const newId = (data as any).id;
+            setProjectId(newId);
+            updateUrlWithProjectId(newId);
+          }
         }
         lastSavedRef.current = current;
         setSaveStatus("saved");
@@ -63,21 +76,25 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [carousel, caption, projectId, projectTitle, user, serialize]);
+  }, [carousel, caption, projectId, projectTitle, user, serialize, updateUrlWithProjectId]);
 
   const loadProject = useCallback((project: Project) => {
     setProjectId(project.id);
     setProjectTitle(project.title);
     lastSavedRef.current = JSON.stringify(project.data);
     setSaveStatus("saved");
+    updateUrlWithProjectId(project.id);
     return project.data;
-  }, []);
+  }, [updateUrlWithProjectId]);
 
   const newProject = useCallback(() => {
     setProjectId(null);
     setProjectTitle("Sem título");
     lastSavedRef.current = "";
     setSaveStatus("idle");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("project");
+    window.history.replaceState({}, "", url.toString());
   }, []);
 
   return {
