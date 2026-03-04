@@ -202,18 +202,23 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       // 1080x1350 slide ratio → PDF page in mm (portrait)
       const pageW = 210; // A4 width mm
       const pageH = pageW * (1350 / 1080); // keep aspect ratio
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, pageH] });
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, pageH], compress: true });
 
       for (let i = 0; i < prepared.slides.length; i++) {
         toast.info(`Renderizando slide ${i + 1}/${prepared.slides.length}...`);
         const blob = await renderSlideToBlob(prepared, i);
-        const dataUrl = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
+        // Convert to compressed JPEG for smaller PDF (LinkedIn < 100MB)
+        const imgBitmap = await createImageBitmap(blob);
+        const cvs = document.createElement("canvas");
+        cvs.width = imgBitmap.width;
+        cvs.height = imgBitmap.height;
+        const ctx = cvs.getContext("2d")!;
+        ctx.drawImage(imgBitmap, 0, 0);
+        const jpegDataUrl = cvs.toDataURL("image/jpeg", 0.82);
+        imgBitmap.close();
+
         if (i > 0) pdf.addPage([pageW, pageH]);
-        pdf.addImage(dataUrl, "PNG", 0, 0, pageW, pageH);
+        pdf.addImage(jpegDataUrl, "JPEG", 0, 0, pageW, pageH);
       }
 
       pdf.save("carrossel.pdf");
