@@ -9,8 +9,7 @@ interface MiniSlidePreviewProps {
 
 const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewProps) => {
   const fontFam = fontFamily === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif";
-  const titleScale = titleSize === "impacto" ? 1.35 : titleSize === "grande" ? 1.15 : 1;
-  const baseTitleSize = 14 * titleScale;
+  const titleScale = titleSize === "impacto" ? 1.4 : titleSize === "grande" ? 1.15 : 1;
 
   const config = useMemo(() => {
     switch (template) {
@@ -23,153 +22,186 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize }: MiniSlidePreviewP
     }
   }, [template]);
 
+  // Internal render at fixed resolution, scale down
+  const W = 270;
+  const H = 337; // 4:5
+
   return (
     <div
-      className="rounded-lg overflow-hidden border border-border"
+      className="rounded-xl overflow-hidden border-2 border-border/60 shadow-lg shadow-black/20"
       style={{
         width: "100%",
         aspectRatio: "4/5",
-        background: "hsl(0 0% 6.5%)",
         position: "relative",
-        display: "flex",
-        flexDirection: "column",
+        background: "hsl(0 0% 5%)",
       }}
     >
-      {/* Image area */}
-      {config.showImage && (
-        <div
-          style={{
-            height: config.layout === "split" ? "45%" : "40%",
-            background: "linear-gradient(135deg, hsl(0 0% 15%), hsl(0 0% 10%))",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-          }}
-        >
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Image area */}
+        {config.showImage && (
           <div
             style={{
-              width: 20,
-              height: 20,
-              borderRadius: 4,
-              background: "hsl(0 0% 25%)",
+              height: config.layout === "split" ? "42%" : "38%",
+              background: "linear-gradient(145deg, hsl(0 0% 18%), hsl(0 0% 8%))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="hsl(0 0% 45%)" strokeWidth="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="m21 15-5-5L5 21" />
-            </svg>
-          </div>
-          {config.layout === "card" && (
+            {/* Decorative grid pattern */}
             <div
               style={{
                 position: "absolute",
-                bottom: 6,
-                left: 8,
-                right: 8,
-                background: "rgba(0,0,0,0.6)",
-                borderRadius: 4,
-                padding: "4px 6px",
+                inset: 0,
+                opacity: 0.08,
+                backgroundImage:
+                  "linear-gradient(hsl(0 0% 50%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 50%) 1px, transparent 1px)",
+                backgroundSize: "16px 16px",
+              }}
+            />
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                background: "hsl(0 0% 20%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "1px solid hsl(0 0% 25%)",
               }}
             >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="hsl(0 0% 40%)" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="m21 15-5-5L5 21" />
+              </svg>
+            </div>
+
+            {/* Card overlay for moderno */}
+            {config.layout === "card" && (
               <div
                 style={{
-                  fontFamily: fontFam,
-                  fontSize: Math.max(7, baseTitleSize * 0.6),
-                  fontWeight: 700,
-                  color: "white",
-                  lineHeight: 1.2,
+                  position: "absolute",
+                  bottom: 8,
+                  left: 10,
+                  right: 10,
+                  background: "rgba(0,0,0,0.7)",
+                  backdropFilter: "blur(8px)",
+                  borderRadius: 6,
+                  padding: "6px 10px",
                 }}
               >
-                Título exemplo
+                <div
+                  style={{
+                    fontFamily: fontFam,
+                    fontSize: Math.max(9, 12 * titleScale),
+                    fontWeight: 700,
+                    color: "white",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Título exemplo
+                </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Text content area */}
+        <div
+          style={{
+            flex: 1,
+            padding: config.layout === "full-text" ? "16px 14px" : "10px 14px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: config.layout === "full-text" ? "center" : "flex-start",
+            gap: 6,
+          }}
+        >
+          {/* Tag badge */}
+          <div
+            style={{
+              alignSelf: "flex-start",
+              background: "hsl(var(--primary))",
+              color: "white",
+              fontSize: 6,
+              fontWeight: 800,
+              padding: "2px 6px",
+              borderRadius: 3,
+              letterSpacing: 0.8,
+              textTransform: "uppercase",
+            }}
+          >
+            INSIGHT
+          </div>
+
+          {/* Title */}
+          <div
+            style={{
+              fontFamily: fontFam,
+              fontSize: config.layout === "full-text"
+                ? Math.max(18, 22 * titleScale)
+                : Math.max(13, 16 * titleScale),
+              fontWeight: template === "bold" ? 900 : 700,
+              color: "hsl(0 0% 100%)",
+              lineHeight: 1.12,
+              letterSpacing: template === "bold" ? "-0.03em" : "-0.01em",
+            }}
+          >
+            {config.layout === "full-text"
+              ? "Texto grande\nque preenche\no slide."
+              : "Como criar\nconteúdo que\nengaja."}
+          </div>
+
+          {/* Body text */}
+          {config.layout !== "full-text" && (
+            <div
+              style={{
+                fontSize: 7.5,
+                color: "hsl(0 0% 50%)",
+                lineHeight: 1.45,
+                marginTop: 2,
+              }}
+            >
+              Corpo de texto com a descrição do conteúdo do slide aqui.
             </div>
           )}
         </div>
-      )}
 
-      {/* Text area */}
-      <div
-        style={{
-          flex: 1,
-          padding: config.layout === "full-text" ? "12px 10px" : "8px 10px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: config.layout === "full-text" ? "center" : "flex-start",
-          gap: 4,
-        }}
-      >
-        {/* Tag */}
+        {/* Footer */}
         <div
           style={{
-            alignSelf: "flex-start",
-            background: "hsl(var(--primary))",
-            color: "white",
-            fontSize: 5,
-            fontWeight: 700,
-            padding: "1px 4px",
-            borderRadius: 2,
-            letterSpacing: 0.5,
-            textTransform: "uppercase",
+            padding: "6px 14px 8px",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            borderTop: "1px solid hsl(0 0% 12%)",
           }}
         >
-          INSIGHT
-        </div>
-
-        {/* Title */}
-        <div
-          style={{
-            fontFamily: fontFam,
-            fontSize: config.layout === "full-text" ? baseTitleSize * 1.3 : baseTitleSize,
-            fontWeight: template === "bold" ? 900 : 700,
-            color: "hsl(0 0% 100%)",
-            lineHeight: 1.15,
-            letterSpacing: template === "bold" ? "-0.02em" : "0",
-          }}
-        >
-          {config.layout === "full-text"
-            ? "Texto grande que preenche o slide."
-            : "Como criar conteúdo que engaja."}
-        </div>
-
-        {/* Body */}
-        {config.layout !== "full-text" && (
           <div
             style={{
-              fontSize: 6,
-              color: "hsl(0 0% 55%)",
-              lineHeight: 1.4,
-              marginTop: 2,
+              width: 14,
+              height: 14,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, hsl(0 0% 25%), hsl(0 0% 15%))",
+              border: "1px solid hsl(0 0% 20%)",
             }}
-          >
-            Corpo de texto com a descrição do conteúdo do slide.
+          />
+          <div style={{ fontSize: 7, color: "hsl(0 0% 45%)", fontWeight: 500 }}>
+            @seuhandle
           </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div
-        style={{
-          padding: "4px 10px 6px",
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-          borderTop: "1px solid hsl(0 0% 12%)",
-        }}
-      >
-        <div
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: "50%",
-            background: "hsl(0 0% 20%)",
-          }}
-        />
-        <div style={{ fontSize: 5, color: "hsl(0 0% 50%)" }}>@handle</div>
+        </div>
       </div>
     </div>
   );
