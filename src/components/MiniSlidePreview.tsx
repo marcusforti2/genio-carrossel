@@ -20,6 +20,12 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize, bgMode = "dark", ac
         return { showImage: false, layout: "full-text" as const };
       case "moderno":
         return { showImage: true, layout: "card" as const };
+      case "minimal":
+        return { showImage: false, layout: "minimal" as const };
+      case "magazine":
+        return { showImage: true, layout: "magazine" as const };
+      case "neon":
+        return { showImage: false, layout: "neon" as const };
       default:
         return { showImage: true, layout: "split" as const };
     }
@@ -137,60 +143,127 @@ const MiniSlidePreview = ({ template, fontFamily, titleSize, bgMode = "dark", ac
         <div
           style={{
             flex: 1,
-            padding: config.layout === "full-text" ? "16px 14px" : "10px 14px",
+            padding: config.layout === "full-text" || config.layout === "neon" ? "16px 14px" : config.layout === "minimal" ? "16px 18px" : config.layout === "magazine" ? "10px 14px" : "10px 14px",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: config.layout === "full-text" ? "center" : "flex-start",
-            gap: 6,
+            flexDirection: config.layout === "magazine" ? "row" : "column",
+            justifyContent: (config.layout === "full-text" || config.layout === "minimal" || config.layout === "neon") ? "center" : "flex-start",
+            alignItems: config.layout === "minimal" ? "center" : "stretch",
+            textAlign: config.layout === "minimal" ? "center" : "left",
+            gap: config.layout === "magazine" ? 8 : 6,
+            position: "relative",
           }}
         >
-          {/* Tag badge */}
-          <div
-            style={{
-              alignSelf: "flex-start",
-              background: colors.accent,
-              color: "white",
-              fontSize: 6,
-              fontWeight: 800,
-              padding: "2px 6px",
-              borderRadius: 3,
-              letterSpacing: 0.8,
-              textTransform: "uppercase",
-            }}
-          >
-            INSIGHT
-          </div>
+          {/* Neon border frame */}
+          {config.layout === "neon" && (
+            <div style={{
+              position: "absolute",
+              inset: 6,
+              border: `1px solid ${colors.accent}60`,
+              borderRadius: 6,
+              boxShadow: `inset 0 0 8px ${colors.accent}15, 0 0 8px ${colors.accent}10`,
+              pointerEvents: "none",
+            }} />
+          )}
 
-          {/* Title */}
-          <div
-            style={{
-              fontFamily: fontFam,
-              fontSize: config.layout === "full-text"
-                ? Math.max(18, 22 * titleScale)
-                : Math.max(13, 16 * titleScale),
-              fontWeight: template === "bold" ? 900 : 700,
-              color: colors.title,
-              lineHeight: 1.12,
-              letterSpacing: template === "bold" ? "-0.03em" : "-0.01em",
-            }}
-          >
-            {config.layout === "full-text"
-              ? "Texto grande\nque preenche\no slide."
-              : "Como criar\nconteúdo que\nengaja."}
-          </div>
+          {/* Corner glow for neon */}
+          {config.layout === "neon" && (
+            <>
+              <div style={{ position: "absolute", top: 0, left: 0, width: 40, height: 40, background: `radial-gradient(circle at top left, ${colors.accent}30, transparent 70%)`, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", bottom: 0, right: 0, width: 40, height: 40, background: `radial-gradient(circle at bottom right, ${colors.accent}20, transparent 70%)`, pointerEvents: "none" }} />
+            </>
+          )}
 
-          {/* Body text */}
-          {config.layout !== "full-text" && (
+          {/* Minimal thin line */}
+          {config.layout === "minimal" && (
+            <div style={{ width: 20, height: 1.5, background: colors.accent, borderRadius: 999, marginBottom: 4 }} />
+          )}
+
+          {/* Magazine accent bars */}
+          {config.layout === "magazine" && (
+            <div style={{ position: "absolute", top: 8, left: 14, right: 14, display: "flex", gap: 3 }}>
+              <div style={{ flex: 3, height: 2, background: colors.accent, borderRadius: 999 }} />
+              <div style={{ flex: 1, height: 2, background: `${colors.accent}40`, borderRadius: 999 }} />
+            </div>
+          )}
+
+          {/* Tag badge — not for minimal */}
+          {config.layout !== "minimal" && (
             <div
               style={{
-                fontSize: 7.5,
-                color: colors.body,
-                lineHeight: 1.45,
-                marginTop: 2,
+                alignSelf: config.layout === "neon" ? "flex-start" : "flex-start",
+                background: config.layout === "neon" ? `${colors.accent}25` : colors.accent,
+                color: config.layout === "neon" ? colors.accent : "white",
+                fontSize: 6,
+                fontWeight: 800,
+                padding: "2px 6px",
+                borderRadius: config.layout === "neon" ? 99 : 3,
+                letterSpacing: 0.8,
+                textTransform: "uppercase",
+                border: config.layout === "neon" ? `1px solid ${colors.accent}50` : "none",
+                marginTop: config.layout === "magazine" ? 8 : 0,
               }}
             >
-              Corpo de texto com a descrição do conteúdo do slide aqui.
+              INSIGHT
             </div>
+          )}
+
+          {/* Magazine layout: two columns */}
+          {config.layout === "magazine" ? (
+            <>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", marginTop: 6 }}>
+                <div style={{ fontFamily: fontFam, fontSize: Math.max(11, 14 * titleScale), fontWeight: 900, color: colors.title, lineHeight: 1.1 }}>
+                  Como criar conteúdo.
+                </div>
+              </div>
+              <div style={{ flex: 1, borderLeft: `1px solid ${colors.footerBorder}`, paddingLeft: 8, display: "flex", flexDirection: "column", justifyContent: "center", marginTop: 6 }}>
+                <div style={{ fontSize: 6.5, color: colors.body, lineHeight: 1.45 }}>
+                  Corpo de texto com a descrição do conteúdo.
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Title */}
+              <div
+                style={{
+                  fontFamily: fontFam,
+                  fontSize: (config.layout === "full-text" || config.layout === "neon")
+                    ? Math.max(18, 22 * titleScale)
+                    : config.layout === "minimal"
+                    ? Math.max(16, 20 * titleScale)
+                    : Math.max(13, 16 * titleScale),
+                  fontWeight: template === "bold" ? 900 : config.layout === "minimal" ? 300 : 700,
+                  color: colors.title,
+                  lineHeight: 1.12,
+                  letterSpacing: template === "bold" ? "-0.03em" : config.layout === "minimal" ? "-0.02em" : "-0.01em",
+                }}
+              >
+                {config.layout === "full-text" || config.layout === "neon"
+                  ? "Texto grande\nque preenche\no slide."
+                  : config.layout === "minimal"
+                  ? "Elegância\nna simplicidade."
+                  : "Como criar\nconteúdo que\nengaja."}
+              </div>
+
+              {/* Body text */}
+              {config.layout !== "full-text" && config.layout !== "neon" && (
+                <div
+                  style={{
+                    fontSize: 7.5,
+                    color: colors.body,
+                    lineHeight: 1.45,
+                    marginTop: 2,
+                  }}
+                >
+                  Corpo de texto com a descrição do conteúdo do slide aqui.
+                </div>
+              )}
+
+              {/* Minimal bottom line */}
+              {config.layout === "minimal" && (
+                <div style={{ width: 20, height: 1.5, background: colors.accent, borderRadius: 999, marginTop: 6 }} />
+              )}
+            </>
           )}
         </div>
 
