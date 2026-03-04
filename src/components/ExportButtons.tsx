@@ -133,7 +133,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     const dataUrl = await toPng(renderTarget, {
       width: 1080,
       height: 1350,
-      pixelRatio: 2,
+      pixelRatio: 3,
       cacheBust: true,
       backgroundColor: bgColor,
       skipAutoScale: true,
