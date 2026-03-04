@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Sparkles, Loader2, LayoutTemplate, Type, ALargeSmall, Sun, Moon, Palette, Upload, X, ImageIcon } from "lucide-react";
-import MiniSlidePreview from "@/components/MiniSlidePreview";
+import RealisticSlidePreview from "@/components/RealisticSlidePreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -68,6 +68,38 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
   // Uploaded images
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Profile data for realistic preview
+  const [profileData, setProfileData] = useState<{ name: string; handle: string; avatar: string }>({ name: "", handle: "", avatar: "" });
+  const [sampleImage, setSampleImage] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!user || !open) return;
+    (async () => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, handle, avatar_url")
+        .eq("user_id", user.id)
+        .single();
+      if (profile) {
+        setProfileData({
+          name: profile.display_name || "",
+          handle: profile.handle || "",
+          avatar: profile.avatar_url || "",
+        });
+      }
+      // Fetch a sample image
+      try {
+        const { data } = await supabase.functions.invoke("search-pexels", {
+          body: { query: "business professional", perPage: 5 },
+        });
+        if (data?.photos?.length) {
+          const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
+          setSampleImage(photo.url);
+        }
+      } catch {}
+    })();
+  }, [user, open]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -185,9 +217,14 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
       <DialogContent className="bg-card border-border sm:max-w-3xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
         <div className="flex flex-col sm:flex-row">
           {/* Left: Live preview */}
-          <div className="hidden sm:flex sm:w-[220px] shrink-0 bg-secondary/30 border-r border-border p-6 flex-col items-center justify-center gap-4">
-            <div className="w-full max-w-[180px]">
-              <MiniSlidePreview template={template} fontFamily={fontFamily} titleSize={titleSize} bgMode={bgMode} accentColor={accentColor} />
+          <div className="hidden sm:flex sm:w-[260px] shrink-0 bg-secondary/30 border-r border-border p-4 flex-col items-center justify-center gap-3">
+            <div className="w-full">
+              <RealisticSlidePreview
+                template={template} fontFamily={fontFamily} titleSize={titleSize}
+                bgMode={bgMode} accentColor={accentColor}
+                profileName={profileData.name} profileHandle={profileData.handle}
+                avatarUrl={profileData.avatar} sampleImageUrl={uploadedImages[0] || sampleImage}
+              />
             </div>
             <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
               Preview em tempo real do estilo selecionado
@@ -208,8 +245,13 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
 
             {/* Mobile preview */}
             <div className="sm:hidden flex justify-center">
-              <div className="w-24">
-                <MiniSlidePreview template={template} fontFamily={fontFamily} titleSize={titleSize} bgMode={bgMode} accentColor={accentColor} />
+              <div className="w-48">
+                <RealisticSlidePreview
+                  template={template} fontFamily={fontFamily} titleSize={titleSize}
+                  bgMode={bgMode} accentColor={accentColor}
+                  profileName={profileData.name} profileHandle={profileData.handle}
+                  avatarUrl={profileData.avatar} sampleImageUrl={uploadedImages[0] || sampleImage}
+                />
               </div>
             </div>
 
