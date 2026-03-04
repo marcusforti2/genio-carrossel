@@ -110,7 +110,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
         {/* Fullimage background */}
         {isFullImage && (
           <>
-            <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.85) 100%)" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.85) 100%)" }} />
           </>
         )}
@@ -157,42 +158,46 @@ interface TemplateProps {
 }
 
 /* ═══════════════════════════════════════════
-   FULLIMAGE CONTENT — image as full bg with text overlay
+   FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
    ═══════════════════════════════════════════ */
 const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps & { fullImageTextColor: string; fullImageBodyColor: string }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative", zIndex: 2 }}>
-      <div style={{ padding: "0 75px 55px" }}>
-        {/* Accent bar */}
-        <div style={{ width: 80, height: 8, borderRadius: 999, background: styles.accent, marginBottom: 36, flexShrink: 0 }} />
+      <div style={{ padding: "0 75px 55px", display: "flex", flexDirection: "column", gap: 0 }}>
+        {/* Accent bar — like text-only slides */}
+        <div style={{ display: "flex", gap: 10, marginBottom: 36, flexShrink: 0 }}>
+          <div style={{ width: 50, height: 7, borderRadius: 999, background: styles.accent }} />
+          <div style={{ width: 20, height: 7, borderRadius: 999, background: "rgba(255,255,255,0.25)" }} />
+        </div>
 
         <h2 style={{
-          fontSize: 68 * titleScale,
+          fontSize: 72 * titleScale,
           fontWeight: 900,
-          lineHeight: 1.08,
+          lineHeight: 1.06,
           color: "white",
           fontFamily: fontFam,
           WebkitLineClamp: 5,
           display: "-webkit-box",
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
-          textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+          textShadow: "0 4px 30px rgba(0,0,0,0.6)",
+          letterSpacing: "-0.01em",
         }}>
           {slide.title}
         </h2>
 
         {slide.body && (
           <p style={{
-            fontSize: 34,
-            lineHeight: 1.55,
-            color: "rgba(255,255,255,0.8)",
-            marginTop: 36,
+            fontSize: 32,
+            lineHeight: 1.6,
+            color: "rgba(255,255,255,0.82)",
+            marginTop: 32,
             fontFamily: fontFam,
             WebkitLineClamp: 6,
             display: "-webkit-box",
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
-            textShadow: "0 1px 10px rgba(0,0,0,0.4)",
+            textShadow: "0 2px 12px rgba(0,0,0,0.5)",
           }}>
             {slide.body}
           </p>
