@@ -3,9 +3,9 @@ import SlidePreview from "@/components/SlidePreview";
 import { CarouselData, DesignTemplate, FontFamily, SlideData, TitleSize } from "@/types/carousel";
 
 interface RealisticSlidePreviewProps {
-  template: DesignTemplate;
-  fontFamily: FontFamily;
-  titleSize: TitleSize;
+  template?: DesignTemplate;
+  fontFamily?: FontFamily;
+  titleSize?: TitleSize;
   bgMode: "dark" | "light";
   accentColor: string;
   profileName?: string;
@@ -42,9 +42,9 @@ const BASE_SLIDES: Omit<SlideData, "id" | "imageUrl">[] = [
 ];
 
 const RealisticSlidePreview = ({
-  template,
-  fontFamily,
-  titleSize,
+  template = "bold",
+  fontFamily = "sans",
+  titleSize = "grande",
   bgMode,
   accentColor,
   profileName = "",

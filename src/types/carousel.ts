@@ -117,10 +117,10 @@ export const createDefaultCarousel = (): CarouselData => ({
     ctaText: "Arrasta para o lado >",
   },
   designStyle: {
-    template: "editorial",
-    fontFamily: "serif",
+    template: "bold",
+    fontFamily: "sans",
     titleSize: "grande",
-    bodySize: "medio",
+    bodySize: "grande",
   },
   slides: [
     {

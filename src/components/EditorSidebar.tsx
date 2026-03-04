@@ -319,7 +319,7 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
 /* ── Per-slide design overrides panel ── */
 const SlideDesignOverrides = ({ slide, onUpdate, carousel }: { slide: SlideData; onUpdate: (s: SlideData) => void; carousel: CarouselData }) => {
   const so = slide.styleOverride || {};
-  const globalDs = carousel.designStyle || { template: "editorial" as const, fontFamily: "serif" as const, titleSize: "grande" as const };
+  const globalDs = carousel.designStyle || { template: "bold" as const, fontFamily: "sans" as const, titleSize: "grande" as const };
   const globalTheme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
 
   const effectiveTemplate = so.template ?? globalDs.template;
@@ -350,68 +350,6 @@ const SlideDesignOverrides = ({ slide, onUpdate, carousel }: { slide: SlideData;
             Resetar
           </Button>
         )}
-      </div>
-
-      {/* Template */}
-      <div className="space-y-1.5">
-        <Label className="text-[10px] text-muted-foreground/70">Template</Label>
-        <div className="space-y-1.5">
-          {DESIGN_TEMPLATES.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => updateOverride({ template: t.id })}
-              className={`w-full text-left p-2.5 rounded-md border transition-all ${
-                effectiveTemplate === t.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-secondary hover:border-muted-foreground/30"
-              } ${so.template === t.id ? "ring-1 ring-primary/50" : ""}`}
-            >
-              <p className={`text-[11px] font-bold ${effectiveTemplate === t.id ? "text-primary" : "text-foreground"}`}>{t.name}</p>
-              <p className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{t.description}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Font */}
-      <div className="space-y-1.5">
-        <Label className="text-[10px] text-muted-foreground/70">Fonte</Label>
-        <div className="flex gap-1.5">
-          {FONT_FAMILIES.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => updateOverride({ fontFamily: f.id })}
-              className={`flex-1 py-2 rounded-md border transition-all text-center ${
-                effectiveFont === f.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-secondary hover:border-muted-foreground/30"
-              } ${so.fontFamily === f.id ? "ring-1 ring-primary/50" : ""}`}
-            >
-              <p className="text-xs font-bold" style={{ fontFamily: f.id === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif", color: effectiveFont === f.id ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>Aa</p>
-              <p className="text-[9px] text-muted-foreground mt-0.5">{f.name}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Title size */}
-      <div className="space-y-1.5">
-        <Label className="text-[10px] text-muted-foreground/70">Título</Label>
-        <div className="flex gap-1.5">
-          {TITLE_SIZES.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => updateOverride({ titleSize: s.id })}
-              className={`flex-1 py-1.5 rounded-md border transition-all text-[10px] font-semibold ${
-                effectiveSize === s.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
-              } ${so.titleSize === s.id ? "ring-1 ring-primary/50" : ""}`}
-            >
-              {s.name}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* BG mode */}
@@ -493,11 +431,11 @@ const EditorSidebar = ({
   };
 
   const updateDesignStyle = (partial: Partial<DesignStyle>) => {
-    const current = carousel.designStyle || { template: "editorial" as const, fontFamily: "serif" as const, titleSize: "grande" as const, bodySize: "medio" as const };
+    const current = carousel.designStyle || { template: "bold" as const, fontFamily: "sans" as const, titleSize: "grande" as const, bodySize: "grande" as const };
     onUpdateCarousel({ ...carousel, designStyle: { ...current, ...partial } });
   };
 
-  const ds = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande", bodySize: "medio" };
+  const ds = carousel.designStyle || { template: "bold", fontFamily: "sans", titleSize: "grande", bodySize: "grande" };
 
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
@@ -537,101 +475,6 @@ const EditorSidebar = ({
 
         {tab === "design" && (
           <div className="space-y-6 animate-fade-in">
-            {/* Design Template */}
-            <div className="space-y-3">
-              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <LayoutTemplate className="w-3.5 h-3.5" /> Template
-              </Label>
-              <div className="space-y-2">
-                {DESIGN_TEMPLATES.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => updateDesignStyle({ template: t.id })}
-                    className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
-                      ds.template === t.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-secondary hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    <p className={`text-xs font-bold ${ds.template === t.id ? "text-primary" : "text-foreground"}`}>{t.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{t.description}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Font Family */}
-            <div className="space-y-3">
-              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Type className="w-3.5 h-3.5" /> Fonte
-              </Label>
-              <div className="flex gap-2">
-                {FONT_FAMILIES.map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => updateDesignStyle({ fontFamily: f.id })}
-                    className={`flex-1 py-3 rounded-lg border-2 transition-all text-center ${
-                      ds.fontFamily === f.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-secondary hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    <p
-                      className="text-sm font-bold"
-                      style={{ fontFamily: f.id === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif", color: ds.fontFamily === f.id ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}
-                    >
-                      Aa
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{f.name}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Title Size */}
-            <div className="space-y-3">
-              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <ALargeSmall className="w-3.5 h-3.5" /> Tamanho do título
-              </Label>
-              <div className="flex gap-2">
-                {TITLE_SIZES.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => updateDesignStyle({ titleSize: s.id })}
-                    className={`flex-1 py-2.5 rounded-lg border-2 transition-all text-xs font-semibold ${
-                      ds.titleSize === s.id
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    {s.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Body Size */}
-            <div className="space-y-3">
-              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <ALargeSmall className="w-3.5 h-3.5" /> Texto do corpo
-              </Label>
-              <div className="flex gap-2">
-                {BODY_SIZES.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => updateDesignStyle({ bodySize: s.id })}
-                    className={`flex-1 py-2.5 rounded-lg border-2 transition-all text-xs font-semibold ${
-                      (ds.bodySize || "medio") === s.id
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    {s.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* BG mode */}
             <div className="space-y-3">
               <Label className="text-xs text-muted-foreground">Fundo do slide</Label>
