@@ -346,7 +346,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
 const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
-  const bg = isTextOnly ? styles.accent : styles.bg;
+  const bg = (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden", background: bg }}>
