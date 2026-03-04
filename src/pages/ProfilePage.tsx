@@ -134,10 +134,10 @@ const ProfilePage = () => {
 
     const { error } = await supabase
       .from("profiles")
-      .update(profile)
-      .eq("user_id", user.id);
+      .upsert({ ...profile, user_id: user.id }, { onConflict: "user_id" });
 
     if (error) {
+      console.error("Profile save error:", error);
       toast.error("Erro ao salvar perfil");
     } else {
       toast.success("Perfil salvo!");

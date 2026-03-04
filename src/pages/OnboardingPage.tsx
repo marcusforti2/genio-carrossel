@@ -114,12 +114,28 @@ const OnboardingPage = () => {
   const handleFinish = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from("profiles").update(profile).eq("user_id", user.id);
-    if (error) {
-      toast.error("Erro ao salvar perfil");
-      setSaving(false);
-      return;
+    
+    // Try update first, fallback to upsert if no row exists
+    const { error: updateError, count } = await supabase
+      .from("profiles")
+      .update(profile)
+      .eq("user_id", user.id);
+    
+    if (updateError) {
+      console.error("Profile update error:", updateError);
+      // Fallback: try upsert (insert if no row exists)
+      const { error: upsertError } = await supabase
+        .from("profiles")
+        .upsert({ ...profile, user_id: user.id }, { onConflict: "user_id" });
+      
+      if (upsertError) {
+        console.error("Profile upsert error:", upsertError);
+        toast.error("Erro ao salvar perfil. Tente novamente.");
+        setSaving(false);
+        return;
+      }
     }
+    
     toast.success("Perfil completo! Vamos criar carrosséis 🚀");
     navigate("/dashboard", { replace: true });
   };
