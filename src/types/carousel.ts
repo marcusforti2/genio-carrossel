@@ -25,7 +25,7 @@ export interface SlideData {
   styleOverride?: SlideStyleOverride;
 }
 
-export type DesignTemplate = "editorial" | "moderno" | "bold" | "minimal" | "magazine" | "neon";
+export type DesignTemplate = "editorial" | "moderno" | "bold" | "minimal";
 export type FontFamily = "serif" | "sans";
 export type TitleSize = "normal" | "grande" | "impacto";
 
@@ -40,8 +40,6 @@ export const DESIGN_TEMPLATES: { id: DesignTemplate; name: string; description: 
   { id: "moderno", name: "Moderno", description: "Sans-serif clean, layout equilibrado com cards sofisticados." },
   { id: "bold", name: "Bold", description: "Texto gigante que preenche o slide. Máximo impacto visual." },
   { id: "minimal", name: "Minimal", description: "Centralizado, muito espaço branco, tipografia elegante e limpa." },
-  { id: "magazine", name: "Magazine", description: "Layout em duas colunas estilo revista. Sofisticado e informativo." },
-  { id: "neon", name: "Neon", description: "Bordas com gradiente neon, efeito de brilho. Futurista e chamativo." },
 ];
 
 export const FONT_FAMILIES: { id: FontFamily; name: string; preview: string }[] = [

@@ -134,14 +134,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           <FullImageContent {...shared} />
         ) : ds.template === "editorial" ? (
           <EditorialContent {...shared} forceTextOnly={forceTextOnly} />
-        ) : ds.template === "bold" ? (
-          <BoldContent {...shared} forceTextOnly={forceTextOnly} />
         ) : ds.template === "minimal" ? (
           <MinimalContent {...shared} forceTextOnly={forceTextOnly} />
-        ) : ds.template === "magazine" ? (
-          <MagazineContent {...shared} forceTextOnly={forceTextOnly} />
-        ) : ds.template === "neon" ? (
-          <NeonContent {...shared} forceTextOnly={forceTextOnly} />
         ) : (
           <ModernoContent {...shared} forceTextOnly={forceTextOnly} />
         )}
@@ -416,140 +410,6 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
 
         {/* Thin line accent bottom */}
         <div style={{ width: 60, height: 3, background: styles.accent, marginTop: 48, borderRadius: 999 }} />
-      </div>
-
-      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════
-   MAGAZINE TEMPLATE — two-column editorial layout
-   ═══════════════════════════════════════════ */
-const MagazineContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden" }}>
-      {/* Top accent line */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 32, flexShrink: 0 }}>
-        <div style={{ flex: 3, height: 6, background: styles.accent, borderRadius: 999 }} />
-        <div style={{ flex: 1, height: 6, background: `${styles.accent}40`, borderRadius: 999 }} />
-      </div>
-
-      <div style={{ flex: 1, display: "flex", gap: 48, overflow: "hidden" }}>
-        {/* Left column — title */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
-          <p style={{ fontSize: 18, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: styles.accent, marginBottom: 20, fontFamily: "'Inter', sans-serif" }}>
-            DESTAQUE
-          </p>
-          <h2 style={{ fontSize: 54 * titleScale, fontWeight: 900, lineHeight: 1.08, color: styles.title, fontFamily: fontFam, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-            {slide.title}
-          </h2>
-        </div>
-
-        {/* Right column — body + image */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start", borderLeft: `2px solid ${styles.borderLight}`, paddingLeft: 48 }}>
-          {slide.body && (
-            <p style={{ fontSize: 30, lineHeight: 1.65, color: styles.body, fontFamily: fontFam, WebkitLineClamp: 8, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-              {slide.body}
-            </p>
-          )}
-
-          {hasImg && (
-            <div style={{ marginTop: "auto", paddingTop: 32 }}>
-              {slide.imageLoading ? (
-                <div style={{ width: "100%", aspectRatio: "4/3", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
-                </div>
-              ) : (
-                <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 8 }} />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
-    </div>
-  );
-};
-
-/* ═══════════════════════════════════════════
-   NEON TEMPLATE — glowing borders, futuristic
-   ═══════════════════════════════════════════ */
-const NeonContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
-  const glowColor = styles.accent;
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden", position: "relative" }}>
-      {/* Corner glow effects */}
-      <div style={{ position: "absolute", top: 0, left: 0, width: 300, height: 300, background: `radial-gradient(circle at top left, ${glowColor}25, transparent 70%)`, pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: 0, right: 0, width: 300, height: 300, background: `radial-gradient(circle at bottom right, ${glowColor}20, transparent 70%)`, pointerEvents: "none" }} />
-
-      {/* Neon border frame */}
-      <div style={{
-        position: "absolute",
-        inset: 40,
-        border: `2px solid ${glowColor}40`,
-        borderRadius: 24,
-        boxShadow: `inset 0 0 30px ${glowColor}10, 0 0 30px ${glowColor}08`,
-        pointerEvents: "none",
-      }} />
-
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 30px", position: "relative", zIndex: 2 }}>
-        {/* Glowing tag */}
-        <div style={{
-          alignSelf: "flex-start",
-          background: `${glowColor}20`,
-          color: glowColor,
-          fontSize: 18,
-          fontWeight: 800,
-          padding: "8px 24px",
-          borderRadius: 999,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          border: `1px solid ${glowColor}50`,
-          boxShadow: `0 0 20px ${glowColor}20`,
-          marginBottom: 36,
-          fontFamily: "'Inter', sans-serif",
-        }}>
-          INSIGHT
-        </div>
-
-        <h2 style={{
-          fontSize: (hasImg ? 58 : 76) * titleScale,
-          fontWeight: 900,
-          lineHeight: 1.08,
-          color: styles.title,
-          fontFamily: fontFam,
-          WebkitLineClamp: 5,
-          display: "-webkit-box",
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-          textShadow: `0 0 40px ${glowColor}15`,
-        }}>
-          {slide.title}
-        </h2>
-
-        {slide.body && (
-          <p style={{ fontSize: 32, lineHeight: 1.55, color: styles.body, marginTop: 40, fontFamily: fontFam, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-            {slide.body}
-          </p>
-        )}
-
-        {hasImg && (
-          <div style={{ marginTop: 40, borderRadius: 16, overflow: "hidden", border: `2px solid ${glowColor}30`, boxShadow: `0 0 30px ${glowColor}15` }}>
-            {slide.imageLoading ? (
-              <div style={{ width: "100%", aspectRatio: "16/9", background: styles.mutedBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: glowColor }} />
-              </div>
-            ) : (
-              <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover" }} />
-            )}
-          </div>
-        )}
       </div>
 
       <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
