@@ -90,14 +90,20 @@ const ProfilePage = () => {
 
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${ext}`;
+      // Use fixed filename to avoid conflicts with different extensions
+      const filePath = `${user.id}/avatar.png`;
+
+      // Try to remove old file first (ignore errors if doesn't exist)
+      await supabase.storage.from("avatars").remove([filePath]);
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, file, { upsert: true, contentType: file.type });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error details:", uploadError);
+        throw uploadError;
+      }
 
       const { data: urlData } = supabase.storage
         .from("avatars")
