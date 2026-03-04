@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Plus, Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal,
+  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -16,6 +16,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import GenerateDialog from "@/components/GenerateDialog";
+import { SlideData, DesignStyle, createDefaultCarousel } from "@/types/carousel";
 
 interface ProjectItem {
   id: string;
@@ -31,6 +33,7 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [generateOpen, setGenerateOpen] = useState(false);
 
   const fetchProjects = async () => {
     if (!user) return;
@@ -52,8 +55,46 @@ const DashboardPage = () => {
     fetchProjects();
   }, [user]);
 
-  const handleNew = () => {
-    navigate("/editor");
+  const handleGenerated = async (slides: SlideData[], caption: string, designStyle: DesignStyle) => {
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    const defaultCarousel = createDefaultCarousel();
+    const carouselData = {
+      ...defaultCarousel,
+      slides,
+      designStyle,
+      profileName: profile?.display_name || "",
+      profileHandle: profile?.handle || "",
+      brandingText: profile?.branding_text || "",
+      brandingSubtext: profile?.branding_subtext || "",
+      avatarUrl: profile?.avatar_url || "",
+      _caption: caption,
+    };
+
+    const title = slides[0]?.title?.substring(0, 60) || "Sem título";
+
+    const { data: newProject, error } = await supabase
+      .from("projects")
+      .insert({
+        user_id: user.id,
+        title,
+        data: carouselData as any,
+      })
+      .select("id")
+      .single();
+
+    if (error || !newProject) {
+      toast.error("Erro ao salvar projeto");
+      return;
+    }
+
+    navigate(`/editor?project=${newProject.id}`);
   };
 
   const handleOpen = (id: string) => {
@@ -144,9 +185,9 @@ const DashboardPage = () => {
               {projects.length} {projects.length === 1 ? "carrossel" : "carrosséis"} criados
             </p>
           </div>
-          <Button onClick={handleNew} className="gap-2 text-sm h-10 px-5">
-            <Plus className="w-4 h-4" />
-            Novo projeto
+          <Button onClick={() => setGenerateOpen(true)} className="gap-2 text-sm h-10 px-5">
+            <Sparkles className="w-4 h-4" />
+            Criar novo carrossel
           </Button>
         </div>
 
@@ -173,13 +214,13 @@ const DashboardPage = () => {
             <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mx-auto mb-4">
               <FolderOpen className="w-7 h-7 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-bold mb-2">Nenhum projeto ainda</h3>
+            <h3 className="text-lg font-bold mb-2">Nenhum carrossel ainda</h3>
             <p className="text-sm text-muted-foreground mb-6">
               Crie seu primeiro carrossel e comece a produzir conteúdo.
             </p>
-            <Button onClick={handleNew} className="gap-2">
-              <Plus className="w-4 h-4" />
-              Criar primeiro projeto
+            <Button onClick={() => setGenerateOpen(true)} className="gap-2">
+              <Sparkles className="w-4 h-4" />
+              Criar primeiro carrossel
             </Button>
           </div>
         ) : filtered.length === 0 ? (
@@ -200,9 +241,7 @@ const DashboardPage = () => {
                   className="w-full text-left group"
                 >
                   <div className="rounded-xl border border-border bg-card p-5 hover:border-primary/50 hover:bg-card/80 transition-all duration-200 space-y-3">
-                    {/* Color accent bar */}
                     <div className="w-10 h-1 rounded-full bg-primary/60" />
-
                     <div className="flex items-start justify-between">
                       <div className="min-w-0 flex-1">
                         <h3 className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
@@ -212,7 +251,6 @@ const DashboardPage = () => {
                           Editado {formatDate(project.updated_at)}
                         </p>
                       </div>
-
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <Button
@@ -224,14 +262,10 @@ const DashboardPage = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem
-                            onClick={(e) => { e.stopPropagation(); handleOpen(project.id); }}
-                          >
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleOpen(project.id); }}>
                             <FolderOpen className="w-3.5 h-3.5 mr-2" /> Abrir
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => { e.stopPropagation(); handleDuplicate(project.id); }}
-                          >
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDuplicate(project.id); }}>
                             <Copy className="w-3.5 h-3.5 mr-2" /> Duplicar
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -268,6 +302,13 @@ const DashboardPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Generate Dialog */}
+      <GenerateDialog
+        open={generateOpen}
+        onOpenChange={setGenerateOpen}
+        onGenerated={handleGenerated}
+      />
     </div>
   );
 };
