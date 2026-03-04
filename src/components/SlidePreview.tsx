@@ -81,6 +81,16 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
   const shared = { slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding };
 
+  // Determine background style
+  const bgStyle = so.bgStyle || "theme";
+  const isFullImage = bgStyle === "fullimage" && slide.imageUrl;
+  const isColorBg = bgStyle === "color";
+  const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
+  
+  // For fullimage, determine text readability
+  const fullImageTextColor = "hsl(0 0% 100%)";
+  const fullImageBodyColor = "hsla(0, 0%, 100%, 0.75)";
+
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
       <div
@@ -89,20 +99,29 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           height: SLIDE_H,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
-          background: styles.bg,
+          background: isFullImage ? "black" : slideBgColor,
           fontFamily: fontFam,
           position: "absolute",
           top: 0,
           left: 0,
+          overflow: "hidden",
         }}
       >
+        {/* Fullimage background */}
+        {isFullImage && (
+          <>
+            <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.85) 100%)" }} />
+          </>
+        )}
+
         {/* Header bar */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "48px 56px 0" }}>
-          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: styles.branding }}>
+          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: isFullImage ? "rgba(255,255,255,0.6)" : styles.branding }}>
             {carousel.brandingSubtext || carousel.brandingText}
           </p>
-          <p style={{ fontSize: 24, color: styles.branding }}>{footerHandle}</p>
-          <div style={{ background: styles.counterBg, color: styles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
+          <p style={{ fontSize: 24, color: isFullImage ? "rgba(255,255,255,0.6)" : styles.branding }}>{footerHandle}</p>
+          <div style={{ background: isFullImage ? "rgba(255,255,255,0.15)" : styles.counterBg, color: isFullImage ? "rgba(255,255,255,0.8)" : styles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
             {slideIndex + 1}/{totalSlides}
           </div>
         </div>
@@ -111,6 +130,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           <CoverSlide {...shared} />
         ) : slide.type === "cta" ? (
           <CtaSlide {...shared} />
+        ) : isFullImage ? (
+          <FullImageContent {...shared} fullImageTextColor={fullImageTextColor} fullImageBodyColor={fullImageBodyColor} />
         ) : ds.template === "editorial" ? (
           <EditorialContent {...shared} />
         ) : ds.template === "bold" ? (
@@ -134,6 +155,54 @@ interface TemplateProps {
   footerHandle: string;
   footerBranding: string;
 }
+
+/* ═══════════════════════════════════════════
+   FULLIMAGE CONTENT — image as full bg with text overlay
+   ═══════════════════════════════════════════ */
+const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps & { fullImageTextColor: string; fullImageBodyColor: string }) => {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative", zIndex: 2 }}>
+      <div style={{ padding: "0 75px 55px" }}>
+        {/* Accent bar */}
+        <div style={{ width: 80, height: 8, borderRadius: 999, background: styles.accent, marginBottom: 36, flexShrink: 0 }} />
+
+        <h2 style={{
+          fontSize: 68 * titleScale,
+          fontWeight: 900,
+          lineHeight: 1.08,
+          color: "white",
+          fontFamily: fontFam,
+          WebkitLineClamp: 5,
+          display: "-webkit-box",
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+        }}>
+          {slide.title}
+        </h2>
+
+        {slide.body && (
+          <p style={{
+            fontSize: 34,
+            lineHeight: 1.55,
+            color: "rgba(255,255,255,0.8)",
+            marginTop: 36,
+            fontFamily: fontFam,
+            WebkitLineClamp: 6,
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textShadow: "0 1px 10px rgba(0,0,0,0.4)",
+          }}>
+            {slide.body}
+          </p>
+        )}
+
+        <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors />
+      </div>
+    </div>
+  );
+};
 
 /* ═══════════════════════════════════════════
    COVER SLIDE

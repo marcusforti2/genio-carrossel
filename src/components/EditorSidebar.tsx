@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride, SlideBgStyle } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload, Type, LayoutTemplate, ALargeSmall } from "lucide-react";
+import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload, Type, LayoutTemplate, ALargeSmall, Palette, Image as ImageIcon, Paintbrush } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
