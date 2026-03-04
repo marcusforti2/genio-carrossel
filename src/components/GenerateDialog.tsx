@@ -214,10 +214,10 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-3xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="bg-card border-border sm:max-w-4xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
         <div className="flex flex-col sm:flex-row">
           {/* Left: Live preview */}
-          <div className="hidden sm:flex sm:w-[260px] shrink-0 bg-secondary/30 border-r border-border p-4 flex-col items-center justify-center gap-3">
+          <div className="hidden sm:flex sm:w-[300px] shrink-0 bg-secondary/30 border-r border-border p-4 flex-col items-center justify-center gap-3">
             <div className="w-full">
               <RealisticSlidePreview
                 template={template} fontFamily={fontFamily} titleSize={titleSize}
