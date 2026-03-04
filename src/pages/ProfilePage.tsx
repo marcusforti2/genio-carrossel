@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -189,6 +190,21 @@ const ProfilePage = () => {
     setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
+  const requiredFields: { key: keyof ProfileData; label: string }[] = [
+    { key: "display_name", label: "Nome" },
+    { key: "handle", label: "Handle" },
+    { key: "avatar_url", label: "Foto" },
+    { key: "niche", label: "Nicho" },
+    { key: "target_audience", label: "Público-alvo" },
+    { key: "tone_of_voice", label: "Tom de voz" },
+    { key: "value_proposition", label: "Proposta de valor" },
+  ];
+
+  const filledCount = requiredFields.filter((f) => profile[f.key]?.trim()).length;
+  const totalCount = requiredFields.length;
+  const completionPercent = Math.round((filledCount / totalCount) * 100);
+  const missingFields = requiredFields.filter((f) => !profile[f.key]?.trim());
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -212,6 +228,36 @@ const ProfilePage = () => {
       </header>
 
       <div className="max-w-2xl mx-auto p-6 space-y-8">
+        {/* Completion Banner */}
+        {completionPercent < 100 ? (
+          <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+              <p className="text-sm font-semibold text-destructive">
+                Perfil {completionPercent}% completo
+              </p>
+            </div>
+            <Progress value={completionPercent} className="h-2" />
+            <div className="flex flex-wrap gap-1.5">
+              {missingFields.map((f) => (
+                <span key={f.key} className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20">
+                  {f.label}
+                </span>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Preencha todos os campos para que a IA gere carrosséis mais personalizados.
+            </p>
+          </section>
+        ) : (
+          <section className="rounded-xl border border-green-500/30 bg-green-500/5 p-3 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+            <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+              Perfil completo! A IA vai usar todas as informações para gerar carrosséis incríveis.
+            </p>
+          </section>
+        )}
+
         {/* Avatar Section */}
         <section className="flex items-center gap-5">
           <div className="relative group">
@@ -296,8 +342,8 @@ const ProfilePage = () => {
           <h2 className="text-lg font-bold font-display border-b border-border pb-2">Identidade Visual</h2>
           <p className="text-xs text-muted-foreground">Essas informações aparecem nos seus carrosséis.</p>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Nome de exibição" value={profile.display_name} onChange={(v) => updateField("display_name", v)} placeholder="Leo Baltazar" />
-            <Field label="@ Handle" value={profile.handle} onChange={(v) => updateField("handle", v)} placeholder="@leobrf_" />
+            <Field label="Nome de exibição" value={profile.display_name} onChange={(v) => updateField("display_name", v)} placeholder="Leo Baltazar" required />
+            <Field label="@ Handle" value={profile.handle} onChange={(v) => updateField("handle", v)} placeholder="@leobrf_" required />
             <Field label="Texto de branding" value={profile.branding_text} onChange={(v) => updateField("branding_text", v)} placeholder="Marketing Insider" />
             <Field label="Sub-branding" value={profile.branding_subtext} onChange={(v) => updateField("branding_subtext", v)} placeholder="Conteúdo com IA" />
           </div>
@@ -308,12 +354,12 @@ const ProfilePage = () => {
           <h2 className="text-lg font-bold font-display border-b border-border pb-2">Perfil de Negócio</h2>
           <p className="text-xs text-muted-foreground">A IA usa essas informações para gerar carrosséis personalizados.</p>
           <div className="space-y-4">
-            <Field label="Nicho" value={profile.niche} onChange={(v) => updateField("niche", v)} placeholder="Marketing digital, coaching, etc." />
-            <FieldArea label="Público-alvo" value={profile.target_audience} onChange={(v) => updateField("target_audience", v)} placeholder="Quem é seu público? O que eles sentem, pensam e querem?" />
+            <Field label="Nicho" value={profile.niche} onChange={(v) => updateField("niche", v)} placeholder="Marketing digital, coaching, etc." required />
+            <FieldArea label="Público-alvo" value={profile.target_audience} onChange={(v) => updateField("target_audience", v)} placeholder="Quem é seu público? O que eles sentem, pensam e querem?" required />
             <FieldArea label="Inimigo em comum" value={profile.common_enemy} onChange={(v) => updateField("common_enemy", v)} placeholder="O que vocês dois (você e seu público) combatem?" />
             <FieldArea label="Crenças e valores" value={profile.beliefs} onChange={(v) => updateField("beliefs", v)} placeholder="Quais são suas crenças fortes sobre seu mercado?" />
-            <FieldArea label="Tom de voz" value={profile.tone_of_voice} onChange={(v) => updateField("tone_of_voice", v)} placeholder="Ex: Provocativo, direto, sem rodeios, com ironia inteligente..." />
-            <FieldArea label="Proposta de valor" value={profile.value_proposition} onChange={(v) => updateField("value_proposition", v)} placeholder="O que você entrega de único? Qual a transformação?" />
+            <FieldArea label="Tom de voz" value={profile.tone_of_voice} onChange={(v) => updateField("tone_of_voice", v)} placeholder="Ex: Provocativo, direto, sem rodeios, com ironia inteligente..." required />
+            <FieldArea label="Proposta de valor" value={profile.value_proposition} onChange={(v) => updateField("value_proposition", v)} placeholder="O que você entrega de único? Qual a transformação?" required />
           </div>
         </section>
       </div>
@@ -321,17 +367,21 @@ const ProfilePage = () => {
   );
 };
 
-const Field = ({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) => (
+const Field = ({ label, value, onChange, placeholder, required }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; required?: boolean }) => (
   <div className="space-y-1.5">
-    <Label className="text-xs text-muted-foreground">{label}</Label>
-    <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="bg-secondary border-border/50" />
+    <Label className={`text-xs ${!value?.trim() && required ? 'text-destructive' : 'text-muted-foreground'}`}>
+      {label} {!value?.trim() && required && <span className="text-destructive">•</span>}
+    </Label>
+    <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={`bg-secondary border-border/50 ${!value?.trim() && required ? 'border-destructive/40' : ''}`} />
   </div>
 );
 
-const FieldArea = ({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) => (
+const FieldArea = ({ label, value, onChange, placeholder, required }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; required?: boolean }) => (
   <div className="space-y-1.5">
-    <Label className="text-xs text-muted-foreground">{label}</Label>
-    <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={3} className="bg-secondary border-border/50 resize-none" />
+    <Label className={`text-xs ${!value?.trim() && required ? 'text-destructive' : 'text-muted-foreground'}`}>
+      {label} {!value?.trim() && required && <span className="text-destructive">•</span>}
+    </Label>
+    <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={3} className={`bg-secondary border-border/50 resize-none ${!value?.trim() && required ? 'border-destructive/40' : ''}`} />
   </div>
 );
 
