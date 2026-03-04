@@ -301,64 +301,80 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandl
 };
 
 /* ═══════════════════════════════════════════
-   CTA SLIDE (último slide — sem imagem)
+   CTA SLIDE (último slide — card elegante)
    ═══════════════════════════════════════════ */
 const CtaSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding }: TemplateProps) => {
-  // Extract keyword in CAPS from body (between quotes or all-caps word)
   const keywordMatch = slide.body?.match(/'([A-ZÁÉÍÓÚÂÊÔÃÕÇ]+)'/);
   const keyword = keywordMatch?.[1] || "";
+  const isDark = (slide.styleOverride?.bgMode ?? carousel.theme?.bgMode) === "dark";
+  const hasImg = slide.hasImage && slide.imageUrl;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: `hsl(${carousel.theme?.accentColor || "1 83% 55%"})`, position: "relative", overflow: "hidden" }}>
-      {/* Decorative circles */}
-      <div style={{ position: "absolute", top: -200, right: -200, width: 600, height: 600, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-      <div style={{ position: "absolute", bottom: -150, left: -150, width: 400, height: 400, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: styles.bg, position: "relative", overflow: "hidden" }}>
+      {/* Background image with heavy overlay */}
+      {hasImg && (
+        <>
+          <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "blur(2px) brightness(0.6)" }} />
+          <div style={{ position: "absolute", inset: 0, background: isDark ? "rgba(10,10,10,0.7)" : "rgba(245,245,245,0.75)" }} />
+        </>
+      )}
+
+      {/* Subtle decorative accent line */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 6, background: styles.accent, zIndex: 5 }} />
 
       {/* Content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "150px 80px 40px", position: "relative", zIndex: 2, textAlign: "center" }}>
         {/* Avatar */}
-        <div style={{ marginBottom: 48 }}>
+        <div style={{ marginBottom: 40 }}>
           {carousel.avatarUrl ? (
-            <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 120, height: 120, border: "4px solid rgba(255,255,255,0.3)" }} />
+            <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 110, height: 110, border: `4px solid ${styles.accent}` }} />
           ) : (
-            <div className="rounded-full flex items-center justify-center" style={{ width: 120, height: 120, background: "rgba(255,255,255,0.15)", border: "4px solid rgba(255,255,255,0.3)" }}>
-              <User style={{ width: 52, height: 52, color: "rgba(255,255,255,0.7)" }} />
+            <div className="rounded-full flex items-center justify-center" style={{ width: 110, height: 110, background: `${styles.accent}22`, border: `4px solid ${styles.accent}55` }}>
+              <User style={{ width: 48, height: 48, color: `${styles.accent}aa` }} />
             </div>
           )}
         </div>
 
+        {/* Name */}
+        <p style={{ fontSize: 30, fontWeight: 700, color: styles.title, marginBottom: 8 }}>
+          {carousel.profileName}
+        </p>
+        <p style={{ fontSize: 24, color: styles.body, marginBottom: 48 }}>{footerHandle}</p>
+
         {/* Title */}
-        <h2 style={{ fontSize: 64 * titleScale, fontWeight: 900, lineHeight: 1.1, color: "white", fontFamily: fontFam, marginBottom: 48 }}>
+        <h2 style={{ fontSize: 58 * titleScale, fontWeight: 900, lineHeight: 1.12, color: styles.title, fontFamily: fontFam, marginBottom: 40, maxWidth: 920 }}>
           {slide.title}
         </h2>
 
         {/* Keyword badge */}
         {keyword && (
-          <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", borderRadius: 16, padding: "20px 48px", marginBottom: 40, border: "2px solid rgba(255,255,255,0.25)" }}>
-            <p style={{ fontSize: 22, color: "rgba(255,255,255,0.7)", fontWeight: 500, marginBottom: 8, fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ background: `${styles.accent}18`, borderRadius: 16, padding: "18px 44px", marginBottom: 36, border: `2px solid ${styles.accent}40` }}>
+            <p style={{ fontSize: 20, color: styles.body, fontWeight: 500, marginBottom: 6, fontFamily: "'Inter', sans-serif" }}>
               Comenta aqui embaixo:
             </p>
-            <p style={{ fontSize: 56, fontWeight: 900, color: "white", letterSpacing: "0.08em", fontFamily: fontFam }}>
+            <p style={{ fontSize: 50, fontWeight: 900, color: styles.accent, letterSpacing: "0.06em", fontFamily: fontFam }}>
               "{keyword}"
             </p>
           </div>
         )}
 
-        {/* Body text (without keyword part if extracted) */}
-        <p style={{ fontSize: 32, lineHeight: 1.6, color: "rgba(255,255,255,0.85)", fontWeight: 500, fontFamily: "'Inter', sans-serif", maxWidth: 900 }}>
-          {slide.body}
-        </p>
+        {/* Body */}
+        {slide.body && (
+          <p style={{ fontSize: 30, lineHeight: 1.6, color: styles.body, fontWeight: 500, fontFamily: "'Inter', sans-serif", maxWidth: 880 }}>
+            {slide.body}
+          </p>
+        )}
       </div>
 
       {/* Footer */}
       <div style={{ padding: "0 80px 55px", position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
         {footerBranding && (
-          <span style={{ fontSize: 24, fontWeight: 600, padding: "8px 24px", borderRadius: 999, background: "rgba(255,255,255,0.2)", color: "white" }}>
+          <span style={{ fontSize: 24, fontWeight: 600, padding: "8px 24px", borderRadius: 999, background: styles.tagBg, color: styles.tagFg }}>
             {footerBranding}
           </span>
         )}
         {footerHandle && (
-          <span style={{ fontSize: 24, fontWeight: 500, padding: "8px 24px", borderRadius: 999, background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,0.2)" }}>
+          <span style={{ fontSize: 24, fontWeight: 500, padding: "8px 24px", borderRadius: 999, background: styles.handleBg, color: `${styles.title}b3`, border: `1px solid ${styles.borderLight}` }}>
             {footerHandle}
           </span>
         )}
