@@ -19,44 +19,107 @@ interface ExportButtonsProps {
   carousel: CarouselData;
 }
 
-// Convert external URL to base64 data URL via proxy
-const proxyImageToBase64 = async (url: string): Promise<string> => {
+// 1px transparent PNG fallback
+const TRANSPARENT_PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQABNjN9GQAAAAlwRFlzAAAWJQAAFiUBSVIk8AAAAA0lEQVQI12P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
+
+// Convert external URL to base64 data URL via proxy with retry
+const proxyImageToBase64 = async (url: string, retries = 2): Promise<string> => {
   if (!url || url.startsWith("data:")) return url;
-  try {
-    const { data, error } = await supabase.functions.invoke("proxy-image", {
-      body: { url },
-    });
-    if (error || data?.error) return url;
-    return data?.dataUrl || url;
-  } catch {
-    return url;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { data, error } = await supabase.functions.invoke("proxy-image", {
+        body: { url },
+      });
+      if (!error && data?.dataUrl) {
+        console.log(`[Export] Proxied image OK (attempt ${attempt + 1}): ${url.substring(0, 80)}...`);
+        return data.dataUrl;
+      }
+      console.warn(`[Export] Proxy attempt ${attempt + 1} failed for: ${url.substring(0, 80)}`, error || data?.error);
+    } catch (e) {
+      console.warn(`[Export] Proxy attempt ${attempt + 1} exception for: ${url.substring(0, 80)}`, e);
+    }
+
+    // Wait before retry
+    if (attempt < retries) {
+      await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+    }
   }
+
+  // All retries failed — return transparent pixel instead of original URL
+  // Original URL would cause CORS failure in html-to-image
+  console.error(`[Export] All proxy attempts failed, using fallback for: ${url.substring(0, 80)}`);
+  return TRANSPARENT_PIXEL;
 };
 
 // Pre-process carousel: convert all external images to base64
 const prepareCarouselForExport = async (carousel: CarouselData): Promise<CarouselData> => {
-  const slides = await Promise.all(
-    carousel.slides.map(async (slide) => {
-      if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
-        const base64Url = await proxyImageToBase64(slide.imageUrl);
-        return { ...slide, imageUrl: base64Url };
-      }
-      return slide;
-    })
-  );
+  console.log("[Export] Preparing carousel for export...");
 
-  let avatarUrl = carousel.avatarUrl;
-  if (avatarUrl && !avatarUrl.startsWith("data:")) {
-    avatarUrl = await proxyImageToBase64(avatarUrl);
+  // Collect all URLs that need proxying
+  const urlsToProxy: { key: string; url: string }[] = [];
+
+  carousel.slides.forEach((slide, i) => {
+    if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
+      urlsToProxy.push({ key: `slide-${i}`, url: slide.imageUrl });
+    }
+  });
+
+  if (carousel.avatarUrl && !carousel.avatarUrl.startsWith("data:")) {
+    urlsToProxy.push({ key: "avatar", url: carousel.avatarUrl });
   }
 
+  console.log(`[Export] Need to proxy ${urlsToProxy.length} images`);
+
+  // Proxy all images in parallel
+  const results = await Promise.all(
+    urlsToProxy.map(async ({ key, url }) => ({
+      key,
+      dataUrl: await proxyImageToBase64(url),
+    }))
+  );
+
+  const urlMap = new Map(results.map(r => [r.key, r.dataUrl]));
+
+  const slides = carousel.slides.map((slide, i) => {
+    const proxied = urlMap.get(`slide-${i}`);
+    if (proxied) {
+      return { ...slide, imageUrl: proxied };
+    }
+    return slide;
+  });
+
+  const avatarUrl = urlMap.get("avatar") || carousel.avatarUrl;
+
+  console.log("[Export] All images prepared");
   return { ...carousel, slides, avatarUrl };
+};
+
+// Gather all computed CSS rules as inline <style> text
+const gatherStyles = (): string => {
+  const cssTexts: string[] = [];
+  try {
+    for (const sheet of document.styleSheets) {
+      try {
+        for (const rule of sheet.cssRules) {
+          cssTexts.push(rule.cssText);
+        }
+      } catch {
+        // Cross-origin stylesheet, skip
+      }
+    }
+  } catch {
+    // Ignore
+  }
+  return cssTexts.join("\n");
 };
 
 const ExportButtons = ({ carousel }: ExportButtonsProps) => {
   const [exporting, setExporting] = useState(false);
 
   const renderSlideToBlob = useCallback(async (preparedCarousel: CarouselData, slideIndex: number): Promise<Blob> => {
+    console.log(`[Export] Rendering slide ${slideIndex + 1}...`);
+
     const wrapper = document.createElement("div");
     wrapper.style.position = "fixed";
     wrapper.style.left = "-9999px";
@@ -66,11 +129,10 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     wrapper.style.zIndex = "-1";
     wrapper.style.overflow = "hidden";
 
-    // Copy all stylesheets to ensure Tailwind classes work
-    const styleSheets = document.querySelectorAll('style, link[rel="stylesheet"]');
-    styleSheets.forEach((sheet) => {
-      wrapper.appendChild(sheet.cloneNode(true));
-    });
+    // Inject all CSS as inline <style> so html-to-image can serialize it
+    const styleEl = document.createElement("style");
+    styleEl.textContent = gatherStyles();
+    wrapper.appendChild(styleEl);
 
     // Copy CSS variables from document
     const rootStyles = getComputedStyle(document.documentElement);
@@ -105,30 +167,50 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
           />
         </div>
       );
-      setTimeout(resolve, 800);
+      setTimeout(resolve, 1200);
     });
 
     // Wait for fonts
     await document.fonts.ready;
 
-    // Wait for all images to load
+    // Wait for all images to load with timeout
     const images = wrapper.querySelectorAll("img");
+    console.log(`[Export] Slide ${slideIndex + 1}: waiting for ${images.length} images...`);
+
     await Promise.all(
       Array.from(images).map(
         (img) =>
           new Promise<void>((resolve) => {
-            if (img.complete) { resolve(); return; }
-            img.onload = () => resolve();
-            img.onerror = () => resolve();
+            if (img.complete && img.naturalWidth > 0) {
+              console.log(`[Export] Image already loaded: ${img.src.substring(0, 60)}...`);
+              resolve();
+              return;
+            }
+            const timeout = setTimeout(() => {
+              console.warn(`[Export] Image load timeout: ${img.src.substring(0, 60)}...`);
+              resolve();
+            }, 5000);
+            img.onload = () => {
+              clearTimeout(timeout);
+              console.log(`[Export] Image loaded: ${img.src.substring(0, 60)}... (${img.naturalWidth}x${img.naturalHeight})`);
+              resolve();
+            };
+            img.onerror = () => {
+              clearTimeout(timeout);
+              console.error(`[Export] Image FAILED to load: ${img.src.substring(0, 60)}...`);
+              resolve();
+            };
           })
       )
     );
 
-    // Extra safety delay
-    await new Promise((r) => setTimeout(r, 300));
+    // Extra safety delay for rendering
+    await new Promise((r) => setTimeout(r, 500));
 
     const isDark = preparedCarousel.theme?.bgMode === "dark";
     const bgColor = isDark ? "#111" : "#f5f5f5";
+
+    console.log(`[Export] Capturing slide ${slideIndex + 1} with toPng...`);
 
     const dataUrl = await toPng(renderTarget, {
       width: 1080,
@@ -137,7 +219,10 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       cacheBust: true,
       backgroundColor: bgColor,
       skipAutoScale: true,
+      includeQueryParams: true,
     });
+
+    console.log(`[Export] Slide ${slideIndex + 1} captured, data URL length: ${dataUrl.length}`);
 
     root.unmount();
     document.body.removeChild(wrapper);
@@ -160,7 +245,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       URL.revokeObjectURL(url);
       toast.success(`Slide ${slideIndex + 1} baixado!`);
     } catch (e) {
-      console.error(e);
+      console.error("[Export] Error exporting single slide:", e);
       toast.error("Erro ao exportar slide");
     } finally {
       setExporting(false);
@@ -180,7 +265,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
           const blob = await renderSlideToBlob(prepared, i);
           zip.file(`slide-${i + 1}.png`, blob);
         } catch (err) {
-          console.error(`Erro no slide ${i + 1}:`, err);
+          console.error(`[Export] Erro no slide ${i + 1}:`, err);
           failed.push(i + 1);
         }
       }
@@ -201,7 +286,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
         toast.success("Carrossel exportado!");
       }
     } catch (e) {
-      console.error(e);
+      console.error("[Export] Error:", e);
       toast.error("Erro ao exportar carrossel");
     } finally {
       setExporting(false);
@@ -210,21 +295,19 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
 
   const downloadPdf = async () => {
     setExporting(true);
-    const TARGET_SIZE = 90 * 1024 * 1024; // 90MB target
+    const TARGET_SIZE = 90 * 1024 * 1024;
     try {
       toast.info("Preparando PDF em alta qualidade...");
       const prepared = await prepareCarouselForExport(carousel);
       const pageW = 210;
       const pageH = pageW * (1350 / 1080);
 
-      // Render all slides to PNG blobs first
       const slideBlobs: Blob[] = [];
       for (let i = 0; i < prepared.slides.length; i++) {
         toast.info(`Renderizando slide ${i + 1}/${prepared.slides.length}...`);
         slideBlobs.push(await renderSlideToBlob(prepared, i));
       }
 
-      // Convert blobs to canvases with white background
       const slideCanvases: HTMLCanvasElement[] = [];
       for (const blob of slideBlobs) {
         const imgBitmap = await createImageBitmap(blob);
@@ -239,7 +322,6 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
         slideCanvases.push(cvs);
       }
 
-      // Try quality from 1.0 down until PDF fits under target
       let quality = 1.0;
       let pdfBlob: Blob | null = null;
 
@@ -255,12 +337,9 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
 
         pdfBlob = pdf.output("blob");
         const sizeMB = pdfBlob.size / (1024 * 1024);
-        console.log(`PDF quality=${quality} → ${sizeMB.toFixed(1)}MB`);
+        console.log(`[Export] PDF quality=${quality} → ${sizeMB.toFixed(1)}MB`);
 
-        if (pdfBlob.size <= TARGET_SIZE) {
-          // If we have room and quality < 1, we found the sweet spot
-          break;
-        }
+        if (pdfBlob.size <= TARGET_SIZE) break;
         quality -= 0.05;
       }
 
@@ -275,7 +354,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       URL.revokeObjectURL(url);
       toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
     } catch (e) {
-      console.error(e);
+      console.error("[Export] PDF error:", e);
       toast.error("Erro ao exportar PDF");
     } finally {
       setExporting(false);
