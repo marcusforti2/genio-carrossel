@@ -173,10 +173,20 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       toast.info("Preparando imagens para export...");
       const prepared = await prepareCarouselForExport(carousel);
       const zip = new JSZip();
+      const failed: number[] = [];
       for (let i = 0; i < prepared.slides.length; i++) {
         toast.info(`Exportando slide ${i + 1}/${prepared.slides.length}...`);
-        const blob = await renderSlideToBlob(prepared, i);
-        zip.file(`slide-${i + 1}.png`, blob);
+        try {
+          const blob = await renderSlideToBlob(prepared, i);
+          zip.file(`slide-${i + 1}.png`, blob);
+        } catch (err) {
+          console.error(`Erro no slide ${i + 1}:`, err);
+          failed.push(i + 1);
+        }
+      }
+      if (Object.keys(zip.files).length === 0) {
+        toast.error("Nenhum slide foi exportado com sucesso.");
+        return;
       }
       const content = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(content);
@@ -185,7 +195,11 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       a.download = "carrossel.zip";
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Carrossel exportado!");
+      if (failed.length > 0) {
+        toast.warning(`Exportado com ${failed.length} slide(s) com erro: ${failed.join(", ")}`);
+      } else {
+        toast.success("Carrossel exportado!");
+      }
     } catch (e) {
       console.error(e);
       toast.error("Erro ao exportar carrossel");
