@@ -192,29 +192,18 @@ const LandingPage = () => {
             </p>
             <div className="rounded-2xl border border-border bg-card p-3 sm:p-5 shadow-2xl shadow-primary/5">
               <div className="grid grid-cols-4 gap-2 sm:gap-3">
-                {[
-                  { img: previewSlide1, title: "O custo de aquisição é sentença." },
-                  { img: previewSlide2, title: "Não venda preço. Venda retorno." },
-                  { img: previewSlide3, title: "Performance virou identidade." },
-                  { img: previewSlide4, title: "Arrasta e descobre." },
-                ].map((s, i) => (
+                {[previewSlide1, previewSlide2, previewSlide3, previewSlide4].map((img, i) => (
                   <div
                     key={i}
                     className="rounded-lg overflow-hidden relative group"
                     style={{ aspectRatio: "4/5" }}
                   >
                     <img
-                      src={s.img}
-                      alt={s.title}
+                      src={img}
+                      alt={`Exemplo de slide ${i + 1}`}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-                      <p className="text-[10px] sm:text-xs font-bold leading-tight text-white">
-                        {s.title}
-                      </p>
-                    </div>
                   </div>
                 ))}
               </div>
