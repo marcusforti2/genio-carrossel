@@ -323,18 +323,19 @@ const SlideDesignOverrides = ({ slide, onUpdate, carousel }: { slide: SlideData;
       {/* Template */}
       <div className="space-y-1.5">
         <Label className="text-[10px] text-muted-foreground/70">Template</Label>
-        <div className="flex gap-1.5">
+        <div className="space-y-1.5">
           {DESIGN_TEMPLATES.map((t) => (
             <button
               key={t.id}
               onClick={() => updateOverride({ template: t.id })}
-              className={`flex-1 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+              className={`w-full text-left p-2.5 rounded-md border transition-all ${
                 effectiveTemplate === t.id
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                  ? "border-primary bg-primary/10"
+                  : "border-border bg-secondary hover:border-muted-foreground/30"
               } ${so.template === t.id ? "ring-1 ring-primary/50" : ""}`}
             >
-              {t.name}
+              <p className={`text-[11px] font-bold ${effectiveTemplate === t.id ? "text-primary" : "text-foreground"}`}>{t.name}</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{t.description}</p>
             </button>
           ))}
         </div>
