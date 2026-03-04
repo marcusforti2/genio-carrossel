@@ -86,6 +86,7 @@ const RealisticSlidePreview = ({
         template,
         fontFamily,
         titleSize,
+        bodySize: "medio",
       },
     }),
     [accentColor, avatarUrl, bgMode, fontFamily, previewSlides, profileHandle, profileName, template, titleSize],

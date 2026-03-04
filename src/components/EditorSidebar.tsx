@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride, SlideBgStyle } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, BODY_SIZES, DesignStyle, SlideStyleOverride, SlideBgStyle } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -493,11 +493,11 @@ const EditorSidebar = ({
   };
 
   const updateDesignStyle = (partial: Partial<DesignStyle>) => {
-    const current = carousel.designStyle || { template: "editorial" as const, fontFamily: "serif" as const, titleSize: "grande" as const };
+    const current = carousel.designStyle || { template: "editorial" as const, fontFamily: "serif" as const, titleSize: "grande" as const, bodySize: "medio" as const };
     onUpdateCarousel({ ...carousel, designStyle: { ...current, ...partial } });
   };
 
-  const ds = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
+  const ds = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande", bodySize: "medio" };
 
   return (
     <div className="h-full flex flex-col bg-card border-r border-border">
@@ -600,6 +600,28 @@ const EditorSidebar = ({
                     onClick={() => updateDesignStyle({ titleSize: s.id })}
                     className={`flex-1 py-2.5 rounded-lg border-2 transition-all text-xs font-semibold ${
                       ds.titleSize === s.id
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Body Size */}
+            <div className="space-y-3">
+              <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <ALargeSmall className="w-3.5 h-3.5" /> Texto do corpo
+              </Label>
+              <div className="flex gap-2">
+                {BODY_SIZES.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => updateDesignStyle({ bodySize: s.id })}
+                    className={`flex-1 py-2.5 rounded-lg border-2 transition-all text-xs font-semibold ${
+                      (ds.bodySize || "medio") === s.id
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
                     }`}

@@ -28,11 +28,13 @@ export interface SlideData {
 export type DesignTemplate = "editorial" | "moderno" | "bold" | "minimal";
 export type FontFamily = "serif" | "sans";
 export type TitleSize = "normal" | "grande" | "impacto";
+export type BodySize = "pequeno" | "medio" | "grande";
 
 export interface DesignStyle {
   template: DesignTemplate;
   fontFamily: FontFamily;
   titleSize: TitleSize;
+  bodySize: BodySize;
 }
 
 export const DESIGN_TEMPLATES: { id: DesignTemplate; name: string; description: string }[] = [
@@ -51,6 +53,12 @@ export const TITLE_SIZES: { id: TitleSize; name: string }[] = [
   { id: "normal", name: "Normal" },
   { id: "grande", name: "Grande" },
   { id: "impacto", name: "Impacto" },
+];
+
+export const BODY_SIZES: { id: BodySize; name: string }[] = [
+  { id: "pequeno", name: "Pequeno" },
+  { id: "medio", name: "Médio" },
+  { id: "grande", name: "Grande" },
 ];
 
 export interface CarouselTheme {
@@ -112,6 +120,7 @@ export const createDefaultCarousel = (): CarouselData => ({
     template: "editorial",
     fontFamily: "serif",
     titleSize: "grande",
+    bodySize: "medio",
   },
   slides: [
     {
