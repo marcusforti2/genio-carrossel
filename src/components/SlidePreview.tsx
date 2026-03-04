@@ -275,22 +275,22 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodySc
         {slide.title}
       </h2>
 
+      {slide.body && hasImg && (
+        <p style={{ fontSize: bodyFs, lineHeight: 1.45, fontWeight: 700, color: styles.title, marginTop: 32, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {slide.body}
+        </p>
+      )}
+
       {hasImg && (
-        <div style={{ marginTop: "auto", paddingTop: 40, flexShrink: 0 }}>
+        <div style={{ flex: 1, minHeight: 120, paddingTop: 32, overflow: "hidden" }}>
           {slide.imageLoading ? (
-            <div style={{ width: "100%", aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", height: "100%", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12 }} />
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
-      )}
-
-      {slide.body && hasImg && (
-        <p style={{ fontSize: bodyFs, lineHeight: 1.45, fontWeight: 700, color: styles.title, marginTop: 40, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {slide.body}
-        </p>
       )}
 
       <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
@@ -317,13 +317,13 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
       )}
 
       {hasImg && (
-        <div style={{ marginTop: "auto", paddingTop: 40 }}>
+        <div style={{ flex: 1, minHeight: 120, paddingTop: 32, overflow: "hidden" }}>
           {slide.imageLoading ? (
-            <div style={{ width: "100%", aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", height: "100%", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/10", objectFit: "cover", borderRadius: 12 }} />
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
@@ -361,13 +361,13 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
       </div>
 
       {hasImg && (
-        <div style={{ flexShrink: 0, paddingTop: 28 }}>
+        <div style={{ flex: "0 1 auto", minHeight: 120, paddingTop: 28, overflow: "hidden" }}>
           {slide.imageLoading ? (
-            <div style={{ width: "100%", aspectRatio: "16/9", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", height: "100%", minHeight: 120, background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", borderRadius: 12 }} />
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", maxHeight: 450, objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
@@ -400,13 +400,13 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
         )}
 
         {hasImg && (
-          <div style={{ marginTop: 48, width: "80%" }}>
+          <div style={{ marginTop: 40, width: "80%", flex: "0 1 auto", minHeight: 100, overflow: "hidden" }}>
             {slide.imageLoading ? (
-              <div style={{ width: "100%", aspectRatio: "1/1", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", height: "100%", minHeight: 100, background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
               </div>
             ) : (
-              <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: "50%" }} />
+              <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "1/1", maxHeight: 380, objectFit: "cover", borderRadius: "50%" }} />
             )}
           </div>
         )}
