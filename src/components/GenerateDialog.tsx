@@ -70,34 +70,44 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile data for realistic preview
-  const [profileData, setProfileData] = useState<{ name: string; handle: string; avatar: string }>({ name: "", handle: "", avatar: "" });
-  const [sampleImage, setSampleImage] = useState<string | undefined>();
+  const [profileData, setProfileData] = useState<{ name: string; handle: string; avatar: string; niche?: string }>({
+    name: "",
+    handle: "",
+    avatar: "",
+    niche: "",
+  });
+  const [sampleImages, setSampleImages] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user || !open) return;
+
     (async () => {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("display_name, handle, avatar_url")
+        .select("display_name, handle, avatar_url, niche")
         .eq("user_id", user.id)
         .single();
+
       if (profile) {
         setProfileData({
           name: profile.display_name || "",
           handle: profile.handle || "",
           avatar: profile.avatar_url || "",
+          niche: profile.niche || "",
         });
       }
-      // Fetch a sample image
+
       try {
+        const query = (profile?.niche || "business professional workspace").slice(0, 80);
         const { data } = await supabase.functions.invoke("search-pexels", {
-          body: { query: "business professional", perPage: 5 },
+          body: { query, perPage: 6 },
         });
-        if (data?.photos?.length) {
-          const photo = data.photos[Math.floor(Math.random() * data.photos.length)];
-          setSampleImage(photo.url);
-        }
-      } catch {}
+
+        const urls = (data?.photos || []).map((p: any) => p.url).filter(Boolean);
+        setSampleImages(urls.slice(0, 3));
+      } catch {
+        setSampleImages([]);
+      }
     })();
   }, [user, open]);
 
@@ -223,7 +233,8 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                 template={template} fontFamily={fontFamily} titleSize={titleSize}
                 bgMode={bgMode} accentColor={accentColor}
                 profileName={profileData.name} profileHandle={profileData.handle}
-                avatarUrl={profileData.avatar} sampleImageUrl={uploadedImages[0] || sampleImage}
+                avatarUrl={profileData.avatar}
+                sampleImageUrls={uploadedImages.length ? uploadedImages : sampleImages}
               />
             </div>
             <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
@@ -250,7 +261,8 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                   template={template} fontFamily={fontFamily} titleSize={titleSize}
                   bgMode={bgMode} accentColor={accentColor}
                   profileName={profileData.name} profileHandle={profileData.handle}
-                  avatarUrl={profileData.avatar} sampleImageUrl={uploadedImages[0] || sampleImage}
+                  avatarUrl={profileData.avatar}
+                  sampleImageUrls={uploadedImages.length ? uploadedImages : sampleImages}
                 />
               </div>
             </div>
