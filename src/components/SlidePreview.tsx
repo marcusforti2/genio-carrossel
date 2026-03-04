@@ -162,49 +162,52 @@ interface TemplateProps {
    ═══════════════════════════════════════════ */
 const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative", zIndex: 2 }}>
-      <div style={{ padding: "0 75px 55px", display: "flex", flexDirection: "column", gap: 0 }}>
-        {/* Accent bar — like text-only slides */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 36, flexShrink: 0 }}>
-          <div style={{ width: 50, height: 7, borderRadius: 999, background: styles.accent }} />
-          <div style={{ width: 20, height: 7, borderRadius: 999, background: "rgba(255,255,255,0.25)" }} />
-        </div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative", zIndex: 2, padding: "150px 75px 55px" }}>
+      {/* Spacer to push content toward center-bottom */}
+      <div style={{ flex: 1 }} />
 
-        <h2 style={{
-          fontSize: 72 * titleScale,
-          fontWeight: 900,
-          lineHeight: 1.06,
-          color: "white",
+      {/* Accent bar */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 36, flexShrink: 0 }}>
+        <div style={{ width: 50, height: 7, borderRadius: 999, background: styles.accent }} />
+        <div style={{ width: 20, height: 7, borderRadius: 999, background: "rgba(255,255,255,0.25)" }} />
+      </div>
+
+      <h2 style={{
+        fontSize: 72 * titleScale,
+        fontWeight: 900,
+        lineHeight: 1.06,
+        color: "white",
+        fontFamily: fontFam,
+        WebkitLineClamp: 5,
+        display: "-webkit-box",
+        WebkitBoxOrient: "vertical",
+        overflow: "hidden",
+        textShadow: "0 4px 30px rgba(0,0,0,0.6)",
+        letterSpacing: "-0.01em",
+        flexShrink: 0,
+      }}>
+        {slide.title}
+      </h2>
+
+      {slide.body && (
+        <p style={{
+          fontSize: 32,
+          lineHeight: 1.6,
+          color: "rgba(255,255,255,0.82)",
+          marginTop: 32,
           fontFamily: fontFam,
-          WebkitLineClamp: 5,
+          WebkitLineClamp: 6,
           display: "-webkit-box",
           WebkitBoxOrient: "vertical",
           overflow: "hidden",
-          textShadow: "0 4px 30px rgba(0,0,0,0.6)",
-          letterSpacing: "-0.01em",
+          textShadow: "0 2px 12px rgba(0,0,0,0.5)",
+          flexShrink: 0,
         }}>
-          {slide.title}
-        </h2>
+          {slide.body}
+        </p>
+      )}
 
-        {slide.body && (
-          <p style={{
-            fontSize: 32,
-            lineHeight: 1.6,
-            color: "rgba(255,255,255,0.82)",
-            marginTop: 32,
-            fontFamily: fontFam,
-            WebkitLineClamp: 6,
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            textShadow: "0 2px 12px rgba(0,0,0,0.5)",
-          }}>
-            {slide.body}
-          </p>
-        )}
-
-        <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors />
-      </div>
+      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors />
     </div>
   );
 };
