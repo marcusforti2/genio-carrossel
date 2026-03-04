@@ -1,4 +1,5 @@
 export type CtaBgStyle = "theme" | "accent" | "image";
+export type SlideBgStyle = "theme" | "color" | "fullimage";
 
 export interface SlideStyleOverride {
   template?: DesignTemplate;
@@ -8,6 +9,8 @@ export interface SlideStyleOverride {
   accentColor?: string;
   accentName?: string;
   ctaBgStyle?: CtaBgStyle;
+  bgStyle?: SlideBgStyle;
+  bgColor?: string;
 }
 
 export interface SlideData {
