@@ -196,18 +196,23 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
 
   const downloadPdf = async () => {
     setExporting(true);
+    const TARGET_SIZE = 90 * 1024 * 1024; // 90MB target
     try {
-      toast.info("Preparando PDF...");
+      toast.info("Preparando PDF em alta qualidade...");
       const prepared = await prepareCarouselForExport(carousel);
-      // 1080x1350 slide ratio → PDF page in mm (portrait)
-      const pageW = 210; // A4 width mm
-      const pageH = pageW * (1350 / 1080); // keep aspect ratio
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, pageH], compress: true });
+      const pageW = 210;
+      const pageH = pageW * (1350 / 1080);
 
+      // Render all slides to PNG blobs first
+      const slideBlobs: Blob[] = [];
       for (let i = 0; i < prepared.slides.length; i++) {
         toast.info(`Renderizando slide ${i + 1}/${prepared.slides.length}...`);
-        const blob = await renderSlideToBlob(prepared, i);
-        // Convert to JPEG for smaller PDF (LinkedIn < 100MB) - high quality
+        slideBlobs.push(await renderSlideToBlob(prepared, i));
+      }
+
+      // Convert blobs to canvases with white background
+      const slideCanvases: HTMLCanvasElement[] = [];
+      for (const blob of slideBlobs) {
         const imgBitmap = await createImageBitmap(blob);
         const cvs = document.createElement("canvas");
         cvs.width = imgBitmap.width;
@@ -216,15 +221,45 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, cvs.width, cvs.height);
         ctx.drawImage(imgBitmap, 0, 0);
-        const jpegDataUrl = cvs.toDataURL("image/jpeg", 0.95);
         imgBitmap.close();
-
-        if (i > 0) pdf.addPage([pageW, pageH]);
-        pdf.addImage(jpegDataUrl, "JPEG", 0, 0, pageW, pageH);
+        slideCanvases.push(cvs);
       }
 
-      pdf.save("carrossel.pdf");
-      toast.success("PDF exportado!");
+      // Try quality from 1.0 down until PDF fits under target
+      let quality = 1.0;
+      let pdfBlob: Blob | null = null;
+
+      while (quality >= 0.5) {
+        toast.info(`Gerando PDF (qualidade ${Math.round(quality * 100)}%)...`);
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, pageH], compress: true });
+
+        for (let i = 0; i < slideCanvases.length; i++) {
+          const jpegDataUrl = slideCanvases[i].toDataURL("image/jpeg", quality);
+          if (i > 0) pdf.addPage([pageW, pageH]);
+          pdf.addImage(jpegDataUrl, "JPEG", 0, 0, pageW, pageH);
+        }
+
+        pdfBlob = pdf.output("blob");
+        const sizeMB = pdfBlob.size / (1024 * 1024);
+        console.log(`PDF quality=${quality} → ${sizeMB.toFixed(1)}MB`);
+
+        if (pdfBlob.size <= TARGET_SIZE) {
+          // If we have room and quality < 1, we found the sweet spot
+          break;
+        }
+        quality -= 0.05;
+      }
+
+      if (!pdfBlob) throw new Error("Falha ao gerar PDF");
+
+      const sizeMB = (pdfBlob.size / (1024 * 1024)).toFixed(1);
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "carrossel.pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
     } catch (e) {
       console.error(e);
       toast.error("Erro ao exportar PDF");
