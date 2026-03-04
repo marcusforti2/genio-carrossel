@@ -113,164 +113,179 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border sm:max-w-lg max-w-[95vw] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-display flex items-center gap-2 text-sm sm:text-base">
-            <Sparkles className="w-5 h-5 text-primary" />
-            Gerar Carrossel com IA
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-5 pt-2">
-          {/* Topic */}
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Tema / Ideia</Label>
-            <Input
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="Ex: Como o LinkedIn cria profissionais culpados..."
-              className="bg-secondary border-border/50"
-            />
-          </div>
-
-          {/* Narrative style */}
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Estilo de narrativa</Label>
-            <Select value={style} onValueChange={setStyle}>
-              <SelectTrigger className="bg-secondary border-border/50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tribunal">⚖️ Tribunal — Julgar e provocar</SelectItem>
-                <SelectItem value="opinião">🔥 Opinião — Polêmico e direto</SelectItem>
-                <SelectItem value="informativo">📊 Informativo — Educar com personalidade</SelectItem>
-                <SelectItem value="sacada">💡 Sacada — Insights rápidos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Slide count */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs text-muted-foreground">Número de slides</Label>
-              <span className="text-xs font-bold text-primary">{slideCount[0]}</span>
+      <DialogContent className="bg-card border-border sm:max-w-2xl max-w-[95vw] max-h-[90vh] overflow-y-auto p-0">
+        <div className="flex flex-col sm:flex-row">
+          {/* Left: Live preview */}
+          <div className="hidden sm:flex sm:w-[220px] shrink-0 bg-secondary/30 border-r border-border p-6 flex-col items-center justify-center gap-4">
+            <div className="w-full max-w-[180px]">
+              <MiniSlidePreview template={template} fontFamily={fontFamily} titleSize={titleSize} />
             </div>
-            <Slider value={slideCount} onValueChange={setSlideCount} min={3} max={11} step={1} className="py-2" />
+            <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
+              Preview em tempo real do estilo selecionado
+            </p>
           </div>
 
-          {/* Design section divider */}
-          <div className="border-t border-border pt-4">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="flex-1">
-                <p className="text-xs font-bold text-foreground mb-1 flex items-center gap-1.5">
-                  <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
-                  Design do Carrossel
-                </p>
-                <p className="text-[10px] text-muted-foreground">Escolha o estilo visual</p>
-              </div>
-              <div className="w-20 shrink-0">
+          {/* Right: Form */}
+          <div className="flex-1 p-5 sm:p-6 space-y-5">
+            <DialogHeader className="p-0">
+              <DialogTitle className="font-display flex items-center gap-2 text-sm sm:text-base">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Criar novo carrossel
+              </DialogTitle>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Configure o conteúdo e design, a IA faz o resto.
+              </p>
+            </DialogHeader>
+
+            {/* Mobile preview */}
+            <div className="sm:hidden flex justify-center">
+              <div className="w-24">
                 <MiniSlidePreview template={template} fontFamily={fontFamily} titleSize={titleSize} />
               </div>
             </div>
 
-            {/* Template */}
-            <div className="space-y-2 mb-4">
-              <Label className="text-[11px] text-muted-foreground">Template</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {DESIGN_TEMPLATES.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTemplate(t.id)}
-                    className={`p-2.5 rounded-lg border-2 transition-all text-left ${
-                      template === t.id
-                        ? "border-primary bg-primary/10"
-                        : "border-border bg-secondary hover:border-muted-foreground/30"
-                    }`}
-                  >
-                    <p className={`text-[11px] font-bold ${template === t.id ? "text-primary" : "text-foreground"}`}>
-                      {t.name}
-                    </p>
-                    <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-2">{t.description}</p>
-                  </button>
-                ))}
+            {/* Topic */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Tema / Ideia</Label>
+              <Input
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="Ex: Como o LinkedIn cria profissionais culpados..."
+                className="bg-secondary border-border/50"
+              />
+            </div>
+
+            {/* Narrative style + Slide count row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">Estilo de narrativa</Label>
+                <Select value={style} onValueChange={setStyle}>
+                  <SelectTrigger className="bg-secondary border-border/50">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tribunal">⚖️ Tribunal</SelectItem>
+                    <SelectItem value="opinião">🔥 Opinião</SelectItem>
+                    <SelectItem value="informativo">📊 Informativo</SelectItem>
+                    <SelectItem value="sacada">💡 Sacada</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground">Slides</Label>
+                  <span className="text-xs font-bold text-primary">{slideCount[0]}</span>
+                </div>
+                <Slider value={slideCount} onValueChange={setSlideCount} min={3} max={11} step={1} className="py-2" />
               </div>
             </div>
 
-            {/* Font + Size row */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Font Family */}
-              <div className="space-y-2">
-                <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <Type className="w-3 h-3" /> Fonte
-                </Label>
-                <div className="flex gap-1.5">
-                  {FONT_FAMILIES.map((f) => (
+            {/* Design section */}
+            <div className="border-t border-border pt-4">
+              <p className="text-xs font-bold text-foreground mb-3 flex items-center gap-1.5">
+                <LayoutTemplate className="w-3.5 h-3.5 text-primary" />
+                Design do Carrossel
+              </p>
+
+              {/* Template */}
+              <div className="space-y-2 mb-4">
+                <Label className="text-[11px] text-muted-foreground">Template</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {DESIGN_TEMPLATES.map((t) => (
                     <button
-                      key={f.id}
-                      onClick={() => setFontFamily(f.id)}
-                      className={`flex-1 py-2 rounded-lg border-2 transition-all text-center ${
-                        fontFamily === f.id
+                      key={t.id}
+                      onClick={() => setTemplate(t.id)}
+                      className={`p-2.5 rounded-lg border-2 transition-all text-left ${
+                        template === t.id
                           ? "border-primary bg-primary/10"
                           : "border-border bg-secondary hover:border-muted-foreground/30"
                       }`}
                     >
-                      <p
-                        className="text-sm font-bold"
-                        style={{
-                          fontFamily: f.id === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif",
-                          color: fontFamily === f.id ? "hsl(var(--primary))" : "hsl(var(--foreground))",
-                        }}
-                      >
-                        Aa
+                      <p className={`text-[11px] font-bold ${template === t.id ? "text-primary" : "text-foreground"}`}>
+                        {t.name}
                       </p>
-                      <p className="text-[9px] text-muted-foreground">{f.name}</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-2">{t.description}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Title Size */}
-              <div className="space-y-2">
-                <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <ALargeSmall className="w-3 h-3" /> Tamanho
-                </Label>
-                <div className="flex flex-col gap-1">
-                  {TITLE_SIZES.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => setTitleSize(s.id)}
-                      className={`py-1.5 px-2 rounded-md border transition-all text-[10px] font-semibold text-left ${
-                        titleSize === s.id
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
-                      }`}
-                    >
-                      {s.name}
-                    </button>
-                  ))}
+              {/* Font + Size row */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Font Family */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <Type className="w-3 h-3" /> Fonte
+                  </Label>
+                  <div className="flex gap-1.5">
+                    {FONT_FAMILIES.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => setFontFamily(f.id)}
+                        className={`flex-1 py-2 rounded-lg border-2 transition-all text-center ${
+                          fontFamily === f.id
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-secondary hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        <p
+                          className="text-sm font-bold"
+                          style={{
+                            fontFamily: f.id === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif",
+                            color: fontFamily === f.id ? "hsl(var(--primary))" : "hsl(var(--foreground))",
+                          }}
+                        >
+                          Aa
+                        </p>
+                        <p className="text-[9px] text-muted-foreground">{f.name}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Title Size */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <ALargeSmall className="w-3 h-3" /> Tamanho
+                  </Label>
+                  <div className="flex flex-col gap-1">
+                    {TITLE_SIZES.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setTitleSize(s.id)}
+                        className={`py-1.5 px-2 rounded-md border transition-all text-[10px] font-semibold text-left ${
+                          titleSize === s.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        {s.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Generate button */}
+            <Button onClick={handleGenerate} disabled={loading || !topic.trim()} className="w-full gap-2 h-11">
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {loadingStatus || "Gerando..."}
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Gerar Carrossel
+                </>
+              )}
+            </Button>
+
+            <p className="text-[10px] text-muted-foreground/60 text-center">
+              A IA gera o conteúdo e busca fotos reais automaticamente.
+            </p>
           </div>
-
-          {/* Generate button */}
-          <Button onClick={handleGenerate} disabled={loading || !topic.trim()} className="w-full gap-2">
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {loadingStatus || "Gerando..."}
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                Gerar Carrossel
-              </>
-            )}
-          </Button>
-
-          <p className="text-[10px] text-muted-foreground/60 text-center">
-            A IA gera o conteúdo e busca fotos reais automaticamente.
-          </p>
         </div>
       </DialogContent>
     </Dialog>
