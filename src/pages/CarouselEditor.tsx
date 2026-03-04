@@ -120,8 +120,13 @@ const CarouselEditor = () => {
     setSelectedSlide(carousel.slides.length);
   };
 
-  const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any) => {
-    setCarousel({ ...carousel, slides, ...(designStyle ? { designStyle } : {}) });
+  const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
+    setCarousel({
+      ...carousel,
+      slides,
+      ...(designStyle ? { designStyle } : {}),
+      ...(theme ? { theme } : {}),
+    });
     setSelectedSlide(0);
     setCaption(newCaption);
   };
@@ -406,6 +411,7 @@ const CarouselEditor = () => {
         onOpenChange={setGenerateOpen}
         onGenerated={handleAIGenerated}
         currentDesignStyle={carousel.designStyle}
+        currentTheme={carousel.theme}
       />
     </div>
   );
