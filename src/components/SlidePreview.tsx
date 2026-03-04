@@ -87,9 +87,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const isColorBg = bgStyle === "color";
   const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
   
-  // For fullimage, determine text readability
-  const fullImageTextColor = "hsl(0 0% 100%)";
-  const fullImageBodyColor = "hsla(0, 0%, 100%, 0.75)";
+  // When color or fullimage mode, force text-only layout in templates
+  const forceTextOnly = bgStyle === "color" || bgStyle === "fullimage";
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
@@ -132,13 +131,13 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
         ) : slide.type === "cta" ? (
           <CtaSlide {...shared} />
         ) : isFullImage ? (
-          <FullImageContent {...shared} fullImageTextColor={fullImageTextColor} fullImageBodyColor={fullImageBodyColor} />
+          <FullImageContent {...shared} />
         ) : ds.template === "editorial" ? (
-          <EditorialContent {...shared} />
+          <EditorialContent {...shared} forceTextOnly={forceTextOnly} />
         ) : ds.template === "bold" ? (
-          <BoldContent {...shared} />
+          <BoldContent {...shared} forceTextOnly={forceTextOnly} />
         ) : (
-          <ModernoContent {...shared} />
+          <ModernoContent {...shared} forceTextOnly={forceTextOnly} />
         )}
       </div>
     </div>
@@ -155,12 +154,13 @@ interface TemplateProps {
   Avatar: React.FC;
   footerHandle: string;
   footerBranding: string;
+  forceTextOnly?: boolean;
 }
 
 /* ═══════════════════════════════════════════
    FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
    ═══════════════════════════════════════════ */
-const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps & { fullImageTextColor: string; fullImageBodyColor: string }) => {
+const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative", zIndex: 2 }}>
       <div style={{ padding: "0 75px 55px", display: "flex", flexDirection: "column", gap: 0 }}>
@@ -241,8 +241,8 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
 /* ═══════════════════════════════════════════
    EDITORIAL TEMPLATE
    ═══════════════════════════════════════════ */
-const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
-  const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
+const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const titleFs = isTextOnly ? 76 * titleScale : 56 * titleScale;
   const bodyFs = isTextOnly ? 36 : 34;
@@ -302,45 +302,49 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footer
 /* ═══════════════════════════════════════════
    MODERNO TEMPLATE
    ═══════════════════════════════════════════ */
-const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => (
-  <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "160px 75px 55px", overflow: "hidden" }}>
-    <h2 style={{ fontSize: 52 * titleScale, fontWeight: 800, lineHeight: 1.18, color: styles.title, fontFamily: fontFam, marginBottom: 28, flexShrink: 0, WebkitLineClamp: 3, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-      {slide.title}
-    </h2>
+const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
 
-    {slide.body && (
-      <p style={{ fontSize: 32, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-        {slide.body}
-      </p>
-    )}
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "160px 75px 55px", overflow: "hidden" }}>
+      <h2 style={{ fontSize: 52 * titleScale, fontWeight: 800, lineHeight: 1.18, color: styles.title, fontFamily: fontFam, marginBottom: 28, flexShrink: 0, WebkitLineClamp: 3, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        {slide.title}
+      </h2>
 
-    {slide.hasImage && (slide.imageUrl || slide.imageLoading) && (
-      <div style={{ marginTop: "auto", paddingTop: 40 }}>
-        {slide.imageLoading ? (
-          <div style={{ width: "100%", aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
-          </div>
-        ) : (
-          <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/10", objectFit: "cover", borderRadius: 12 }} />
-        )}
-      </div>
-    )}
+      {slide.body && (
+        <p style={{ fontSize: 32, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {slide.body}
+        </p>
+      )}
 
-    {!slide.hasImage && !slide.imageUrl && (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ width: 120, height: 8, borderRadius: 999, background: styles.accent }} />
-      </div>
-    )}
+      {hasImg && (
+        <div style={{ marginTop: "auto", paddingTop: 40 }}>
+          {slide.imageLoading ? (
+            <div style={{ width: "100%", aspectRatio: "16/10", background: styles.mutedBg, border: `1px solid ${styles.borderLight}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
+            </div>
+          ) : (
+            <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "16/10", objectFit: "cover", borderRadius: 12 }} />
+          )}
+        </div>
+      )}
 
-    <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
-  </div>
-);
+      {!hasImg && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div style={{ width: 120, height: 8, borderRadius: 999, background: styles.accent }} />
+        </div>
+      )}
+
+      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} />
+    </div>
+  );
+};
 
 /* ═══════════════════════════════════════════
    BOLD TEMPLATE
    ═══════════════════════════════════════════ */
-const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
-  const hasImg = slide.hasImage && (slide.imageUrl || slide.imageLoading);
+const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const bg = isTextOnly ? styles.accent : styles.bg;
 
