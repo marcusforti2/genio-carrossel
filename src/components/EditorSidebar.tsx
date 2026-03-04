@@ -138,31 +138,63 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         </div>
       )}
 
-      {/* CTA background style */}
-      {slide.type === "cta" && (
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Fundo do CTA</Label>
-          <div className="flex gap-1.5">
-            {([
-              { id: "theme" as const, label: "Tema" },
-              { id: "accent" as const, label: "Cor destaque" },
-              { id: "image" as const, label: "Imagem" },
-            ]).map((opt) => (
+      {/* Background style for all slides */}
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Fundo do slide</Label>
+        <div className="flex gap-1.5">
+          {([
+            { id: "theme" as const, label: "Tema" },
+            { id: "color" as const, label: "Cor sólida" },
+            { id: "fullimage" as const, label: "Imagem cheia" },
+          ] as { id: SlideBgStyle; label: string }[]).map((opt) => (
+            <button
+              key={opt.id}
+              onClick={() => onUpdate({ ...slide, styleOverride: { ...slide.styleOverride, bgStyle: opt.id } })}
+              className={`flex-1 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+                (slide.styleOverride?.bgStyle || "theme") === opt.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Color presets when "Cor sólida" is selected */}
+        {slide.styleOverride?.bgStyle === "color" && (
+          <div className="grid grid-cols-5 gap-1.5 pt-1">
+            {[
+              { name: "Preto", color: "0 0% 8%" },
+              { name: "Marinho", color: "220 30% 12%" },
+              { name: "Cinza", color: "0 0% 20%" },
+              { name: "Creme", color: "40 30% 90%" },
+              { name: "Branco", color: "0 0% 98%" },
+              ...ACCENT_PRESETS.slice(0, 5),
+            ].map((c) => (
               <button
-                key={opt.id}
-                onClick={() => onUpdate({ ...slide, styleOverride: { ...slide.styleOverride, ctaBgStyle: opt.id } })}
-                className={`flex-1 py-2 rounded-md border transition-all text-[10px] font-semibold ${
-                  (slide.styleOverride?.ctaBgStyle || "theme") === opt.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                key={c.name}
+                onClick={() => onUpdate({ ...slide, styleOverride: { ...slide.styleOverride, bgStyle: "color", bgColor: c.color } })}
+                className={`flex flex-col items-center gap-1 py-1.5 rounded-md border transition-all ${
+                  slide.styleOverride?.bgColor === c.color
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-muted-foreground/30"
                 }`}
               >
-                {opt.label}
+                <div className="w-5 h-5 rounded-full border border-border/50" style={{ background: `hsl(${c.color})` }} />
+                <span className="text-[8px] text-muted-foreground">{c.name}</span>
               </button>
             ))}
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Hint for fullimage mode */}
+        {slide.styleOverride?.bgStyle === "fullimage" && !slide.imageUrl && (
+          <p className="text-[9px] text-muted-foreground/70 pt-1">
+            Adicione uma imagem ao slide para usar como fundo em tela cheia.
+          </p>
+        )}
+      </div>
 
       <div className="flex items-center justify-between py-1">
         <Label className="text-xs text-muted-foreground">Com imagem</Label>
