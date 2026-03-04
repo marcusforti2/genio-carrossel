@@ -30,7 +30,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
   const isCover = slide.type === "cover";
   const globalTheme = carousel.theme || { bgMode: "dark" as const, accentColor: "1 83% 55%", accentName: "Vermelho" };
-  const globalDs: DesignStyle = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande" };
+  const globalDs: DesignStyle = carousel.designStyle || { template: "editorial", fontFamily: "serif", titleSize: "grande", bodySize: "medio" };
 
   // Merge per-slide overrides
   const so = slide.styleOverride || {};
@@ -43,10 +43,12 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
     template: so.template ?? globalDs.template,
     fontFamily: so.fontFamily ?? globalDs.fontFamily,
     titleSize: so.titleSize ?? globalDs.titleSize,
+    bodySize: globalDs.bodySize ?? "medio",
   };
 
   const fontFam = ds.fontFamily === "serif" ? "'Playfair Display', serif" : "'Inter', sans-serif";
   const titleScale = ds.titleSize === "impacto" ? 1.35 : ds.titleSize === "grande" ? 1.15 : 1;
+  const bodyScale = ds.bodySize === "grande" ? 1.3 : ds.bodySize === "medio" ? 1 : 0.8;
 
   const styles = useMemo(() => {
     const isDark = theme.bgMode === "dark";
@@ -79,7 +81,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const footerHandle = carousel.profileHandle || "";
   const footerBranding = carousel.brandingText || "";
 
-  const shared = { slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding };
+  const shared = { slide, carousel, styles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
 
   // Determine background style
   const bgStyle = so.bgStyle || "theme";
@@ -151,6 +153,7 @@ interface TemplateProps {
   styles: Record<string, string>;
   fontFam: string;
   titleScale: number;
+  bodyScale: number;
   Avatar: React.FC;
   footerHandle: string;
   footerBranding: string;
@@ -160,7 +163,7 @@ interface TemplateProps {
 /* ═══════════════════════════════════════════
    FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
    ═══════════════════════════════════════════ */
-const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footerHandle, footerBranding }: TemplateProps) => {
+const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, bodyScale, footerHandle, footerBranding }: TemplateProps) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", position: "relative", zIndex: 2, padding: "150px 65px 55px", overflow: "hidden" }}>
       {/* Accent bar */}
@@ -184,7 +187,7 @@ const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, footer
 
         {slide.body && (
           <p style={{
-            fontSize: 36,
+            fontSize: 36 * bodyScale,
             lineHeight: 1.55,
             color: "rgba(255,255,255,0.85)",
             marginTop: 48,
@@ -237,11 +240,11 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
 /* ═══════════════════════════════════════════
    EDITORIAL TEMPLATE
    ═══════════════════════════════════════════ */
-const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const titleFs = isTextOnly ? 76 * titleScale : 56 * titleScale;
-  const bodyFs = isTextOnly ? 36 : 34;
+  const bodyFs = (isTextOnly ? 36 : 34) * bodyScale;
 
   if (isTextOnly) {
     return (
@@ -298,7 +301,7 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, footer
 /* ═══════════════════════════════════════════
    MODERNO TEMPLATE
    ═══════════════════════════════════════════ */
-const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
 
   return (
@@ -308,7 +311,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
       </h2>
 
       {slide.body && (
-        <p style={{ fontSize: 32, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        <p style={{ fontSize: 32 * bodyScale, lineHeight: 1.6, color: styles.body, fontFamily: fontFam, flexShrink: 0, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.body}
         </p>
       )}
@@ -339,7 +342,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
 /* ═══════════════════════════════════════════
    BOLD TEMPLATE
    ═══════════════════════════════════════════ */
-const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const bg = (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
@@ -351,7 +354,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandl
           {slide.title}
         </h2>
         {slide.body && (
-          <p style={{ fontSize: isTextOnly ? 36 : 32, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: isTextOnly ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: (isTextOnly ? 36 : 32) * bodyScale, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: isTextOnly ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {slide.body}
           </p>
         )}
@@ -377,7 +380,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandl
 /* ═══════════════════════════════════════════
    MINIMAL TEMPLATE — centered, clean, lots of whitespace
    ═══════════════════════════════════════════ */
-const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
 
   return (
@@ -391,7 +394,7 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, footerHa
         </h2>
 
         {slide.body && (
-          <p style={{ fontSize: 30, lineHeight: 1.7, color: styles.body, marginTop: 40, fontFamily: fontFam, fontWeight: 400, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: 30 * bodyScale, lineHeight: 1.7, color: styles.body, marginTop: 40, fontFamily: fontFam, fontWeight: 400, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {slide.body}
           </p>
         )}

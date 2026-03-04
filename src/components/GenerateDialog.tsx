@@ -11,8 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import {
   SlideData, DesignStyle, CarouselTheme,
-  DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, ACCENT_PRESETS,
-  DesignTemplate, FontFamily, TitleSize,
+  DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, BODY_SIZES, ACCENT_PRESETS,
+  DesignTemplate, FontFamily, TitleSize, BodySize,
 } from "@/types/carousel";
 import { toast } from "sonner";
 
@@ -59,6 +59,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
   const [template, setTemplate] = useState<DesignTemplate>(currentDesignStyle?.template || "editorial");
   const [fontFamily, setFontFamily] = useState<FontFamily>(currentDesignStyle?.fontFamily || "serif");
   const [titleSize, setTitleSize] = useState<TitleSize>(currentDesignStyle?.titleSize || "grande");
+  const [bodySize, setBodySize] = useState<BodySize>(currentDesignStyle?.bodySize || "medio");
 
   // Theme state
   const [bgMode, setBgMode] = useState<"dark" | "light">(currentTheme?.bgMode || "dark");
@@ -206,7 +207,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
         return { ...clean, imageUrl: images[i] || undefined };
       });
 
-      const designStyle: DesignStyle = { template, fontFamily, titleSize };
+      const designStyle: DesignStyle = { template, fontFamily, titleSize, bodySize };
       const theme: CarouselTheme = { bgMode, accentColor, accentName };
       onGenerated(slidesWithImages, data.caption || "", designStyle, theme);
       toast.success("Carrossel gerado com imagens!");
@@ -390,8 +391,8 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                 </div>
               </div>
 
-              {/* Font + Size row */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Font + Title Size + Body Size row */}
+              <div className="grid grid-cols-3 gap-3">
                 {/* Font Family */}
                 <div className="space-y-2">
                   <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
@@ -426,7 +427,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                 {/* Title Size */}
                 <div className="space-y-2">
                   <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <ALargeSmall className="w-3 h-3" /> Tamanho do título
+                    <ALargeSmall className="w-3 h-3" /> Título
                   </Label>
                   <div className="flex flex-col gap-1">
                     {TITLE_SIZES.map((s) => (
@@ -435,6 +436,28 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                         onClick={() => setTitleSize(s.id)}
                         className={`py-1.5 px-2 rounded-md border transition-all text-[10px] font-semibold text-left ${
                           titleSize === s.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        {s.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Body Size */}
+                <div className="space-y-2">
+                  <Label className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <ALargeSmall className="w-3 h-3" /> Texto corpo
+                  </Label>
+                  <div className="flex flex-col gap-1">
+                    {BODY_SIZES.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setBodySize(s.id)}
+                        className={`py-1.5 px-2 rounded-md border transition-all text-[10px] font-semibold text-left ${
+                          bodySize === s.id
                             ? "border-primary bg-primary/10 text-primary"
                             : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
                         }`}
