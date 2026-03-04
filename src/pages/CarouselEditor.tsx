@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
@@ -186,25 +186,44 @@ const CarouselEditor = () => {
     />
   );
 
+  // Swipe handling for mobile
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only swipe if horizontal movement > 50px and mostly horizontal
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx > 0) goToSlide(-1);
+      else goToSlide(1);
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-[100dvh] flex flex-col bg-background">
       {/* Header */}
-      <header className="h-12 sm:h-14 border-b border-border flex items-center justify-between px-3 sm:px-5 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <header className="h-12 sm:h-14 border-b border-border flex items-center justify-between px-2 sm:px-5 gap-1 sm:gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
           <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <Input
             value={projectTitle}
             onChange={(e) => setProjectTitle(e.target.value)}
-            className="h-7 text-xs bg-transparent border-none px-1 w-24 sm:w-40 font-semibold truncate"
+            className="h-7 text-xs bg-transparent border-none px-1 w-20 sm:w-40 font-semibold truncate"
             placeholder="Nome do projeto"
           />
           <SaveStatusIndicator />
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* View toggle */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {/* View toggle - desktop */}
           <div className="hidden sm:flex items-center border border-border rounded-md">
             <Button
               variant={viewMode === "editor" ? "secondary" : "ghost"}
@@ -224,7 +243,7 @@ const CarouselEditor = () => {
             </Button>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={() => navigate("/profile")} className="text-xs gap-1 text-muted-foreground h-8 px-2">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/profile")} className="text-xs gap-1 text-muted-foreground h-8 px-2 hidden sm:flex">
             <User className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Perfil</span>
           </Button>
@@ -239,7 +258,7 @@ const CarouselEditor = () => {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Desktop Sidebar */}
         {!isMobile && viewMode === "editor" && (
           <div className="w-80 flex-shrink-0">
@@ -250,7 +269,7 @@ const CarouselEditor = () => {
         {/* Mobile Bottom Sheet */}
         {isMobile && (
           <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-            <SheetContent side="bottom" className="h-[75vh] p-0 bg-card border-border rounded-t-2xl">
+            <SheetContent side="bottom" className="h-[70vh] p-0 bg-card border-border rounded-t-2xl">
               <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mt-2 mb-1" />
               {sidebarContent}
             </SheetContent>
@@ -265,8 +284,12 @@ const CarouselEditor = () => {
             onSelectSlide={handleCanvasSelect}
           />
         ) : (
-          <div className="flex-1 flex items-center justify-center relative bg-background px-4">
-            <div className="relative w-full" style={{ maxWidth: isMobile ? "55vw" : "340px" }}>
+          <div
+            className="flex-1 flex items-center justify-center relative bg-background px-2 sm:px-4"
+            onTouchStart={isMobile ? handleTouchStart : undefined}
+            onTouchEnd={isMobile ? handleTouchEnd : undefined}
+          >
+            <div className="relative w-full" style={{ maxWidth: isMobile ? "62vw" : "340px" }}>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={carousel.slides[selectedSlide]?.id}
@@ -285,25 +308,25 @@ const CarouselEditor = () => {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Nav arrows */}
-              <div className="absolute -left-10 sm:-left-14 top-1/2 -translate-y-1/2">
+              {/* Nav arrows - hidden on mobile (use swipe) */}
+              <div className="hidden sm:block absolute -left-14 top-1/2 -translate-y-1/2">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => goToSlide(-1)}
                   disabled={selectedSlide === 0}
-                  className="rounded-full w-8 h-8 sm:w-9 sm:h-9 text-muted-foreground hover:text-foreground disabled:opacity-20"
+                  className="rounded-full w-9 h-9 text-muted-foreground hover:text-foreground disabled:opacity-20"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </Button>
               </div>
-              <div className="absolute -right-10 sm:-right-14 top-1/2 -translate-y-1/2">
+              <div className="hidden sm:block absolute -right-14 top-1/2 -translate-y-1/2">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => goToSlide(1)}
                   disabled={selectedSlide === carousel.slides.length - 1}
-                  className="rounded-full w-8 h-8 sm:w-9 sm:h-9 text-muted-foreground hover:text-foreground disabled:opacity-20"
+                  className="rounded-full w-9 h-9 text-muted-foreground hover:text-foreground disabled:opacity-20"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </Button>
@@ -339,17 +362,17 @@ const CarouselEditor = () => {
 
       {/* Mobile bottom bar: slide thumbnails + tab buttons */}
       {isMobile && (
-        <div className="border-t border-border bg-card">
-          {/* Slide thumbnails */}
-          <div className="px-3 pt-2 pb-1.5">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+        <div className="border-t border-border bg-card flex-shrink-0 safe-area-bottom">
+          {/* Slide thumbnails - scrollable */}
+          <div className="px-2 pt-2 pb-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
               {carousel.slides.map((slide, i) => {
                 const hasOverride = slide.styleOverride && Object.keys(slide.styleOverride).length > 0;
                 return (
                   <button
                     key={slide.id}
                     onClick={() => setSelectedSlide(i)}
-                    className={`relative flex-shrink-0 w-9 h-11 rounded-md border-2 transition-all text-[9px] font-bold flex items-center justify-center ${
+                    className={`relative flex-shrink-0 w-10 h-12 rounded-lg border-2 transition-all text-[10px] font-bold flex items-center justify-center active:scale-95 ${
                       i === selectedSlide
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border bg-secondary text-muted-foreground"
@@ -364,14 +387,14 @@ const CarouselEditor = () => {
               })}
               <button
                 onClick={addSlide}
-                className="flex-shrink-0 w-9 h-11 rounded-md border-2 border-dashed border-border hover:border-primary/50 text-muted-foreground flex items-center justify-center"
+                className="flex-shrink-0 w-10 h-12 rounded-lg border-2 border-dashed border-border hover:border-primary/50 active:scale-95 text-muted-foreground flex items-center justify-center"
               >
                 <span className="text-lg leading-none">+</span>
               </button>
             </div>
           </div>
 
-          {/* Action tabs */}
+          {/* Action tabs - larger touch targets */}
           <div className="flex border-t border-border/50">
             {([
               { id: "slide" as const, icon: Pencil, label: "Slide" },
@@ -382,18 +405,18 @@ const CarouselEditor = () => {
               <button
                 key={t.id}
                 onClick={() => openMobileTab(t.id)}
-                className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+                className="flex-1 flex flex-col items-center gap-0.5 py-3 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
               >
-                <t.icon className="w-4 h-4" />
-                <span className="text-[9px] font-medium">{t.label}</span>
+                <t.icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium">{t.label}</span>
               </button>
             ))}
             <button
               onClick={() => setViewMode(viewMode === "canvas" ? "editor" : "canvas")}
-              className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+              className="flex-1 flex flex-col items-center gap-0.5 py-3 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
             >
-              <LayoutGrid className="w-4 h-4" />
-              <span className="text-[9px] font-medium">Todos</span>
+              <LayoutGrid className="w-5 h-5" />
+              <span className="text-[10px] font-medium">Todos</span>
             </button>
           </div>
         </div>

@@ -256,7 +256,7 @@ const DashboardPage = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                            className="h-8 w-8 text-muted-foreground sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0"
                           >
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
