@@ -125,6 +125,45 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         </div>
       )}
 
+      {slide.type === "cta" && (
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Corpo do texto</Label>
+          <Textarea
+            value={slide.body}
+            onChange={(e) => onUpdate({ ...slide, body: e.target.value })}
+            placeholder="Call to action..."
+            rows={3}
+            className="bg-secondary border-border/50 text-foreground placeholder:text-muted-foreground/50 resize-none"
+          />
+        </div>
+      )}
+
+      {/* CTA background style */}
+      {slide.type === "cta" && (
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Fundo do CTA</Label>
+          <div className="flex gap-1.5">
+            {([
+              { id: "theme" as const, label: "Tema" },
+              { id: "accent" as const, label: "Cor destaque" },
+              { id: "image" as const, label: "Imagem" },
+            ]).map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => onUpdate({ ...slide, styleOverride: { ...slide.styleOverride, ctaBgStyle: opt.id } })}
+                className={`flex-1 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+                  (slide.styleOverride?.ctaBgStyle || "theme") === opt.id
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between py-1">
         <Label className="text-xs text-muted-foreground">Com imagem</Label>
         <Switch
