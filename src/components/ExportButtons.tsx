@@ -105,7 +105,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
           />
         </div>
       );
-      setTimeout(resolve, 500);
+      setTimeout(resolve, 800);
     });
 
     // Wait for fonts
@@ -207,14 +207,16 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
       for (let i = 0; i < prepared.slides.length; i++) {
         toast.info(`Renderizando slide ${i + 1}/${prepared.slides.length}...`);
         const blob = await renderSlideToBlob(prepared, i);
-        // Convert to compressed JPEG for smaller PDF (LinkedIn < 100MB)
+        // Convert to JPEG for smaller PDF (LinkedIn < 100MB) - high quality
         const imgBitmap = await createImageBitmap(blob);
         const cvs = document.createElement("canvas");
         cvs.width = imgBitmap.width;
         cvs.height = imgBitmap.height;
         const ctx = cvs.getContext("2d")!;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
         ctx.drawImage(imgBitmap, 0, 0);
-        const jpegDataUrl = cvs.toDataURL("image/jpeg", 0.82);
+        const jpegDataUrl = cvs.toDataURL("image/jpeg", 0.95);
         imgBitmap.close();
 
         if (i > 0) pdf.addPage([pageW, pageH]);
