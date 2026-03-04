@@ -5,6 +5,10 @@ import { motion } from "framer-motion";
 import heroMockup from "@/assets/hero-mockup.jpg";
 import instagramLifestyle from "@/assets/instagram-lifestyle.jpg";
 import aiAbstract from "@/assets/ai-abstract.jpg";
+import previewSlide1 from "@/assets/preview-slide-1.jpg";
+import previewSlide2 from "@/assets/preview-slide-2.jpg";
+import previewSlide3 from "@/assets/preview-slide-3.jpg";
+import previewSlide4 from "@/assets/preview-slide-4.jpg";
 
 const features = [
   {
@@ -172,6 +176,50 @@ const LandingPage = () => {
               <div className="absolute -inset-4 -z-10 rounded-3xl bg-primary/5 blur-2xl" />
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Carousel Preview */}
+      <section className="pb-16 px-5 -mt-4">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+          >
+            <p className="text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-6">
+              Exemplo de carrossel gerado pela IA
+            </p>
+            <div className="rounded-2xl border border-border bg-card p-3 sm:p-5 shadow-2xl shadow-primary/5">
+              <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                {[
+                  { img: previewSlide1, title: "O custo de aquisição é sentença." },
+                  { img: previewSlide2, title: "Não venda preço. Venda retorno." },
+                  { img: previewSlide3, title: "Performance virou identidade." },
+                  { img: previewSlide4, title: "Arrasta e descobre." },
+                ].map((s, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg overflow-hidden relative group"
+                    style={{ aspectRatio: "4/5" }}
+                  >
+                    <img
+                      src={s.img}
+                      alt={s.title}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                      <p className="text-[10px] sm:text-xs font-bold leading-tight text-white">
+                        {s.title}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
