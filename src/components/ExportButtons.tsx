@@ -1,10 +1,11 @@
 import { useState, useCallback } from "react";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
+import { jsPDF } from "jspdf";
 import { CarouselData } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, FileArchive, Image } from "lucide-react";
+import { Download, Loader2, FileArchive, Image, FileText } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -193,6 +194,38 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     }
   };
 
+  const downloadPdf = async () => {
+    setExporting(true);
+    try {
+      toast.info("Preparando PDF...");
+      const prepared = await prepareCarouselForExport(carousel);
+      // 1080x1350 slide ratio → PDF page in mm (portrait)
+      const pageW = 210; // A4 width mm
+      const pageH = pageW * (1350 / 1080); // keep aspect ratio
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pageW, pageH] });
+
+      for (let i = 0; i < prepared.slides.length; i++) {
+        toast.info(`Renderizando slide ${i + 1}/${prepared.slides.length}...`);
+        const blob = await renderSlideToBlob(prepared, i);
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+        if (i > 0) pdf.addPage([pageW, pageH]);
+        pdf.addImage(dataUrl, "PNG", 0, 0, pageW, pageH);
+      }
+
+      pdf.save("carrossel.pdf");
+      toast.success("PDF exportado!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Erro ao exportar PDF");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -205,6 +238,10 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
         <DropdownMenuItem onClick={downloadAll} className="gap-2 text-xs cursor-pointer">
           <FileArchive className="w-3.5 h-3.5" />
           Baixar tudo (.zip)
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={downloadPdf} className="gap-2 text-xs cursor-pointer">
+          <FileText className="w-3.5 h-3.5" />
+          Baixar PDF
         </DropdownMenuItem>
         {carousel.slides.map((_, i) => (
           <DropdownMenuItem key={i} onClick={() => downloadSingle(i)} className="gap-2 text-xs cursor-pointer">
