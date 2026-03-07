@@ -4,6 +4,7 @@ import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
 import GenerateDialog from "@/components/GenerateDialog";
 import ExportButtons from "@/components/ExportButtons";
+import CaptionButton from "@/components/CaptionButton";
 import CanvasView from "@/components/CanvasView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -247,6 +248,7 @@ const CarouselEditor = () => {
             <User className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Perfil</span>
           </Button>
+          <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
           <ExportButtons carousel={carousel} />
           <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
@@ -422,12 +424,6 @@ const CarouselEditor = () => {
         </div>
       )}
 
-      {caption && !isMobile && (
-        <div className="border-t border-border px-3 sm:px-5 py-2 sm:py-3 max-h-28 sm:max-h-32 overflow-y-auto">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Legenda gerada</p>
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap">{caption}</p>
-        </div>
-      )}
 
       <GenerateDialog
         open={generateOpen}
