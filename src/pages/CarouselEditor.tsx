@@ -217,7 +217,7 @@ const CarouselEditor = () => {
           <Input
             value={projectTitle}
             onChange={(e) => setProjectTitle(e.target.value)}
-            className="h-7 text-xs bg-transparent border-none px-1 w-20 sm:w-40 font-semibold truncate"
+            className="h-7 text-xs bg-transparent border-none px-1 w-24 sm:w-40 font-semibold truncate"
             placeholder="Nome do projeto"
           />
           <SaveStatusIndicator />
@@ -248,8 +248,11 @@ const CarouselEditor = () => {
             <User className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Perfil</span>
           </Button>
-          <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
-          <ExportButtons carousel={carousel} />
+          {/* Desktop-only action buttons */}
+          <div className="hidden sm:flex items-center gap-1">
+            <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
+            <ExportButtons carousel={carousel} />
+          </div>
           <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Gerar com IA</span>
