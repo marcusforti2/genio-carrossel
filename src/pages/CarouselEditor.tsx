@@ -4,6 +4,7 @@ import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
 import GenerateDialog from "@/components/GenerateDialog";
 import ExportButtons from "@/components/ExportButtons";
+import CaptionButton from "@/components/CaptionButton";
 import CanvasView from "@/components/CanvasView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
