@@ -253,9 +253,9 @@ const CarouselEditor = () => {
             <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
             <ExportButtons carousel={carousel} />
           </div>
-          <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3" onClick={() => setGenerateOpen(true)}>
+          <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3 hidden sm:flex" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Gerar com IA</span>
+            <span>Gerar com IA</span>
           </Button>
           <Button variant="ghost" size="icon" className="hidden sm:flex h-8 w-8 text-muted-foreground" onClick={signOut}>
             <LogOut className="w-3.5 h-3.5" />
