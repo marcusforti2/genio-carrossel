@@ -15,6 +15,7 @@ interface CaptionButtonProps {
   carousel: CarouselData;
   caption: string;
   onCaptionChange: (caption: string) => void;
+  showLabel?: boolean;
 }
 
 const CaptionButton = ({ carousel, caption, onCaptionChange }: CaptionButtonProps) => {
