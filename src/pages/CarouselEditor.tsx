@@ -248,6 +248,7 @@ const CarouselEditor = () => {
             <User className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Perfil</span>
           </Button>
+          <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
           <ExportButtons carousel={carousel} />
           <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
