@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ExportButtonsProps {
   carousel: CarouselData;
+  showLabel?: boolean;
 }
 
 // 1px transparent PNG fallback
