@@ -85,9 +85,9 @@ const CaptionButton = ({ carousel, caption, onCaptionChange, showLabel }: Captio
   return (
     <>
       <Button
-        variant="outline"
+        variant={showLabel ? "outline" : "outline"}
         size="sm"
-        className="text-xs gap-1.5 h-8 px-2"
+        className={showLabel ? "flex-1 text-[11px] gap-1.5 h-9" : "text-xs gap-1.5 h-8 px-2"}
         onClick={handleClick}
         disabled={generating}
       >
@@ -96,7 +96,7 @@ const CaptionButton = ({ carousel, caption, onCaptionChange, showLabel }: Captio
         ) : (
           <MessageSquareText className="w-3.5 h-3.5" />
         )}
-        <span className="hidden sm:inline">Legenda</span>
+        {showLabel ? "Legenda" : <span className="hidden sm:inline">Legenda</span>}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

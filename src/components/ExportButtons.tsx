@@ -392,9 +392,9 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="text-xs gap-1.5" disabled={exporting}>
+        <Button variant="outline" size="sm" className={showLabel ? "flex-1 text-[11px] gap-1.5 h-9" : "text-xs gap-1.5"} disabled={exporting}>
           {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">Exportar</span>
+          {showLabel ? "Exportar" : <span className="hidden sm:inline">Exportar</span>}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
