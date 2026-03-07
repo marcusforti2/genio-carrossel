@@ -181,7 +181,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
           />
         </div>
       );
-      setTimeout(resolve, 1200);
+      setTimeout(resolve, 1500);
     });
 
     // Wait for fonts
