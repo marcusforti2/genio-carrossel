@@ -217,7 +217,7 @@ const CarouselEditor = () => {
           <Input
             value={projectTitle}
             onChange={(e) => setProjectTitle(e.target.value)}
-            className="h-7 text-xs bg-transparent border-none px-1 w-20 sm:w-40 font-semibold truncate"
+            className="h-7 text-xs bg-transparent border-none px-1 w-24 sm:w-40 font-semibold truncate"
             placeholder="Nome do projeto"
           />
           <SaveStatusIndicator />
@@ -248,11 +248,14 @@ const CarouselEditor = () => {
             <User className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Perfil</span>
           </Button>
-          <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
-          <ExportButtons carousel={carousel} />
-          <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3" onClick={() => setGenerateOpen(true)}>
+          {/* Desktop-only action buttons */}
+          <div className="hidden sm:flex items-center gap-1">
+            <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
+            <ExportButtons carousel={carousel} />
+          </div>
+          <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3 hidden sm:flex" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Gerar com IA</span>
+            <span>Gerar com IA</span>
           </Button>
           <Button variant="ghost" size="icon" className="hidden sm:flex h-8 w-8 text-muted-foreground" onClick={signOut}>
             <LogOut className="w-3.5 h-3.5" />
@@ -396,10 +399,24 @@ const CarouselEditor = () => {
             </div>
           </div>
 
-          {/* Action tabs - larger touch targets */}
+          {/* Primary actions row - clear labeled buttons for mobile */}
+          <div className="flex gap-1.5 px-2 py-1.5 border-t border-border/30">
+            <Button
+              size="sm"
+              className="flex-1 text-[11px] gap-1.5 h-9"
+              onClick={() => setGenerateOpen(true)}
+            >
+              <Sparkles className="w-4 h-4" />
+              Gerar IA
+            </Button>
+            <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} showLabel />
+            <ExportButtons carousel={carousel} showLabel />
+          </div>
+
+          {/* Edit tabs - section navigation */}
           <div className="flex border-t border-border/50">
             {([
-              { id: "slide" as const, icon: Pencil, label: "Slide" },
+              { id: "slide" as const, icon: Pencil, label: "Editar" },
               { id: "design" as const, icon: Palette, label: "Design" },
               { id: "profile" as const, icon: UserCircle, label: "Perfil" },
               { id: "footer" as const, icon: Type, label: "Rodapé" },
@@ -407,17 +424,17 @@ const CarouselEditor = () => {
               <button
                 key={t.id}
                 onClick={() => openMobileTab(t.id)}
-                className="flex-1 flex flex-col items-center gap-0.5 py-3 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+                className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
               >
-                <t.icon className="w-5 h-5" />
+                <t.icon className="w-4.5 h-4.5" />
                 <span className="text-[10px] font-medium">{t.label}</span>
               </button>
             ))}
             <button
               onClick={() => setViewMode(viewMode === "canvas" ? "editor" : "canvas")}
-              className="flex-1 flex flex-col items-center gap-0.5 py-3 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+              className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
             >
-              <LayoutGrid className="w-5 h-5" />
+              <LayoutGrid className="w-4.5 h-4.5" />
               <span className="text-[10px] font-medium">Todos</span>
             </button>
           </div>
