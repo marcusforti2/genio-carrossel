@@ -18,7 +18,7 @@ interface CaptionButtonProps {
   showLabel?: boolean;
 }
 
-const CaptionButton = ({ carousel, caption, onCaptionChange }: CaptionButtonProps) => {
+const CaptionButton = ({ carousel, caption, onCaptionChange, showLabel }: CaptionButtonProps) => {
   const [generating, setGenerating] = useState(false);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
