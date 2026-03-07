@@ -11,20 +11,39 @@ serve(async (req) => {
   try {
     const { url } = await req.json();
     if (!url || typeof url !== "string") {
+      console.error("[proxy-image] Missing URL");
       return new Response(JSON.stringify({ error: "URL is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const response = await fetch(url);
+    console.log(`[proxy-image] Fetching: ${url.substring(0, 120)}`);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; ImageProxy/1.0)",
+        "Accept": "image/*,*/*",
+      },
+    });
+    clearTimeout(timeout);
+
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: "Failed to fetch image" }), {
+      console.error(`[proxy-image] Fetch failed: ${response.status} ${response.statusText}`);
+      return new Response(JSON.stringify({ error: `Failed to fetch image: ${response.status}` }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const buffer = await response.arrayBuffer();
     const bytes = new Uint8Array(buffer);
+    
+    console.log(`[proxy-image] Got ${bytes.length} bytes`);
+
+    // Use chunks to avoid stack overflow on large images
     let binary = "";
     const chunkSize = 8192;
     for (let i = 0; i < bytes.length; i += chunkSize) {
@@ -34,12 +53,15 @@ serve(async (req) => {
     const contentType = response.headers.get("content-type") || "image/jpeg";
     const dataUrl = `data:${contentType};base64,${base64}`;
 
+    console.log(`[proxy-image] Success: dataUrl length=${dataUrl.length}`);
+
     return new Response(JSON.stringify({ dataUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("proxy-image error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    console.error("[proxy-image] Error:", msg);
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
