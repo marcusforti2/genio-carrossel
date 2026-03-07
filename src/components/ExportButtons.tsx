@@ -196,22 +196,20 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
         (img) =>
           new Promise<void>((resolve) => {
             if (img.complete && img.naturalWidth > 0) {
-              console.log(`[Export] Image already loaded: ${img.src.substring(0, 60)}...`);
               resolve();
               return;
             }
             const timeout = setTimeout(() => {
               console.warn(`[Export] Image load timeout: ${img.src.substring(0, 60)}...`);
               resolve();
-            }, 5000);
+            }, 8000);
             img.onload = () => {
               clearTimeout(timeout);
-              console.log(`[Export] Image loaded: ${img.src.substring(0, 60)}... (${img.naturalWidth}x${img.naturalHeight})`);
               resolve();
             };
             img.onerror = () => {
               clearTimeout(timeout);
-              console.error(`[Export] Image FAILED to load: ${img.src.substring(0, 60)}...`);
+              console.error(`[Export] Image FAILED: ${img.src.substring(0, 60)}...`);
               resolve();
             };
           })
@@ -219,22 +217,37 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
     );
 
     // Extra safety delay for rendering
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 800));
 
     const isDark = preparedCarousel.theme?.bgMode === "dark";
     const bgColor = isDark ? "#111" : "#f5f5f5";
 
     console.log(`[Export] Capturing slide ${slideIndex + 1} with toPng...`);
 
-    const dataUrl = await toPng(renderTarget, {
+    const toPngOptions = {
       width: 1080,
       height: 1350,
       pixelRatio: 3,
-      cacheBust: true,
+      cacheBust: false,  // CRITICAL: cacheBust corrupts base64 data URLs
       backgroundColor: bgColor,
       skipAutoScale: true,
       includeQueryParams: true,
-    });
+      imagePlaceholder: TRANSPARENT_PIXEL,
+    };
+
+    // WORKAROUND: html-to-image has a known bug where images are
+    // missing on the first render. The first call "primes" the internal
+    // cache, and the second call actually captures them correctly.
+    try {
+      await toPng(renderTarget, toPngOptions);
+    } catch {
+      // First render may fail, that's okay
+    }
+
+    // Small delay between captures
+    await new Promise((r) => setTimeout(r, 300));
+
+    const dataUrl = await toPng(renderTarget, toPngOptions);
 
     console.log(`[Export] Slide ${slideIndex + 1} captured, data URL length: ${dataUrl.length}`);
 
