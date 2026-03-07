@@ -424,12 +424,6 @@ const CarouselEditor = () => {
         </div>
       )}
 
-      {caption && !isMobile && (
-        <div className="border-t border-border px-3 sm:px-5 py-2 sm:py-3 max-h-28 sm:max-h-32 overflow-y-auto">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Legenda gerada</p>
-          <p className="text-xs text-foreground/80 whitespace-pre-wrap">{caption}</p>
-        </div>
-      )}
 
       <GenerateDialog
         open={generateOpen}
