@@ -138,6 +138,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           <EditorialContent {...shared} forceTextOnly={forceTextOnly} />
         ) : ds.template === "minimal" ? (
           <MinimalContent {...shared} forceTextOnly={forceTextOnly} />
+        ) : ds.template === "bold" ? (
+          <BoldContent {...shared} forceTextOnly={forceTextOnly} />
         ) : (
           <ModernoContent {...shared} forceTextOnly={forceTextOnly} />
         )}

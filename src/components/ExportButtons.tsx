@@ -71,6 +71,10 @@ const prepareCarouselForExport = async (carousel: CarouselData): Promise<Carouse
 
   console.log(`[Export] Need to proxy ${urlsToProxy.length} images`);
 
+  if (urlsToProxy.length === 0) {
+    return carousel;
+  }
+
   // Proxy all images in parallel
   const results = await Promise.all(
     urlsToProxy.map(async ({ key, url }) => ({
@@ -83,13 +87,23 @@ const prepareCarouselForExport = async (carousel: CarouselData): Promise<Carouse
 
   const slides = carousel.slides.map((slide, i) => {
     const proxied = urlMap.get(`slide-${i}`);
-    if (proxied) {
+    if (proxied && proxied !== TRANSPARENT_PIXEL) {
       return { ...slide, imageUrl: proxied };
+    }
+    // If proxy failed but it's a relative/same-origin URL, keep it
+    if (slide.imageUrl && (slide.imageUrl.startsWith("/") || slide.imageUrl.startsWith(window.location.origin))) {
+      return slide;
+    }
+    // If proxy totally failed, remove image to avoid CORS error
+    if (proxied === TRANSPARENT_PIXEL) {
+      console.warn(`[Export] Removing failed image from slide ${i + 1}`);
+      return { ...slide, imageUrl: undefined, hasImage: false };
     }
     return slide;
   });
 
-  const avatarUrl = urlMap.get("avatar") || carousel.avatarUrl;
+  const avatarProxied = urlMap.get("avatar");
+  const avatarUrl = (avatarProxied && avatarProxied !== TRANSPARENT_PIXEL) ? avatarProxied : carousel.avatarUrl;
 
   console.log("[Export] All images prepared");
   return { ...carousel, slides, avatarUrl };
@@ -167,7 +181,7 @@ const ExportButtons = ({ carousel }: ExportButtonsProps) => {
           />
         </div>
       );
-      setTimeout(resolve, 1200);
+      setTimeout(resolve, 1500);
     });
 
     // Wait for fonts
