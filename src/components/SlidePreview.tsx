@@ -199,7 +199,8 @@ const SlideMedia = memo(({ slide, style }: { slide: SlideData; style?: React.CSS
     return <video src={slide.videoUrl} autoPlay loop muted playsInline style={style} />;
   }
   return <img src={slide.imageUrl} alt="" style={style} />;
-};
+});
+SlideMedia.displayName = "SlideMedia";
 
 /* ═══════════════════════════════════════════
    FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
