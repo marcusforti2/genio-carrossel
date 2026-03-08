@@ -117,10 +117,20 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
   };
 
   const selectVideo = (video: { url: string; thumbnail: string; user: string }) => {
-    onUpdate({ ...slide, videoUrl: video.url, videoThumbnail: video.thumbnail, hasImage: true, mediaType: "video", imageUrl: video.thumbnail });
+    setPreviewVideo(video);
+  };
+
+  const confirmVideo = () => {
+    if (!previewVideo) return;
+    onUpdate({ ...slide, videoUrl: previewVideo.url, videoThumbnail: previewVideo.thumbnail, hasImage: true, mediaType: "video", imageUrl: previewVideo.thumbnail });
+    setPreviewVideo(null);
     setShowVideoSearch(false);
     setVideoResults([]);
-    toast.success(`Vídeo de ${video.user} aplicado!`);
+    toast.success(`Vídeo de ${previewVideo.user} aplicado!`);
+  };
+
+  const cancelVideoPreview = () => {
+    setPreviewVideo(null);
   };
 
   return (
