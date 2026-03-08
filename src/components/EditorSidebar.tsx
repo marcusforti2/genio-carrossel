@@ -104,7 +104,7 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         body: {
           query: query || videoSearchQuery || contextParts,
           perPage: 6,
-          topic: [carousel.brandingText, carousel.profileName, carousel.niche].filter(Boolean).join(", "),
+          topic: [carousel.brandingText, carousel.profileName].filter(Boolean).join(", "),
         },
       });
       if (error) throw error;
