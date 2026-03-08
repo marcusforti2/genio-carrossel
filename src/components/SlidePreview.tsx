@@ -320,7 +320,7 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodySc
    MODERNO TEMPLATE
    ═══════════════════════════════════════════ */
 const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "160px 75px 55px", overflow: "hidden" }}>
