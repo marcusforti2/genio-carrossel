@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
@@ -95,20 +95,24 @@ const CarouselEditor = () => {
     }
   }, [user]);
 
-  const updateSlide = (index: number, slide: SlideData) => {
-    const newSlides = [...carousel.slides];
-    newSlides[index] = slide;
-    setCarousel({ ...carousel, slides: newSlides });
-  };
+  const updateSlide = useCallback((index: number, slide: SlideData) => {
+    setCarousel(prev => {
+      const newSlides = [...prev.slides];
+      newSlides[index] = slide;
+      return { ...prev, slides: newSlides };
+    });
+  }, []);
 
-  const deleteSlide = (index: number) => {
-    if (carousel.slides.length <= 1) return;
-    const newSlides = carousel.slides.filter((_, i) => i !== index);
-    setCarousel({ ...carousel, slides: newSlides });
-    if (selectedSlide >= newSlides.length) setSelectedSlide(newSlides.length - 1);
-  };
+  const deleteSlide = useCallback((index: number) => {
+    setCarousel(prev => {
+      if (prev.slides.length <= 1) return prev;
+      const newSlides = prev.slides.filter((_, i) => i !== index);
+      setSelectedSlide(s => Math.min(s, newSlides.length - 1));
+      return { ...prev, slides: newSlides };
+    });
+  }, []);
 
-  const addSlide = () => {
+  const addSlide = useCallback(() => {
     const newSlide: SlideData = {
       id: crypto.randomUUID(),
       type: "content",
@@ -116,22 +120,24 @@ const CarouselEditor = () => {
       body: "Desenvolva seu argumento aqui. Seja provocativo, direto e autêntico.",
       hasImage: true,
     };
-    setCarousel({ ...carousel, slides: [...carousel.slides, newSlide] });
-    setSelectedSlide(carousel.slides.length);
-  };
+    setCarousel(prev => {
+      setSelectedSlide(prev.slides.length);
+      return { ...prev, slides: [...prev.slides, newSlide] };
+    });
+  }, []);
 
-  const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
-    setCarousel({
-      ...carousel,
+  const handleAIGenerated = useCallback((slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
+    setCarousel(prev => ({
+      ...prev,
       slides,
       ...(designStyle ? { designStyle } : {}),
       ...(theme ? { theme } : {}),
-    });
+    }));
     setSelectedSlide(0);
     setCaption(newCaption);
-  };
+  }, []);
 
-  const handleLoadProject = (project: Project) => {
+  const handleLoadProject = useCallback((project: Project) => {
     const data = loadProject(project);
     if (data) {
       const restored = data as any;
@@ -141,36 +147,34 @@ const CarouselEditor = () => {
       setCaption(cap);
       setSelectedSlide(0);
     }
-  };
+  }, [loadProject]);
 
-  const handleNewProject = () => {
+  const handleNewProject = useCallback(() => {
     newProject();
     setCarousel(createDefaultCarousel());
     setCaption("");
     setSelectedSlide(0);
-  };
+  }, [newProject]);
 
-  const goToSlide = (dir: -1 | 1) => {
-    const next = selectedSlide + dir;
-    if (next >= 0 && next < carousel.slides.length) setSelectedSlide(next);
-  };
+  const goToSlide = useCallback((dir: -1 | 1) => {
+    setSelectedSlide(prev => {
+      const next = prev + dir;
+      return next >= 0 && next < carousel.slides.length ? next : prev;
+    });
+  }, [carousel.slides.length]);
 
-  const handleCanvasSelect = (index: number) => {
+  const handleCanvasSelect = useCallback((index: number) => {
     setSelectedSlide(index);
     setViewMode("editor");
-  };
+  }, []);
 
-  const openMobileSidebar = () => {
-    setMobileSidebarOpen(true);
-  };
-
-  const SaveStatusIndicator = () => (
+  const saveStatusContent = useMemo(() => (
     <span className="text-[10px] text-muted-foreground flex items-center gap-1">
       {saveStatus === "saving" && <><Loader className="w-3 h-3 animate-spin" /> Salvando...</>}
       {saveStatus === "saved" && <><Check className="w-3 h-3 text-green-500" /> Salvo</>}
       {saveStatus === "error" && <span className="text-destructive">Erro ao salvar</span>}
     </span>
-  );
+  ), [saveStatus]);
 
   const sidebarContent = (
     <EditorSidebar
@@ -218,7 +222,7 @@ const CarouselEditor = () => {
             className="h-7 text-xs bg-transparent border-none px-1 w-24 sm:w-40 font-semibold truncate"
             placeholder="Nome do projeto"
           />
-          <SaveStatusIndicator />
+          {saveStatusContent}
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">
@@ -414,7 +418,7 @@ const CarouselEditor = () => {
           {/* Bottom actions */}
           <div className="flex border-t border-border/50">
             <button
-              onClick={openMobileSidebar}
+              onClick={() => setMobileSidebarOpen(true)}
               className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
             >
               <Pencil className="w-4 h-4" />

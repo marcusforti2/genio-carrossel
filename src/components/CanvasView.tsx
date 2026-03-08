@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { CarouselData } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import { motion } from "framer-motion";
@@ -8,7 +9,7 @@ interface CanvasViewProps {
   onSelectSlide: (index: number) => void;
 }
 
-const CanvasView = ({ carousel, selectedSlide, onSelectSlide }: CanvasViewProps) => {
+const CanvasView = memo(({ carousel, selectedSlide, onSelectSlide }: CanvasViewProps) => {
   return (
     <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-background">
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
@@ -36,6 +37,8 @@ const CanvasView = ({ carousel, selectedSlide, onSelectSlide }: CanvasViewProps)
       </div>
     </div>
   );
-};
+});
+
+CanvasView.displayName = "CanvasView";
 
 export default CanvasView;

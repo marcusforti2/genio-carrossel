@@ -1,6 +1,6 @@
 import { SlideData, CarouselData, DesignStyle } from "@/types/carousel";
 import { User, Loader2 } from "lucide-react";
-import { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect, memo } from "react";
 
 interface SlidePreviewProps {
   slide: SlideData;
@@ -69,14 +69,14 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       handleBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
     };
   }, [theme.bgMode, theme.accentColor]);
-  const Avatar = () =>
+  const avatarNode = useMemo(() =>
     carousel.avatarUrl ? (
       <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 80, height: 80, border: `3px solid ${styles.accent}` }} />
     ) : (
       <div className="rounded-full flex items-center justify-center" style={{ width: 80, height: 80, background: `${styles.accent}33`, border: `3px solid ${styles.accent}55` }}>
         <User style={{ width: 36, height: 36, color: `${styles.accent}aa` }} />
       </div>
-    );
+    ), [carousel.avatarUrl, styles.accent]);
 
   const footerHandle = carousel.profileHandle || "";
   const footerBranding = carousel.brandingText || "";
@@ -116,7 +116,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
     tagFg: colorBgIsLight ? "hsl(0 0% 100%)" : "hsl(0 0% 100%)",
   } : styles;
 
-  const shared = { slide, carousel, styles: effectiveStyles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
+  const shared = { slide, carousel, styles: effectiveStyles, fontFam, titleScale, bodyScale, avatarNode, footerHandle, footerBranding };
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
@@ -186,7 +186,7 @@ interface TemplateProps {
   fontFam: string;
   titleScale: number;
   bodyScale: number;
-  Avatar: React.FC;
+  avatarNode: React.ReactNode;
   footerHandle: string;
   footerBranding: string;
   forceTextOnly?: boolean;
@@ -252,7 +252,7 @@ const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, bodySc
 /* ═══════════════════════════════════════════
    COVER SLIDE
    ═══════════════════════════════════════════ */
-const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle }: TemplateProps) => (
+const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, footerHandle }: TemplateProps) => (
   <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative" }}>
     {slide.mediaType === "video" && slide.videoUrl ? (
       <video src={slide.videoUrl} autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
@@ -262,7 +262,7 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
     <div style={{ position: "relative", zIndex: 10, padding: "0 75px 120px", textAlign: "left" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 40 }}>
-        <Avatar />
+        {avatarNode}
         <div>
           <p style={{ fontSize: 32, fontWeight: 700, color: styles.title, lineHeight: 1.2 }}>
             {carousel.profileName} <span style={{ color: styles.accent }}>✓</span>
@@ -469,7 +469,7 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
 /* ═══════════════════════════════════════════
    CTA SLIDE — 3 modes: theme / accent / image
    ═══════════════════════════════════════════ */
-const CtaSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding }: TemplateProps) => {
+const CtaSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, footerHandle, footerBranding }: TemplateProps) => {
   const keywordMatch = slide.body?.match(/'([A-ZÁÉÍÓÚÂÊÔÃÕÇ]+)'/);
   const keyword = keywordMatch?.[1] || "";
   const isDark = (slide.styleOverride?.bgMode ?? carousel.theme?.bgMode) === "dark";
@@ -589,4 +589,4 @@ const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertCol
   </div>
 );
 
-export default SlidePreview;
+export default memo(SlidePreview);
