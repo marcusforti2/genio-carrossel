@@ -285,7 +285,7 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
             onClick={() => searchPexels(slide.title)}
           >
             {searching ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
-            Foto Pexels
+            Buscar Foto
           </Button>
           <Button
             variant="outline"
