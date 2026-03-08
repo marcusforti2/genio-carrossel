@@ -69,9 +69,9 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         body: {
           query: query || searchQuery || contextParts,
           perPage: 6,
-          topic: [carousel.brandingText, carousel.profileName, carousel.niche].filter(Boolean).join(", "),
+          topic: [carousel.brandingText, carousel.profileName].filter(Boolean).join(", "),
           bgMode: carousel.theme?.bgMode || "dark",
-          niche: carousel.niche || "",
+          niche: "",
         },
       });
       if (error) throw error;
