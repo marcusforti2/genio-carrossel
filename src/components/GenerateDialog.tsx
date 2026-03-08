@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Sparkles, Loader2, LayoutTemplate, Type, ALargeSmall, Sun, Moon, Palette, Upload, X, ImageIcon } from "lucide-react";
+import { Sparkles, Loader2, LayoutTemplate, Type, ALargeSmall, Sun, Moon, Palette, Upload, X, ImageIcon, Video } from "lucide-react";
 import RealisticSlidePreview from "@/components/RealisticSlidePreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
