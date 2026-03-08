@@ -111,6 +111,9 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
     handleBg: colorBgIsLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)",
     borderLight: colorBgIsLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
     mutedBg: colorBgIsLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+    overlayFrom: colorBgIsLight ? "rgba(240,240,240,0.3)" : "rgba(20,20,20,0.3)",
+    overlayTo: colorBgIsLight ? "rgba(245,245,245,0.92)" : "rgba(17,17,17,0.92)",
+    tagFg: colorBgIsLight ? "hsl(0 0% 100%)" : "hsl(0 0% 100%)",
   } : styles;
 
   const shared = { slide, carousel, styles: effectiveStyles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
