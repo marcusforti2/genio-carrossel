@@ -371,6 +371,20 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         {/* Pexels video search results */}
         {showVideoSearch && (
           <div className="space-y-1.5">
+            {/* Video preview */}
+            {previewVideo && (
+              <div className="rounded-md overflow-hidden border border-primary">
+                <video src={previewVideo.url} autoPlay loop muted playsInline className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+                <div className="flex gap-1 p-1.5">
+                  <Button size="sm" className="flex-1 text-[10px] h-7" onClick={confirmVideo}>
+                    Aplicar vídeo
+                  </Button>
+                  <Button variant="ghost" size="sm" className="text-[10px] h-7" onClick={cancelVideoPreview}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="flex gap-1.5">
               <Input
                 value={videoSearchQuery}
@@ -379,14 +393,14 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
                 className="bg-secondary border-border/50 text-xs h-7"
                 onKeyDown={(e) => e.key === "Enter" && searchPexelsVideos()}
               />
-              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => { setShowVideoSearch(false); setVideoResults([]); }}>
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => { setShowVideoSearch(false); setVideoResults([]); setPreviewVideo(null); }}>
                 <X className="w-3 h-3" />
               </Button>
             </div>
             {videoResults.length > 0 && (
               <div className="grid grid-cols-3 gap-1 max-h-36 overflow-y-auto">
                 {videoResults.map((video) => (
-                  <button key={video.id} onClick={() => selectVideo(video)} className="rounded overflow-hidden border border-border hover:border-primary transition-colors relative group">
+                  <button key={video.id} onClick={() => selectVideo(video)} className={`rounded overflow-hidden border transition-colors relative group ${previewVideo?.url === video.url ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-primary'}`}>
                     <img src={video.thumbnail} alt="" className="w-full h-12 object-cover" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Video className="w-3 h-3 text-white" />
