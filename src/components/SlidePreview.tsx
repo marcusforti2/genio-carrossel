@@ -361,7 +361,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
    BOLD TEMPLATE
    ═══════════════════════════════════════════ */
 const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const bg = (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
 
