@@ -183,6 +183,7 @@ const OnboardingPage = () => {
                   rawText={rawText}
                   setRawText={setRawText}
                   parsing={parsing}
+                  updateField={updateField}
                 />
               )}
               {step === 1 && (
