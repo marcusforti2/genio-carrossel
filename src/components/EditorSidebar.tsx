@@ -225,9 +225,9 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         )}
 
         {/* Hint for fullimage mode */}
-        {slide.styleOverride?.bgStyle === "fullimage" && !slide.imageUrl && (
+        {slide.styleOverride?.bgStyle === "fullimage" && !slide.imageUrl && !slide.videoUrl && (
           <p className="text-[9px] text-muted-foreground/70 pt-1">
-            Adicione uma imagem ao slide para usar como fundo em tela cheia.
+            Adicione uma imagem ou vídeo ao slide para usar como fundo em tela cheia.
           </p>
         )}
       </div>
