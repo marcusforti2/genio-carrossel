@@ -24,13 +24,13 @@ export const useProfileComplete = () => {
     }
 
     const check = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(REQUIRED_FIELDS.join(","))
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (!data) {
+      if (error || !data) {
         setIsComplete(false);
       } else {
         const allFilled = REQUIRED_FIELDS.every(
