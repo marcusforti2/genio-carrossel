@@ -107,11 +107,8 @@ const CarouselEditor = () => {
     setCarousel(prev => {
       if (prev.slides.length <= 1) return prev;
       const newSlides = prev.slides.filter((_, i) => i !== index);
+      setSelectedSlide(s => Math.min(s, newSlides.length - 1));
       return { ...prev, slides: newSlides };
-    });
-    setSelectedSlide(prev => {
-      // We need current slides length, but since state is batched, use a safe approach
-      return (idx: number) => idx;
     });
   }, []);
 
