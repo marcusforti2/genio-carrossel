@@ -13,6 +13,8 @@ export interface SlideStyleOverride {
   bgColor?: string;
 }
 
+export type MediaType = "image" | "video";
+
 export interface SlideData {
   id: string;
   type: "cover" | "content" | "cta";
@@ -22,6 +24,9 @@ export interface SlideData {
   imageUrl?: string;
   imagePrompt?: string;
   imageLoading?: boolean;
+  mediaType?: MediaType;
+  videoUrl?: string;
+  videoThumbnail?: string;
   styleOverride?: SlideStyleOverride;
 }
 

@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload, Type, LayoutTemplate, ALargeSmall, Palette, Image as ImageIcon, Paintbrush } from "lucide-react";
+import { Plus, Trash2, GripVertical, User, ImagePlus, Loader2, Sun, Moon, Search, X, Upload, Type, LayoutTemplate, ALargeSmall, Palette, Image as ImageIcon, Paintbrush, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -23,6 +23,10 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
   const [searchResults, setSearchResults] = useState<Array<{ id: number; url: string; thumbnail: string; photographer: string; alt: string }>>([]);
   const [searching, setSearching] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [videoSearchQuery, setVideoSearchQuery] = useState("");
+  const [videoResults, setVideoResults] = useState<Array<{ id: number; url: string; thumbnail: string; duration: number; user: string }>>([]);
+  const [searchingVideo, setSearchingVideo] = useState(false);
+  const [showVideoSearch, setShowVideoSearch] = useState(false);
 
   const generateImage = async () => {
     setImgLoading(true);
@@ -80,10 +84,42 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
   };
 
   const selectPhoto = (photo: { url: string; photographer: string }) => {
-    onUpdate({ ...slide, imageUrl: photo.url, hasImage: true });
+    onUpdate({ ...slide, imageUrl: photo.url, hasImage: true, mediaType: "image", videoUrl: undefined });
     setShowSearch(false);
     setSearchResults([]);
     toast.success(`Foto de ${photo.photographer} aplicada!`);
+  };
+
+  const searchPexelsVideos = async (query?: string) => {
+    const q = query || videoSearchQuery || slide.title;
+    if (!q.trim()) return;
+    setSearchingVideo(true);
+    setShowVideoSearch(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("search-pexels-videos", {
+        body: {
+          query: q,
+          perPage: 6,
+          topic: carousel.brandingText || carousel.profileName || "",
+        },
+      });
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); return; }
+      setVideoResults(data?.videos || []);
+      if (!data?.videos?.length) toast.info("Nenhum vídeo encontrado");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Erro ao buscar vídeos");
+    } finally {
+      setSearchingVideo(false);
+    }
+  };
+
+  const selectVideo = (video: { url: string; thumbnail: string; user: string }) => {
+    onUpdate({ ...slide, videoUrl: video.url, videoThumbnail: video.thumbnail, hasImage: true, mediaType: "video", imageUrl: video.thumbnail });
+    setShowVideoSearch(false);
+    setVideoResults([]);
+    toast.success(`Vídeo de ${video.user} aplicado!`);
   };
 
   return (
@@ -189,9 +225,9 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         )}
 
         {/* Hint for fullimage mode */}
-        {slide.styleOverride?.bgStyle === "fullimage" && !slide.imageUrl && (
+        {slide.styleOverride?.bgStyle === "fullimage" && !slide.imageUrl && !slide.videoUrl && (
           <p className="text-[9px] text-muted-foreground/70 pt-1">
-            Adicione uma imagem ao slide para usar como fundo em tela cheia.
+            Adicione uma imagem ou vídeo ao slide para usar como fundo em tela cheia.
           </p>
         )}
       </div>
@@ -253,6 +289,59 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         )}
       </div>
 
+      {/* Pexels video search */}
+      <div className="space-y-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full gap-2 text-xs"
+          disabled={searchingVideo}
+          onClick={() => searchPexelsVideos(slide.title)}
+        >
+          {searchingVideo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Video className="w-3.5 h-3.5" />}
+          {searchingVideo ? "Buscando..." : "Buscar vídeo (Pexels)"}
+        </Button>
+
+        {showVideoSearch && (
+          <div className="space-y-2">
+            <div className="flex gap-1.5">
+              <Input
+                value={videoSearchQuery}
+                onChange={(e) => setVideoSearchQuery(e.target.value)}
+                placeholder="Buscar vídeo por tema..."
+                className="bg-secondary border-border/50 text-xs h-8"
+                onKeyDown={(e) => e.key === "Enter" && searchPexelsVideos()}
+              />
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => { setShowVideoSearch(false); setVideoResults([]); }}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+
+            {videoResults.length > 0 && (
+              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto">
+                {videoResults.map((video) => (
+                  <button
+                    key={video.id}
+                    onClick={() => selectVideo(video)}
+                    className="rounded-md overflow-hidden border border-border hover:border-primary transition-colors relative group"
+                  >
+                    <img src={video.thumbnail} alt="" className="w-full h-16 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center flex-col gap-0.5">
+                      <Video className="w-3.5 h-3.5 text-white" />
+                      <span className="text-[8px] text-white font-medium">{video.duration}s</span>
+                    </div>
+                    <div className="absolute top-0.5 right-0.5 bg-black/70 rounded px-1">
+                      <Video className="w-2.5 h-2.5 text-white" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-[8px] text-muted-foreground/60 text-center">Vídeos por Pexels</p>
+          </div>
+        )}
+      </div>
+
       {/* Upload manual */}
       <div>
         <input
@@ -299,16 +388,26 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         {imgLoading ? "Gerando imagem..." : "Gerar imagem com IA"}
       </Button>
 
-      {slide.imageUrl && (
+      {(slide.imageUrl || slide.videoUrl) && (
         <div className="rounded-md overflow-hidden border border-border">
-          <img src={slide.imageUrl} alt="Slide" className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+          {slide.mediaType === "video" && slide.videoUrl ? (
+            <div className="relative">
+              <video src={slide.videoUrl} autoPlay loop muted playsInline className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+              <div className="absolute top-1 right-1 bg-black/70 rounded px-1.5 py-0.5 flex items-center gap-1">
+                <Video className="w-3 h-3 text-white" />
+                <span className="text-[9px] text-white font-medium">Vídeo</span>
+              </div>
+            </div>
+          ) : (
+            <img src={slide.imageUrl} alt="Slide" className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+          )}
           <Button
             variant="ghost"
             size="sm"
             className="w-full text-[10px] text-muted-foreground"
-            onClick={() => onUpdate({ ...slide, imageUrl: undefined })}
+            onClick={() => onUpdate({ ...slide, imageUrl: undefined, videoUrl: undefined, videoThumbnail: undefined, mediaType: undefined })}
           >
-            Remover imagem
+            Remover {slide.mediaType === "video" ? "vídeo" : "imagem"}
           </Button>
         </div>
       )}

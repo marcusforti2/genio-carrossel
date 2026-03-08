@@ -85,7 +85,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
   // Determine background style
   const bgStyle = so.bgStyle || "theme";
-  const isFullImage = bgStyle === "fullimage" && slide.imageUrl;
+  const isFullImage = bgStyle === "fullimage" && (slide.imageUrl || slide.videoUrl);
   const isColorBg = bgStyle === "color";
   const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
   
@@ -108,10 +108,14 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           overflow: "hidden",
         }}
       >
-        {/* Fullimage background */}
+        {/* Fullimage background - image or video */}
         {isFullImage && (
           <>
-            <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            {slide.mediaType === "video" && slide.videoUrl ? (
+              <video src={slide.videoUrl} autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            ) : (
+              <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            )}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.85) 100%)" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.85) 100%)" }} />
           </>
@@ -161,6 +165,14 @@ interface TemplateProps {
   footerBranding: string;
   forceTextOnly?: boolean;
 }
+
+/* ── Media renderer (image or video) ── */
+const SlideMedia = ({ slide, style }: { slide: SlideData; style?: React.CSSProperties }) => {
+  if (slide.mediaType === "video" && slide.videoUrl) {
+    return <video src={slide.videoUrl} autoPlay loop muted playsInline style={style} />;
+  }
+  return <img src={slide.imageUrl} alt="" style={style} />;
+};
 
 /* ═══════════════════════════════════════════
    FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
@@ -215,7 +227,11 @@ const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, bodySc
    ═══════════════════════════════════════════ */
 const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle }: TemplateProps) => (
   <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative" }}>
-    {slide.imageUrl && <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
+    {slide.mediaType === "video" && slide.videoUrl ? (
+      <video src={slide.videoUrl} autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+    ) : slide.imageUrl ? (
+      <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+    ) : null}
     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
     <div style={{ position: "relative", zIndex: 10, padding: "0 75px 120px", textAlign: "left" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 40 }}>
@@ -243,7 +259,7 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
    EDITORIAL TEMPLATE
    ═══════════════════════════════════════════ */
 const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const titleFs = isTextOnly ? 76 * titleScale : 56 * titleScale;
   const bodyFs = (isTextOnly ? 36 : 34) * bodyScale;
@@ -290,7 +306,7 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodySc
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
+            <SlideMedia slide={slide} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
@@ -304,7 +320,7 @@ const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodySc
    MODERNO TEMPLATE
    ═══════════════════════════════════════════ */
 const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "160px 75px 55px", overflow: "hidden" }}>
@@ -325,7 +341,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
+            <SlideMedia slide={slide} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
@@ -345,7 +361,7 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
    BOLD TEMPLATE
    ═══════════════════════════════════════════ */
 const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const bg = (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
 
@@ -369,7 +385,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", maxHeight: 450, objectFit: "cover", borderRadius: 12 }} />
+            <SlideMedia slide={slide} style={{ width: "100%", height: "100%", maxHeight: 450, objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
@@ -383,7 +399,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
    MINIMAL TEMPLATE — centered, clean, lots of whitespace
    ═══════════════════════════════════════════ */
 const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 80px 55px", overflow: "hidden", alignItems: "center", textAlign: "center" }}>
@@ -408,7 +424,7 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
                 <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
               </div>
             ) : (
-              <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "1/1", maxHeight: 380, objectFit: "cover", borderRadius: "50%" }} />
+              <SlideMedia slide={slide} style={{ width: "100%", aspectRatio: "1/1", maxHeight: 380, objectFit: "cover", borderRadius: "50%" }} />
             )}
           </div>
         )}
