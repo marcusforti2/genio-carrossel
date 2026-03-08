@@ -14,7 +14,7 @@ import {
   CheckCircle2, Wand2, Rocket, Target, Palette, MessageSquare,
 } from "lucide-react";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 const OnboardingPage = () => {
   const { user } = useAuth();
@@ -80,12 +80,13 @@ const OnboardingPage = () => {
       if (error) throw error;
       if (data?.error) { toast.error(data.error); return; }
 
+      // Only fill fields that are still empty — don't overwrite identity fields already filled in step 1
       setProfile((prev) => ({
         ...prev,
-        display_name: data.display_name || prev.display_name,
-        handle: data.handle || prev.handle,
-        branding_text: data.branding_text || prev.branding_text,
-        branding_subtext: data.branding_subtext || prev.branding_subtext,
+        display_name: prev.display_name.trim() ? prev.display_name : (data.display_name || prev.display_name),
+        handle: prev.handle.trim() ? prev.handle : (data.handle || prev.handle),
+        branding_text: prev.branding_text.trim() ? prev.branding_text : (data.branding_text || prev.branding_text),
+        branding_subtext: prev.branding_subtext.trim() ? prev.branding_subtext : (data.branding_subtext || prev.branding_subtext),
         niche: data.niche || prev.niche,
         target_audience: data.target_audience || prev.target_audience,
         common_enemy: data.common_enemy || prev.common_enemy,
@@ -105,8 +106,7 @@ const OnboardingPage = () => {
     switch (step) {
       case 0: return true; // welcome
       case 1: return !!profile.avatar_url && !!profile.display_name.trim() && !!profile.handle.trim();
-      case 2: return !!profile.niche.trim() && !!profile.target_audience.trim();
-      case 3: return !!profile.tone_of_voice.trim() && !!profile.value_proposition.trim();
+      case 2: return !!profile.niche.trim() && !!profile.target_audience.trim() && !!profile.tone_of_voice.trim() && !!profile.value_proposition.trim();
       default: return true;
     }
   };
@@ -115,15 +115,13 @@ const OnboardingPage = () => {
     if (!user) return;
     setSaving(true);
     
-    // Try update first, fallback to upsert if no row exists
-    const { error: updateError, count } = await supabase
+    const { error: updateError } = await supabase
       .from("profiles")
       .update(profile)
       .eq("user_id", user.id);
     
     if (updateError) {
       console.error("Profile update error:", updateError);
-      // Fallback: try upsert (insert if no row exists)
       const { error: upsertError } = await supabase
         .from("profiles")
         .upsert({ ...profile, user_id: user.id }, { onConflict: "user_id" });
@@ -186,7 +184,7 @@ const OnboardingPage = () => {
                 />
               )}
               {step === 2 && (
-                <StepBusiness
+                <StepBusinessAndVoice
                   profile={profile}
                   updateField={updateField}
                   rawText={rawText}
@@ -194,9 +192,6 @@ const OnboardingPage = () => {
                   parsing={parsing}
                   onParse={handleParseWithAI}
                 />
-              )}
-              {step === 3 && (
-                <StepVoice profile={profile} updateField={updateField} />
               )}
             </motion.div>
           </AnimatePresence>
@@ -267,11 +262,10 @@ const StepWelcome = () => (
         que todo conteúdo gerado tenha a <span className="text-primary font-semibold">sua cara</span>.
       </p>
     </div>
-    <div className="grid grid-cols-3 gap-3 pt-2">
+    <div className="grid grid-cols-2 gap-3 pt-2">
       {[
         { icon: Palette, label: "Sua identidade", desc: "Foto, nome e marca" },
-        { icon: Target, label: "Seu negócio", desc: "Nicho e público" },
-        { icon: MessageSquare, label: "Sua voz", desc: "Tom e proposta" },
+        { icon: Target, label: "Negócio & Voz", desc: "Nicho, público e tom" },
       ].map(({ icon: Icon, label, desc }) => (
         <div key={label} className="rounded-xl border border-border bg-card p-3 space-y-2">
           <Icon className="w-5 h-5 text-primary mx-auto" />
@@ -379,7 +373,7 @@ const StepIdentity = ({
   </div>
 );
 
-const StepBusiness = ({
+const StepBusinessAndVoice = ({
   profile, updateField, rawText, setRawText, parsing, onParse,
 }: {
   profile: any;
@@ -393,10 +387,10 @@ const StepBusiness = ({
     <div className="text-center space-y-2">
       <Target className="w-8 h-8 text-primary mx-auto" />
       <h2 className="text-2xl font-black tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-        Seu negócio
+        Seu posicionamento
       </h2>
       <p className="text-sm text-muted-foreground">
-        Conte sobre seu nicho e público para a IA te entender
+        Nicho, público e tom de voz — tudo que a IA precisa pra criar por você
       </p>
     </div>
 
@@ -404,15 +398,15 @@ const StepBusiness = ({
     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Wand2 className="w-4 h-4 text-primary" />
-        <span className="text-xs font-bold text-primary">Atalho: Preencha com IA</span>
+        <span className="text-xs font-bold text-primary">Atalho: Preencha tudo com IA</span>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Cole qualquer texto sobre seu negócio e a IA preenche tudo automaticamente.
+        Cole qualquer texto sobre seu negócio e a IA preenche todos os campos abaixo.
       </p>
       <Textarea
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
-        placeholder="Cole aqui sobre seu negócio..."
+        placeholder="Cole aqui sobre seu negócio, público, como você fala..."
         rows={3}
         className="bg-secondary border-border/50 resize-none text-sm"
       />
@@ -434,87 +428,48 @@ const StepBusiness = ({
     </div>
 
     <div className="space-y-4">
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Nicho *</Label>
-        <Input
-          value={profile.niche}
-          onChange={(e) => updateField("niche", e.target.value)}
-          placeholder="Marketing digital, coaching, etc."
-          className="bg-secondary border-border/50"
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Nicho *</Label>
+          <Input
+            value={profile.niche}
+            onChange={(e) => updateField("niche", e.target.value)}
+            placeholder="Marketing digital, coaching..."
+            className="bg-secondary border-border/50"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Tom de voz *</Label>
+          <Input
+            value={profile.tone_of_voice}
+            onChange={(e) => updateField("tone_of_voice", e.target.value)}
+            placeholder="Direto, provocativo..."
+            className="bg-secondary border-border/50"
+          />
+        </div>
       </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        {["Direto e provocativo", "Técnico e educacional", "Leve e inspirador", "Profissional e sério"].map((t) => (
+          <button
+            key={t}
+            onClick={() => updateField("tone_of_voice", t)}
+            className="text-[10px] px-2.5 py-1 rounded-full border border-border bg-card hover:border-primary/50 hover:text-primary transition-colors"
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">Público-alvo *</Label>
         <Textarea
           value={profile.target_audience}
           onChange={(e) => updateField("target_audience", e.target.value)}
           placeholder="Quem é seu público? O que eles sentem e querem?"
-          rows={3}
-          className="bg-secondary border-border/50 resize-none"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Inimigo em comum</Label>
-        <Textarea
-          value={profile.common_enemy}
-          onChange={(e) => updateField("common_enemy", e.target.value)}
-          placeholder="O que vocês combatem juntos?"
           rows={2}
           className="bg-secondary border-border/50 resize-none"
         />
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Crenças e valores</Label>
-        <Textarea
-          value={profile.beliefs}
-          onChange={(e) => updateField("beliefs", e.target.value)}
-          placeholder="Suas crenças fortes sobre o mercado"
-          rows={2}
-          className="bg-secondary border-border/50 resize-none"
-        />
-      </div>
-    </div>
-  </div>
-);
-
-const StepVoice = ({
-  profile, updateField,
-}: {
-  profile: any;
-  updateField: (f: string, v: string) => void;
-}) => (
-  <div className="space-y-6">
-    <div className="text-center space-y-2">
-      <MessageSquare className="w-8 h-8 text-primary mx-auto" />
-      <h2 className="text-2xl font-black tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-        Sua voz
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        Como a IA deve escrever por você?
-      </p>
-    </div>
-
-    <div className="space-y-4">
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Tom de voz *</Label>
-        <Textarea
-          value={profile.tone_of_voice}
-          onChange={(e) => updateField("tone_of_voice", e.target.value)}
-          placeholder="Ex: Provocativo, direto, sem rodeios, com ironia inteligente..."
-          rows={3}
-          className="bg-secondary border-border/50 resize-none"
-        />
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {["Direto e provocativo", "Técnico e educacional", "Leve e inspirador", "Profissional e sério"].map((t) => (
-            <button
-              key={t}
-              onClick={() => updateField("tone_of_voice", t)}
-              className="text-[10px] px-2.5 py-1 rounded-full border border-border bg-card hover:border-primary/50 hover:text-primary transition-colors"
-            >
-              {t}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div className="space-y-1.5">
@@ -523,9 +478,32 @@ const StepVoice = ({
           value={profile.value_proposition}
           onChange={(e) => updateField("value_proposition", e.target.value)}
           placeholder="O que você entrega de único? Qual a transformação?"
-          rows={4}
+          rows={2}
           className="bg-secondary border-border/50 resize-none"
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Inimigo em comum</Label>
+          <Textarea
+            value={profile.common_enemy}
+            onChange={(e) => updateField("common_enemy", e.target.value)}
+            placeholder="O que vocês combatem juntos?"
+            rows={2}
+            className="bg-secondary border-border/50 resize-none"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Crenças e valores</Label>
+          <Textarea
+            value={profile.beliefs}
+            onChange={(e) => updateField("beliefs", e.target.value)}
+            placeholder="Suas convicções sobre o mercado"
+            rows={2}
+            className="bg-secondary border-border/50 resize-none"
+          />
+        </div>
       </div>
     </div>
 
