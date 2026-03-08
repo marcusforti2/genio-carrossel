@@ -168,17 +168,13 @@ const CarouselEditor = () => {
     setViewMode("editor");
   }, []);
 
-  const openMobileSidebar = () => {
-    setMobileSidebarOpen(true);
-  };
-
-  const SaveStatusIndicator = () => (
+  const saveStatusContent = useMemo(() => (
     <span className="text-[10px] text-muted-foreground flex items-center gap-1">
       {saveStatus === "saving" && <><Loader className="w-3 h-3 animate-spin" /> Salvando...</>}
       {saveStatus === "saved" && <><Check className="w-3 h-3 text-green-500" /> Salvo</>}
       {saveStatus === "error" && <span className="text-destructive">Erro ao salvar</span>}
     </span>
-  );
+  ), [saveStatus]);
 
   const sidebarContent = (
     <EditorSidebar
