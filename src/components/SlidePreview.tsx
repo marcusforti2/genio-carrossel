@@ -166,6 +166,14 @@ interface TemplateProps {
   forceTextOnly?: boolean;
 }
 
+/* ── Media renderer (image or video) ── */
+const SlideMedia = ({ slide, style }: { slide: SlideData; style?: React.CSSProperties }) => {
+  if (slide.mediaType === "video" && slide.videoUrl) {
+    return <video src={slide.videoUrl} autoPlay loop muted playsInline style={style} />;
+  }
+  return <img src={slide.imageUrl} alt="" style={style} />;
+};
+
 /* ═══════════════════════════════════════════
    FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
    ═══════════════════════════════════════════ */
