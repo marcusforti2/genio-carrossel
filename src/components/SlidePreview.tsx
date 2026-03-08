@@ -185,6 +185,16 @@ interface TemplateProps {
   footerHandle: string;
   footerBranding: string;
   forceTextOnly?: boolean;
+  isColorBg?: boolean;
+}
+  styles: Record<string, string>;
+  fontFam: string;
+  titleScale: number;
+  bodyScale: number;
+  Avatar: React.FC;
+  footerHandle: string;
+  footerBranding: string;
+  forceTextOnly?: boolean;
 }
 
 /* ── Media renderer (image or video) ── */
