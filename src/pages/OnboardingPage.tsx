@@ -104,7 +104,7 @@ const OnboardingPage = () => {
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case 0: return !!profile.avatar_url && rawText.trim().length >= 10;
+      case 0: return !!profile.avatar_url && !!profile.handle.trim() && rawText.trim().length >= 10;
       case 1: return !!profile.display_name.trim() && !!profile.handle.trim() && !!profile.niche.trim() && !!profile.target_audience.trim() && !!profile.tone_of_voice.trim() && !!profile.value_proposition.trim();
       default: return true;
     }
