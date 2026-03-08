@@ -113,6 +113,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
     mutedBg: colorBgIsLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
   } : styles;
 
+  const shared = { slide, carousel, styles: effectiveStyles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
+
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
       <div
