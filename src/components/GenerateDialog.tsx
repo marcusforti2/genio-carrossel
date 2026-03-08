@@ -474,7 +474,20 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                   ? `Adicionar mais (${uploadedImages.length} selecionada${uploadedImages.length > 1 ? "s" : ""})`
                   : "Subir imagens do computador"}
               </Button>
-            </div>
+            </div>}
+
+            {/* Video info */}
+            {mediaType === "video" && (
+              <div className="border-t border-border pt-4">
+                <p className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5">
+                  <Video className="w-3.5 h-3.5 text-primary" />
+                  Vídeos automáticos
+                </p>
+                <p className="text-[10px] text-muted-foreground">
+                  Vídeos serão buscados automaticamente no Pexels com base no conteúdo de cada slide.
+                </p>
+              </div>
+            )}
 
             {/* Generate button */}
             <Button onClick={handleGenerate} disabled={loading || !topic.trim()} className="w-full gap-2 h-11">
@@ -492,7 +505,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
             </Button>
 
             <p className="text-[10px] text-muted-foreground/60 text-center">
-              A IA gera o conteúdo e busca fotos reais automaticamente.
+              A IA gera o conteúdo e busca {mediaType === "video" ? "vídeos" : "fotos"} reais automaticamente.
             </p>
           </div>
         </div>
