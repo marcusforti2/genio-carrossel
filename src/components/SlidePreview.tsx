@@ -384,10 +384,11 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
 /* ═══════════════════════════════════════════
    BOLD TEMPLATE
    ═══════════════════════════════════════════ */
-const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly, isColorBg }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
-  const bg = (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
+  // In color mode, use transparent so the outer bg color shows through. Otherwise, accent for text-only.
+  const bg = isColorBg ? "transparent" : (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden", background: bg }}>
