@@ -222,7 +222,7 @@ const CarouselEditor = () => {
             className="h-7 text-xs bg-transparent border-none px-1 w-24 sm:w-40 font-semibold truncate"
             placeholder="Nome do projeto"
           />
-          <SaveStatusIndicator />
+          {saveStatusContent}
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">
