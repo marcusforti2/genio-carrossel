@@ -505,7 +505,6 @@ const SlideDesignOverrides = ({ slide, onUpdate, carousel }: { slide: SlideData;
 };
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
 
 const SectionHeader = ({ icon: Icon, label, open, onToggle }: { icon: React.ElementType; label: string; open: boolean; onToggle: () => void }) => (
   <CollapsibleTrigger asChild onClick={onToggle}>
