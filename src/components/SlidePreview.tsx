@@ -424,7 +424,7 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
                 <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
               </div>
             ) : (
-              <img src={slide.imageUrl} alt="" style={{ width: "100%", aspectRatio: "1/1", maxHeight: 380, objectFit: "cover", borderRadius: "50%" }} />
+              <SlideMedia slide={slide} style={{ width: "100%", aspectRatio: "1/1", maxHeight: 380, objectFit: "cover", borderRadius: "50%" }} />
             )}
           </div>
         )}
