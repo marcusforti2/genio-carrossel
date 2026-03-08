@@ -126,18 +126,18 @@ const CarouselEditor = () => {
     });
   }, []);
 
-  const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
-    setCarousel({
-      ...carousel,
+  const handleAIGenerated = useCallback((slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
+    setCarousel(prev => ({
+      ...prev,
       slides,
       ...(designStyle ? { designStyle } : {}),
       ...(theme ? { theme } : {}),
-    });
+    }));
     setSelectedSlide(0);
     setCaption(newCaption);
-  };
+  }, []);
 
-  const handleLoadProject = (project: Project) => {
+  const handleLoadProject = useCallback((project: Project) => {
     const data = loadProject(project);
     if (data) {
       const restored = data as any;
@@ -147,24 +147,26 @@ const CarouselEditor = () => {
       setCaption(cap);
       setSelectedSlide(0);
     }
-  };
+  }, [loadProject]);
 
-  const handleNewProject = () => {
+  const handleNewProject = useCallback(() => {
     newProject();
     setCarousel(createDefaultCarousel());
     setCaption("");
     setSelectedSlide(0);
-  };
+  }, [newProject]);
 
-  const goToSlide = (dir: -1 | 1) => {
-    const next = selectedSlide + dir;
-    if (next >= 0 && next < carousel.slides.length) setSelectedSlide(next);
-  };
+  const goToSlide = useCallback((dir: -1 | 1) => {
+    setSelectedSlide(prev => {
+      const next = prev + dir;
+      return next >= 0 && next < carousel.slides.length ? next : prev;
+    });
+  }, [carousel.slides.length]);
 
-  const handleCanvasSelect = (index: number) => {
+  const handleCanvasSelect = useCallback((index: number) => {
     setSelectedSlide(index);
     setViewMode("editor");
-  };
+  }, []);
 
   const openMobileSidebar = () => {
     setMobileSidebarOpen(true);
