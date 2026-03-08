@@ -469,7 +469,7 @@ const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
 /* ═══════════════════════════════════════════
    CTA SLIDE — 3 modes: theme / accent / image
    ═══════════════════════════════════════════ */
-const CtaSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle, footerBranding }: TemplateProps) => {
+const CtaSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, footerHandle, footerBranding }: TemplateProps) => {
   const keywordMatch = slide.body?.match(/'([A-ZÁÉÍÓÚÂÊÔÃÕÇ]+)'/);
   const keyword = keywordMatch?.[1] || "";
   const isDark = (slide.styleOverride?.bgMode ?? carousel.theme?.bgMode) === "dark";
