@@ -571,7 +571,7 @@ interface FooterProps {
   invertColors?: boolean;
 }
 
-const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertColors }: FooterProps) => (
+const SlideFooter = memo(({ carousel, styles, footerHandle, footerBranding, invertColors }: FooterProps) => (
   <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 40, flexShrink: 0 }}>
     {carousel.footer?.showBranding !== false && footerBranding && (
       <span style={{ fontSize: 24, fontWeight: 600, padding: "8px 24px", borderRadius: 999, background: invertColors ? "rgba(255,255,255,0.2)" : styles.tagBg, color: styles.tagFg }}>
