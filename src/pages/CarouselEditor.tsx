@@ -418,7 +418,7 @@ const CarouselEditor = () => {
           {/* Bottom actions */}
           <div className="flex border-t border-border/50">
             <button
-              onClick={openMobileSidebar}
+              onClick={() => setMobileSidebarOpen(true)}
               className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
             >
               <Pencil className="w-4 h-4" />
