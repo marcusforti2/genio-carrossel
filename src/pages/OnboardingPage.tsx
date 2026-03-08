@@ -120,21 +120,14 @@ const OnboardingPage = () => {
     if (!user) return;
     setSaving(true);
 
-    const { error: updateError } = await supabase
+    const { error } = await supabase
       .from("profiles")
-      .update(profile)
-      .eq("user_id", user.id);
+      .upsert({ ...profile, user_id: user.id }, { onConflict: "user_id" });
 
-    if (updateError) {
-      const { error: upsertError } = await supabase
-        .from("profiles")
-        .upsert({ ...profile, user_id: user.id }, { onConflict: "user_id" });
-
-      if (upsertError) {
-        toast.error("Erro ao salvar perfil. Tente novamente.");
-        setSaving(false);
-        return;
-      }
+    if (error) {
+      toast.error("Erro ao salvar perfil. Tente novamente.");
+      setSaving(false);
+      return;
     }
 
     toast.success("Perfil completo! Vamos criar carrosséis 🚀");
