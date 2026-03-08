@@ -62,12 +62,14 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     if (!q.trim()) return;
     setSearching(true);
     setShowSearch(true);
+    // Build richer context for first automatic search
+    const contextParts = [slide.title, slide.body].filter(Boolean).join(" — ");
     try {
       const { data, error } = await supabase.functions.invoke("search-pexels", {
         body: {
-          query: q,
+          query: query || searchQuery || contextParts,
           perPage: 6,
-          topic: carousel.brandingText || carousel.profileName || "",
+          topic: [carousel.brandingText, carousel.profileName].filter(Boolean).join(", "),
           bgMode: carousel.theme?.bgMode || "dark",
           niche: "",
         },
@@ -96,12 +98,13 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     if (!q.trim()) return;
     setSearchingVideo(true);
     setShowVideoSearch(true);
+    const contextParts = [slide.title, slide.body].filter(Boolean).join(" — ");
     try {
       const { data, error } = await supabase.functions.invoke("search-pexels-videos", {
         body: {
-          query: q,
+          query: query || videoSearchQuery || contextParts,
           perPage: 6,
-          topic: carousel.brandingText || carousel.profileName || "",
+          topic: [carousel.brandingText, carousel.profileName].filter(Boolean).join(", "),
         },
       });
       if (error) throw error;
