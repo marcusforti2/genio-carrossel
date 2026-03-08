@@ -399,7 +399,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
    MINIMAL TEMPLATE — centered, clean, lots of whitespace
    ═══════════════════════════════════════════ */
 const MinimalContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 80px 55px", overflow: "hidden", alignItems: "center", textAlign: "center" }}>
