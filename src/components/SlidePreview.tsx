@@ -144,11 +144,11 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
         {/* Header bar */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "48px 56px 0" }}>
-          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: isFullImage ? "rgba(255,255,255,0.6)" : styles.branding }}>
+          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: isFullImage ? "rgba(255,255,255,0.6)" : effectiveStyles.branding }}>
             {carousel.brandingSubtext || carousel.brandingText}
           </p>
-          <p style={{ fontSize: 24, color: isFullImage ? "rgba(255,255,255,0.6)" : styles.branding }}>{footerHandle}</p>
-          <div style={{ background: isFullImage ? "rgba(255,255,255,0.15)" : styles.counterBg, color: isFullImage ? "rgba(255,255,255,0.8)" : styles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
+          <p style={{ fontSize: 24, color: isFullImage ? "rgba(255,255,255,0.6)" : effectiveStyles.branding }}>{footerHandle}</p>
+          <div style={{ background: isFullImage ? "rgba(255,255,255,0.15)" : effectiveStyles.counterBg, color: isFullImage ? "rgba(255,255,255,0.8)" : effectiveStyles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
             {slideIndex + 1}/{totalSlides}
           </div>
         </div>
@@ -164,7 +164,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
         ) : ds.template === "minimal" ? (
           <MinimalContent {...shared} forceTextOnly={forceTextOnly} />
         ) : ds.template === "bold" ? (
-          <BoldContent {...shared} forceTextOnly={forceTextOnly} />
+          <BoldContent {...shared} forceTextOnly={forceTextOnly} isColorBg={isColorBg} />
         ) : (
           <ModernoContent {...shared} forceTextOnly={forceTextOnly} />
         )}
