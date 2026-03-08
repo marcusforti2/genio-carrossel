@@ -35,7 +35,7 @@ const DashboardPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [generateOpen, setGenerateOpen] = useState(false);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
@@ -49,7 +49,7 @@ const DashboardPage = () => {
     }
     setProjects(data || []);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchProjects();
