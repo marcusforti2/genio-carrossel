@@ -160,8 +160,7 @@ const CarouselEditor = () => {
     setViewMode("editor");
   };
 
-  const openMobileTab = (tab: "slide" | "design" | "profile" | "footer") => {
-    setMobileTab(tab);
+  const openMobileSidebar = () => {
     setMobileSidebarOpen(true);
   };
 
