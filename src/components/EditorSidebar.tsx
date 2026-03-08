@@ -84,10 +84,42 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
   };
 
   const selectPhoto = (photo: { url: string; photographer: string }) => {
-    onUpdate({ ...slide, imageUrl: photo.url, hasImage: true });
+    onUpdate({ ...slide, imageUrl: photo.url, hasImage: true, mediaType: "image", videoUrl: undefined });
     setShowSearch(false);
     setSearchResults([]);
     toast.success(`Foto de ${photo.photographer} aplicada!`);
+  };
+
+  const searchPexelsVideos = async (query?: string) => {
+    const q = query || videoSearchQuery || slide.title;
+    if (!q.trim()) return;
+    setSearchingVideo(true);
+    setShowVideoSearch(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("search-pexels-videos", {
+        body: {
+          query: q,
+          perPage: 6,
+          topic: carousel.brandingText || carousel.profileName || "",
+        },
+      });
+      if (error) throw error;
+      if (data?.error) { toast.error(data.error); return; }
+      setVideoResults(data?.videos || []);
+      if (!data?.videos?.length) toast.info("Nenhum vídeo encontrado");
+    } catch (e: any) {
+      console.error(e);
+      toast.error("Erro ao buscar vídeos");
+    } finally {
+      setSearchingVideo(false);
+    }
+  };
+
+  const selectVideo = (video: { url: string; thumbnail: string; user: string }) => {
+    onUpdate({ ...slide, videoUrl: video.url, videoThumbnail: video.thumbnail, hasImage: true, mediaType: "video", imageUrl: video.thumbnail });
+    setShowVideoSearch(false);
+    setVideoResults([]);
+    toast.success(`Vídeo de ${video.user} aplicado!`);
   };
 
   return (
