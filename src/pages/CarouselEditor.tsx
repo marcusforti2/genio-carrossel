@@ -181,7 +181,7 @@ const CarouselEditor = () => {
       onDeleteSlide={deleteSlide}
       onAddSlide={addSlide}
       onUpdateCarousel={setCarousel}
-      initialTab={isMobile ? mobileTab : undefined}
+      initialTab={undefined}
     />
   );
 
