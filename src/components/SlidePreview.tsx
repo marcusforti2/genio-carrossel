@@ -108,10 +108,14 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
           overflow: "hidden",
         }}
       >
-        {/* Fullimage background */}
+        {/* Fullimage background - image or video */}
         {isFullImage && (
           <>
-            <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            {slide.mediaType === "video" && slide.videoUrl ? (
+              <video src={slide.videoUrl} autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            ) : (
+              <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+            )}
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.85) 100%)" }} />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.85) 100%)" }} />
           </>
