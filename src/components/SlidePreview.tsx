@@ -281,7 +281,8 @@ const CoverSlide = memo(({ slide, carousel, styles, fontFam, titleScale, avatarN
       )}
     </div>
   </div>
-);
+));
+CoverSlide.displayName = "CoverSlide";
 
 /* ═══════════════════════════════════════════
    EDITORIAL TEMPLATE
