@@ -8,7 +8,7 @@ import CaptionButton from "@/components/CaptionButton";
 import CanvasView from "@/components/CanvasView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft, Pencil, Palette, UserCircle, Type } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectAutosave, Project } from "@/hooks/useProjectAutosave";
@@ -26,7 +26,6 @@ const CarouselEditor = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<"editor" | "canvas">("editor");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"slide" | "design" | "profile" | "footer">("slide");
   const [initialLoading, setInitialLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -161,8 +160,7 @@ const CarouselEditor = () => {
     setViewMode("editor");
   };
 
-  const openMobileTab = (tab: "slide" | "design" | "profile" | "footer") => {
-    setMobileTab(tab);
+  const openMobileSidebar = () => {
     setMobileSidebarOpen(true);
   };
 
@@ -183,7 +181,7 @@ const CarouselEditor = () => {
       onDeleteSlide={deleteSlide}
       onAddSlide={addSlide}
       onUpdateCarousel={setCarousel}
-      initialTab={isMobile ? mobileTab : undefined}
+      initialTab={undefined}
     />
   );
 
@@ -413,28 +411,20 @@ const CarouselEditor = () => {
             <ExportButtons carousel={carousel} showLabel />
           </div>
 
-          {/* Edit tabs - section navigation */}
+          {/* Bottom actions */}
           <div className="flex border-t border-border/50">
-            {([
-              { id: "slide" as const, icon: Pencil, label: "Editar" },
-              { id: "design" as const, icon: Palette, label: "Design" },
-              { id: "profile" as const, icon: UserCircle, label: "Perfil" },
-              { id: "footer" as const, icon: Type, label: "Rodapé" },
-            ]).map((t) => (
-              <button
-                key={t.id}
-                onClick={() => openMobileTab(t.id)}
-                className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
-              >
-                <t.icon className="w-4.5 h-4.5" />
-                <span className="text-[10px] font-medium">{t.label}</span>
-              </button>
-            ))}
+            <button
+              onClick={openMobileSidebar}
+              className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+              <span className="text-[10px] font-medium">Editar</span>
+            </button>
             <button
               onClick={() => setViewMode(viewMode === "canvas" ? "editor" : "canvas")}
               className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-muted-foreground active:text-primary active:bg-primary/5 transition-colors"
             >
-              <LayoutGrid className="w-4.5 h-4.5" />
+              <LayoutGrid className="w-4 h-4" />
               <span className="text-[10px] font-medium">Todos</span>
             </button>
           </div>
