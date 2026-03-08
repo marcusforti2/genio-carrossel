@@ -267,6 +267,35 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
               </div>
             </div>
 
+            {/* Media type selector */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Tipo de mídia</Label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMediaType("image")}
+                  className={`flex-1 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                    mediaType === "image"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-secondary hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4" style={{ color: mediaType === "image" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
+                  <span className={`text-xs font-semibold ${mediaType === "image" ? "text-primary" : "text-muted-foreground"}`}>Imagens</span>
+                </button>
+                <button
+                  onClick={() => setMediaType("video")}
+                  className={`flex-1 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
+                    mediaType === "video"
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-secondary hover:border-muted-foreground/30"
+                  }`}
+                >
+                  <Video className="w-4 h-4" style={{ color: mediaType === "video" ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }} />
+                  <span className={`text-xs font-semibold ${mediaType === "video" ? "text-primary" : "text-muted-foreground"}`}>Vídeos</span>
+                </button>
+              </div>
+            </div>
+
             {/* Topic */}
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Tema / Ideia</Label>
