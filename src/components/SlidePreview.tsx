@@ -81,7 +81,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const footerHandle = carousel.profileHandle || "";
   const footerBranding = carousel.brandingText || "";
 
-  const shared = { slide, carousel, styles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
+  
 
   // Determine background style
   const bgStyle = so.bgStyle || "theme";
@@ -89,8 +89,31 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const isColorBg = bgStyle === "color";
   const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
   
-  // When color or fullimage mode, force text-only layout in templates
-  const forceTextOnly = bgStyle === "color" || bgStyle === "fullimage";
+  // Only fullimage forces text-only (image becomes bg). Color mode keeps images visible.
+  const forceTextOnly = bgStyle === "fullimage";
+
+  // For color bg mode, detect if the chosen color is light to invert text colors
+  const colorBgIsLight = isColorBg && (() => {
+    const parts = (so.bgColor || "0 0% 6%").split(" ");
+    const lightness = parseFloat(parts[2] || "6");
+    return lightness > 55;
+  })();
+
+  // Override text colors when using a solid color bg
+  const effectiveStyles = isColorBg ? {
+    ...styles,
+    bg: slideBgColor,
+    title: colorBgIsLight ? "hsl(0 0% 8%)" : "hsl(0 0% 100%)",
+    body: colorBgIsLight ? "hsl(0 0% 30%)" : "hsl(0 0% 70%)",
+    branding: colorBgIsLight ? "hsl(0 0% 50%)" : "hsl(0 0% 55%)",
+    counterBg: colorBgIsLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.15)",
+    counterText: colorBgIsLight ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.8)",
+    handleBg: colorBgIsLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)",
+    borderLight: colorBgIsLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+    mutedBg: colorBgIsLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+  } : styles;
+
+  const shared = { slide, carousel, styles: effectiveStyles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
@@ -123,11 +146,11 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
         {/* Header bar */}
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "48px 56px 0" }}>
-          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: isFullImage ? "rgba(255,255,255,0.6)" : styles.branding }}>
+          <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: isFullImage ? "rgba(255,255,255,0.6)" : effectiveStyles.branding }}>
             {carousel.brandingSubtext || carousel.brandingText}
           </p>
-          <p style={{ fontSize: 24, color: isFullImage ? "rgba(255,255,255,0.6)" : styles.branding }}>{footerHandle}</p>
-          <div style={{ background: isFullImage ? "rgba(255,255,255,0.15)" : styles.counterBg, color: isFullImage ? "rgba(255,255,255,0.8)" : styles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
+          <p style={{ fontSize: 24, color: isFullImage ? "rgba(255,255,255,0.6)" : effectiveStyles.branding }}>{footerHandle}</p>
+          <div style={{ background: isFullImage ? "rgba(255,255,255,0.15)" : effectiveStyles.counterBg, color: isFullImage ? "rgba(255,255,255,0.8)" : effectiveStyles.counterText, borderRadius: 999, padding: "6px 20px", fontSize: 22, fontWeight: 500, backdropFilter: "blur(8px)" }}>
             {slideIndex + 1}/{totalSlides}
           </div>
         </div>
@@ -143,7 +166,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
         ) : ds.template === "minimal" ? (
           <MinimalContent {...shared} forceTextOnly={forceTextOnly} />
         ) : ds.template === "bold" ? (
-          <BoldContent {...shared} forceTextOnly={forceTextOnly} />
+          <BoldContent {...shared} forceTextOnly={forceTextOnly} isColorBg={isColorBg} />
         ) : (
           <ModernoContent {...shared} forceTextOnly={forceTextOnly} />
         )}
@@ -164,6 +187,7 @@ interface TemplateProps {
   footerHandle: string;
   footerBranding: string;
   forceTextOnly?: boolean;
+  isColorBg?: boolean;
 }
 
 /* ── Media renderer (image or video) ── */
@@ -360,19 +384,20 @@ const ModernoContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScal
 /* ═══════════════════════════════════════════
    BOLD TEMPLATE
    ═══════════════════════════════════════════ */
-const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
+const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly, isColorBg }: TemplateProps) => {
   const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
-  const bg = (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
+  // In color mode, use transparent so the outer bg color shows through. Otherwise, accent for text-only.
+  const bg = isColorBg ? "transparent" : (isTextOnly && !forceTextOnly) ? styles.accent : (forceTextOnly ? "transparent" : styles.bg);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", padding: "150px 65px 55px", overflow: "hidden", background: bg }}>
       <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <h2 style={{ fontSize: (isTextOnly ? 82 : 62) * titleScale, fontWeight: 900, lineHeight: 1.08, color: isTextOnly ? styles.tagFg : styles.title, fontFamily: fontFam, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        <h2 style={{ fontSize: (isTextOnly ? 82 : 62) * titleScale, fontWeight: 900, lineHeight: 1.08, color: (isTextOnly && !isColorBg) ? styles.tagFg : styles.title, fontFamily: fontFam, WebkitLineClamp: 6, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
           {slide.title}
         </h2>
         {slide.body && (
-          <p style={{ fontSize: (isTextOnly ? 36 : 32) * bodyScale, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: isTextOnly ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <p style={{ fontSize: (isTextOnly ? 36 : 32) * bodyScale, lineHeight: 1.5, marginTop: 48, fontWeight: 500, color: (isTextOnly && !isColorBg) ? `${styles.tagFg}cc` : styles.body, fontFamily: fontFam, WebkitLineClamp: 7, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {slide.body}
           </p>
         )}
@@ -390,7 +415,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
         </div>
       )}
 
-      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors={isTextOnly} />
+      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors={isTextOnly && !isColorBg} />
     </div>
   );
 };
