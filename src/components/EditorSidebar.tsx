@@ -289,6 +289,59 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         )}
       </div>
 
+      {/* Pexels video search */}
+      <div className="space-y-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full gap-2 text-xs"
+          disabled={searchingVideo}
+          onClick={() => searchPexelsVideos(slide.title)}
+        >
+          {searchingVideo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Video className="w-3.5 h-3.5" />}
+          {searchingVideo ? "Buscando..." : "Buscar vídeo (Pexels)"}
+        </Button>
+
+        {showVideoSearch && (
+          <div className="space-y-2">
+            <div className="flex gap-1.5">
+              <Input
+                value={videoSearchQuery}
+                onChange={(e) => setVideoSearchQuery(e.target.value)}
+                placeholder="Buscar vídeo por tema..."
+                className="bg-secondary border-border/50 text-xs h-8"
+                onKeyDown={(e) => e.key === "Enter" && searchPexelsVideos()}
+              />
+              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => { setShowVideoSearch(false); setVideoResults([]); }}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+
+            {videoResults.length > 0 && (
+              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto">
+                {videoResults.map((video) => (
+                  <button
+                    key={video.id}
+                    onClick={() => selectVideo(video)}
+                    className="rounded-md overflow-hidden border border-border hover:border-primary transition-colors relative group"
+                  >
+                    <img src={video.thumbnail} alt="" className="w-full h-16 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center flex-col gap-0.5">
+                      <Video className="w-3.5 h-3.5 text-white" />
+                      <span className="text-[8px] text-white font-medium">{video.duration}s</span>
+                    </div>
+                    <div className="absolute top-0.5 right-0.5 bg-black/70 rounded px-1">
+                      <Video className="w-2.5 h-2.5 text-white" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-[8px] text-muted-foreground/60 text-center">Vídeos por Pexels</p>
+          </div>
+        )}
+      </div>
+
       {/* Upload manual */}
       <div>
         <input
