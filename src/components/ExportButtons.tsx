@@ -389,6 +389,8 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
     }
   };
 
+  const hasVideo = carousel.slides.some(s => s.mediaType === "video" && s.videoUrl);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -402,9 +404,14 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
           <FileArchive className="w-3.5 h-3.5" />
           Baixar tudo (.zip)
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={downloadPdf} className="gap-2 text-xs cursor-pointer">
+        <DropdownMenuItem
+          onClick={hasVideo ? undefined : downloadPdf}
+          disabled={hasVideo}
+          className="gap-2 text-xs cursor-pointer"
+        >
           <FileText className="w-3.5 h-3.5" />
           Baixar PDF
+          {hasVideo && <span className="text-[9px] text-muted-foreground ml-auto">(tem vídeo)</span>}
         </DropdownMenuItem>
         {carousel.slides.map((_, i) => (
           <DropdownMenuItem key={i} onClick={() => downloadSingle(i)} className="gap-2 text-xs cursor-pointer">
