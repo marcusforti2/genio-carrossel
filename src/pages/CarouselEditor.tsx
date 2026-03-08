@@ -120,8 +120,10 @@ const CarouselEditor = () => {
       body: "Desenvolva seu argumento aqui. Seja provocativo, direto e autêntico.",
       hasImage: true,
     };
-    setCarousel(prev => ({ ...prev, slides: [...prev.slides, newSlide] }));
-    setSelectedSlide(prev => prev + 1);
+    setCarousel(prev => {
+      setSelectedSlide(prev.slides.length);
+      return { ...prev, slides: [...prev.slides, newSlide] };
+    });
   }, []);
 
   const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
