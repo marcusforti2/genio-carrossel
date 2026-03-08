@@ -589,6 +589,7 @@ const SlideFooter = memo(({ carousel, styles, footerHandle, footerBranding, inve
       </span>
     )}
   </div>
-);
+));
+SlideFooter.displayName = "SlideFooter";
 
 export default memo(SlidePreview);
