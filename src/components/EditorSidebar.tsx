@@ -388,16 +388,26 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         {imgLoading ? "Gerando imagem..." : "Gerar imagem com IA"}
       </Button>
 
-      {slide.imageUrl && (
+      {(slide.imageUrl || slide.videoUrl) && (
         <div className="rounded-md overflow-hidden border border-border">
-          <img src={slide.imageUrl} alt="Slide" className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+          {slide.mediaType === "video" && slide.videoUrl ? (
+            <div className="relative">
+              <video src={slide.videoUrl} autoPlay loop muted playsInline className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+              <div className="absolute top-1 right-1 bg-black/70 rounded px-1.5 py-0.5 flex items-center gap-1">
+                <Video className="w-3 h-3 text-white" />
+                <span className="text-[9px] text-white font-medium">Vídeo</span>
+              </div>
+            </div>
+          ) : (
+            <img src={slide.imageUrl} alt="Slide" className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+          )}
           <Button
             variant="ghost"
             size="sm"
             className="w-full text-[10px] text-muted-foreground"
-            onClick={() => onUpdate({ ...slide, imageUrl: undefined })}
+            onClick={() => onUpdate({ ...slide, imageUrl: undefined, videoUrl: undefined, videoThumbnail: undefined, mediaType: undefined })}
           >
-            Remover imagem
+            Remover {slide.mediaType === "video" ? "vídeo" : "imagem"}
           </Button>
         </div>
       )}
