@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { CarouselData, SlideData, createDefaultCarousel } from "@/types/carousel";
 import SlidePreview from "@/components/SlidePreview";
 import EditorSidebar from "@/components/EditorSidebar";
