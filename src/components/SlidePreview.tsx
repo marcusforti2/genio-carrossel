@@ -81,7 +81,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const footerHandle = carousel.profileHandle || "";
   const footerBranding = carousel.brandingText || "";
 
-  const shared = { slide, carousel, styles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
+  const shared = { slide, carousel, styles: effectiveStyles, fontFam, titleScale, bodyScale, Avatar, footerHandle, footerBranding };
 
   // Determine background style
   const bgStyle = so.bgStyle || "theme";
