@@ -83,7 +83,7 @@ const OnboardingPage = () => {
       setProfile((prev) => ({
         ...prev,
         display_name: data.display_name || prev.display_name,
-        handle: data.handle || prev.handle,
+        handle: prev.handle.trim() ? prev.handle : (data.handle || prev.handle),
         branding_text: data.branding_text || prev.branding_text,
         branding_subtext: data.branding_subtext || prev.branding_subtext,
         niche: data.niche || prev.niche,
