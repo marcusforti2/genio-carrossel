@@ -385,7 +385,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
               <Loader2 className="animate-spin" style={{ width: 48, height: 48, color: styles.accent }} />
             </div>
           ) : (
-            <img src={slide.imageUrl} alt="" style={{ width: "100%", height: "100%", maxHeight: 450, objectFit: "cover", borderRadius: 12 }} />
+            <SlideMedia slide={slide} style={{ width: "100%", height: "100%", maxHeight: 450, objectFit: "cover", borderRadius: 12 }} />
           )}
         </div>
       )}
