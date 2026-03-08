@@ -298,12 +298,15 @@ const StepPhotoAndText = ({
         )}
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">Seu @ *</Label>
-          <Input
-            value={profile.handle}
-            onChange={(e) => updateField("handle", e.target.value)}
-            placeholder="@seuhandle"
-            className="bg-secondary border-border/50 text-sm"
-          />
+          <div className="flex items-center bg-secondary border border-border/50 rounded-md overflow-hidden">
+            <span className="pl-3 text-sm text-muted-foreground select-none">@</span>
+            <Input
+              value={profile.handle.replace(/^@/, "")}
+              onChange={(e) => updateField("handle", `@${e.target.value.replace(/^@/, "")}`)}
+              placeholder="seuhandle"
+              className="bg-transparent border-none text-sm focus-visible:ring-0 focus-visible:ring-offset-0 pl-0.5"
+            />
+          </div>
         </div>
       </div>
     </div>
