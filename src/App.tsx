@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfileComplete } from "@/hooks/useProfileComplete";
-import { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 const CarouselEditor = lazy(() => import("./pages/CarouselEditor"));
@@ -16,13 +16,21 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+    },
+  },
+});
 
-const LoadingScreen = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
+const LoadingScreen = React.forwardRef<HTMLDivElement>((_, ref) => (
+  <div ref={ref} className="min-h-screen bg-background flex items-center justify-center">
     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
   </div>
-);
+));
+LoadingScreen.displayName = "LoadingScreen";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();

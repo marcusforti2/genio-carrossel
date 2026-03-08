@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { SlideData, CarouselData, ACCENT_PRESETS, DesignStyle } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,18 +52,18 @@ const EditorSidebar = ({
   });
   const selectedSlide = carousel.slides[selectedSlideIndex];
 
-  const toggleSection = (section: string) => {
+  const toggleSection = useCallback((section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
+  }, []);
 
-  const updateTheme = (partial: Partial<CarouselData["theme"]>) => {
+  const updateTheme = useCallback((partial: Partial<CarouselData["theme"]>) => {
     onUpdateCarousel({ ...carousel, theme: { ...carousel.theme, ...partial } });
-  };
+  }, [carousel, onUpdateCarousel]);
 
-  const updateDesignStyle = (partial: Partial<DesignStyle>) => {
+  const updateDesignStyle = useCallback((partial: Partial<DesignStyle>) => {
     const current = carousel.designStyle || { template: "bold" as const, fontFamily: "sans" as const, titleSize: "grande" as const, bodySize: "grande" as const };
     onUpdateCarousel({ ...carousel, designStyle: { ...current, ...partial } });
-  };
+  }, [carousel, onUpdateCarousel]);
 
   const ds = carousel.designStyle || { template: "bold", fontFamily: "sans", titleSize: "grande", bodySize: "grande" };
 
@@ -327,4 +327,4 @@ const EditorSidebar = ({
   );
 };
 
-export default EditorSidebar;
+export default memo(EditorSidebar);
