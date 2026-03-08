@@ -61,7 +61,10 @@ const prepareCarouselForExport = async (carousel: CarouselData): Promise<Carouse
   const urlsToProxy: { key: string; url: string }[] = [];
 
   carousel.slides.forEach((slide, i) => {
-    if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
+    // For video slides, use the thumbnail as a static image for export
+    if (slide.mediaType === "video" && slide.videoThumbnail) {
+      urlsToProxy.push({ key: `slide-${i}`, url: slide.videoThumbnail });
+    } else if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
       urlsToProxy.push({ key: `slide-${i}`, url: slide.imageUrl });
     }
   });
@@ -88,6 +91,13 @@ const prepareCarouselForExport = async (carousel: CarouselData): Promise<Carouse
 
   const slides = carousel.slides.map((slide, i) => {
     const proxied = urlMap.get(`slide-${i}`);
+    
+    // Convert video slides to image slides using thumbnail
+    if (slide.mediaType === "video" && proxied && proxied !== TRANSPARENT_PIXEL) {
+      console.log(`[Export] Converting video slide ${i + 1} to image using thumbnail`);
+      return { ...slide, imageUrl: proxied, mediaType: "image" as const, videoUrl: undefined, hasImage: true };
+    }
+    
     if (proxied && proxied !== TRANSPARENT_PIXEL) {
       return { ...slide, imageUrl: proxied };
     }
@@ -98,7 +108,7 @@ const prepareCarouselForExport = async (carousel: CarouselData): Promise<Carouse
     // If proxy totally failed, remove image to avoid CORS error
     if (proxied === TRANSPARENT_PIXEL) {
       console.warn(`[Export] Removing failed image from slide ${i + 1}`);
-      return { ...slide, imageUrl: undefined, hasImage: false };
+      return { ...slide, imageUrl: undefined, hasImage: false, videoUrl: undefined, mediaType: undefined };
     }
     return slide;
   });
