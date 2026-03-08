@@ -262,7 +262,7 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, 
     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
     <div style={{ position: "relative", zIndex: 10, padding: "0 75px 120px", textAlign: "left" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 40 }}>
-        <Avatar />
+        {avatarNode}
         <div>
           <p style={{ fontSize: 32, fontWeight: 700, color: styles.title, lineHeight: 1.2 }}>
             {carousel.profileName} <span style={{ color: styles.accent }}>✓</span>
