@@ -194,12 +194,13 @@ interface TemplateProps {
 }
 
 /* ── Media renderer (image or video) ── */
-const SlideMedia = ({ slide, style }: { slide: SlideData; style?: React.CSSProperties }) => {
+const SlideMedia = memo(({ slide, style }: { slide: SlideData; style?: React.CSSProperties }) => {
   if (slide.mediaType === "video" && slide.videoUrl) {
     return <video src={slide.videoUrl} autoPlay loop muted playsInline style={style} />;
   }
   return <img src={slide.imageUrl} alt="" style={style} />;
-};
+});
+SlideMedia.displayName = "SlideMedia";
 
 /* ═══════════════════════════════════════════
    FULLIMAGE CONTENT — image as full bg, text-only layout overlaid
@@ -252,7 +253,7 @@ const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, bodySc
 /* ═══════════════════════════════════════════
    COVER SLIDE
    ═══════════════════════════════════════════ */
-const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, footerHandle }: TemplateProps) => (
+const CoverSlide = memo(({ slide, carousel, styles, fontFam, titleScale, avatarNode, footerHandle }: TemplateProps) => (
   <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative" }}>
     {slide.mediaType === "video" && slide.videoUrl ? (
       <video src={slide.videoUrl} autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
@@ -280,7 +281,8 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, 
       )}
     </div>
   </div>
-);
+));
+CoverSlide.displayName = "CoverSlide";
 
 /* ═══════════════════════════════════════════
    EDITORIAL TEMPLATE
@@ -569,7 +571,7 @@ interface FooterProps {
   invertColors?: boolean;
 }
 
-const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertColors }: FooterProps) => (
+const SlideFooter = memo(({ carousel, styles, footerHandle, footerBranding, invertColors }: FooterProps) => (
   <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 40, flexShrink: 0 }}>
     {carousel.footer?.showBranding !== false && footerBranding && (
       <span style={{ fontSize: 24, fontWeight: 600, padding: "8px 24px", borderRadius: 999, background: invertColors ? "rgba(255,255,255,0.2)" : styles.tagBg, color: styles.tagFg }}>
@@ -587,6 +589,7 @@ const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertCol
       </span>
     )}
   </div>
-);
+));
+SlideFooter.displayName = "SlideFooter";
 
 export default memo(SlidePreview);

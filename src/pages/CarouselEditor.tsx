@@ -176,18 +176,23 @@ const CarouselEditor = () => {
     </span>
   ), [saveStatus]);
 
-  const sidebarContent = (
+  const handleSidebarSelectSlide = useCallback((i: number) => {
+    setSelectedSlide(i);
+    setMobileSidebarOpen(false);
+  }, []);
+
+  const sidebarContent = useMemo(() => (
     <EditorSidebar
       carousel={carousel}
       selectedSlideIndex={selectedSlide}
-      onSelectSlide={(i) => { setSelectedSlide(i); setMobileSidebarOpen(false); }}
+      onSelectSlide={handleSidebarSelectSlide}
       onUpdateSlide={updateSlide}
       onDeleteSlide={deleteSlide}
       onAddSlide={addSlide}
       onUpdateCarousel={setCarousel}
       initialTab={undefined}
     />
-  );
+  ), [carousel, selectedSlide, handleSidebarSelectSlide, updateSlide, deleteSlide, addSlide]);
 
   // Swipe handling for mobile
   const touchStartX = useRef(0);

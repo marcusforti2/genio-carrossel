@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,7 +35,7 @@ const DashboardPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [generateOpen, setGenerateOpen] = useState(false);
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
@@ -49,7 +49,7 @@ const DashboardPage = () => {
     }
     setProjects(data || []);
     setLoading(false);
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchProjects();
@@ -129,18 +129,18 @@ const DashboardPage = () => {
     fetchProjects();
   };
 
-  const formatDate = (d: string) =>
+  const formatDate = useCallback((d: string) =>
     new Date(d).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
+    }), []);
 
-  const filtered = projects.filter((p) =>
+  const filtered = useMemo(() => projects.filter((p) =>
     p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [projects, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
