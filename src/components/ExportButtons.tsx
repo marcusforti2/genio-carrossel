@@ -61,7 +61,10 @@ const prepareCarouselForExport = async (carousel: CarouselData): Promise<Carouse
   const urlsToProxy: { key: string; url: string }[] = [];
 
   carousel.slides.forEach((slide, i) => {
-    if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
+    // For video slides, use the thumbnail as a static image for export
+    if (slide.mediaType === "video" && slide.videoThumbnail) {
+      urlsToProxy.push({ key: `slide-${i}`, url: slide.videoThumbnail });
+    } else if (slide.imageUrl && !slide.imageUrl.startsWith("data:")) {
       urlsToProxy.push({ key: `slide-${i}`, url: slide.imageUrl });
     }
   });
