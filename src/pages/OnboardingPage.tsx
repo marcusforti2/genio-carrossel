@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -11,10 +11,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
   Sparkles, ArrowRight, ArrowLeft, Camera, Loader2, User,
-  CheckCircle2, Wand2, Rocket, Target, Palette, MessageSquare,
+  CheckCircle2, Wand2, Rocket, Target,
 } from "lucide-react";
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 2;
 
 const OnboardingPage = () => {
   const { user } = useAuth();
@@ -80,13 +80,12 @@ const OnboardingPage = () => {
       if (error) throw error;
       if (data?.error) { toast.error(data.error); return; }
 
-      // Only fill fields that are still empty — don't overwrite identity fields already filled in step 1
       setProfile((prev) => ({
         ...prev,
-        display_name: prev.display_name.trim() ? prev.display_name : (data.display_name || prev.display_name),
-        handle: prev.handle.trim() ? prev.handle : (data.handle || prev.handle),
-        branding_text: prev.branding_text.trim() ? prev.branding_text : (data.branding_text || prev.branding_text),
-        branding_subtext: prev.branding_subtext.trim() ? prev.branding_subtext : (data.branding_subtext || prev.branding_subtext),
+        display_name: data.display_name || prev.display_name,
+        handle: data.handle || prev.handle,
+        branding_text: data.branding_text || prev.branding_text,
+        branding_subtext: data.branding_subtext || prev.branding_subtext,
         niche: data.niche || prev.niche,
         target_audience: data.target_audience || prev.target_audience,
         common_enemy: data.common_enemy || prev.common_enemy,
@@ -94,7 +93,8 @@ const OnboardingPage = () => {
         tone_of_voice: data.tone_of_voice || prev.tone_of_voice,
         value_proposition: data.value_proposition || prev.value_proposition,
       }));
-      toast.success("Perfil preenchido pela IA!");
+      toast.success("Perfil preenchido pela IA! Confira e ajuste no próximo passo.");
+      setStep(1);
     } catch {
       toast.error("Erro ao processar texto");
     } finally {
@@ -104,36 +104,39 @@ const OnboardingPage = () => {
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case 0: return true; // welcome
-      case 1: return !!profile.avatar_url && !!profile.display_name.trim() && !!profile.handle.trim();
-      case 2: return !!profile.niche.trim() && !!profile.target_audience.trim() && !!profile.tone_of_voice.trim() && !!profile.value_proposition.trim();
+      case 0: return !!profile.avatar_url && rawText.trim().length >= 10;
+      case 1: return !!profile.display_name.trim() && !!profile.handle.trim() && !!profile.niche.trim() && !!profile.target_audience.trim() && !!profile.tone_of_voice.trim() && !!profile.value_proposition.trim();
       default: return true;
+    }
+  };
+
+  const handleNext = () => {
+    if (step === 0) {
+      handleParseWithAI();
     }
   };
 
   const handleFinish = async () => {
     if (!user) return;
     setSaving(true);
-    
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update(profile)
       .eq("user_id", user.id);
-    
+
     if (updateError) {
-      console.error("Profile update error:", updateError);
       const { error: upsertError } = await supabase
         .from("profiles")
         .upsert({ ...profile, user_id: user.id }, { onConflict: "user_id" });
-      
+
       if (upsertError) {
-        console.error("Profile upsert error:", upsertError);
         toast.error("Erro ao salvar perfil. Tente novamente.");
         setSaving(false);
         return;
       }
     }
-    
+
     toast.success("Perfil completo! Vamos criar carrosséis 🚀");
     navigate("/dashboard", { replace: true });
   };
@@ -148,7 +151,6 @@ const OnboardingPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress bar */}
       <div className="w-full px-6 pt-6">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-2">
@@ -161,7 +163,6 @@ const OnboardingPage = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-lg">
           <AnimatePresence mode="wait">
@@ -173,24 +174,21 @@ const OnboardingPage = () => {
               exit="exit"
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              {step === 0 && <StepWelcome />}
-              {step === 1 && (
-                <StepIdentity
+              {step === 0 && (
+                <StepPhotoAndText
                   profile={profile}
-                  updateField={updateField}
                   fileInputRef={fileInputRef}
                   uploading={uploading}
                   onAvatarUpload={handleAvatarUpload}
-                />
-              )}
-              {step === 2 && (
-                <StepBusinessAndVoice
-                  profile={profile}
-                  updateField={updateField}
                   rawText={rawText}
                   setRawText={setRawText}
                   parsing={parsing}
-                  onParse={handleParseWithAI}
+                />
+              )}
+              {step === 1 && (
+                <StepReview
+                  profile={profile}
+                  updateField={updateField}
                 />
               )}
             </motion.div>
@@ -198,7 +196,6 @@ const OnboardingPage = () => {
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="w-full px-6 pb-8">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <Button
@@ -212,14 +209,17 @@ const OnboardingPage = () => {
             Voltar
           </Button>
 
-          {step < TOTAL_STEPS - 1 ? (
+          {step === 0 ? (
             <Button
-              onClick={() => setStep((s) => s + 1)}
-              disabled={!canAdvance()}
+              onClick={handleNext}
+              disabled={!canAdvance() || parsing}
               className="gap-2 px-6"
             >
-              Continuar
-              <ArrowRight className="w-4 h-4" />
+              {parsing ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Analisando com IA...</>
+              ) : (
+                <><Sparkles className="w-4 h-4" /> Analisar e preencher</>
+              )}
             </Button>
           ) : (
             <Button
@@ -240,64 +240,38 @@ const OnboardingPage = () => {
   );
 };
 
-/* ─── Step Components ─── */
+/* ─── Step 1: Photo + Text ─── */
 
-const StepWelcome = () => (
-  <div className="text-center space-y-6">
-    <motion.div
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-      className="w-20 h-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto"
-    >
-      <Sparkles className="w-9 h-9 text-primary" />
-    </motion.div>
-    <div className="space-y-3">
-      <h1 className="text-3xl font-black tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-        Bem-vindo ao Carousel Spark
-      </h1>
-      <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-        Antes de criar seus carrosséis com IA, vamos configurar seu perfil. 
-        Isso leva <span className="text-foreground font-semibold">menos de 2 minutos</span> e garante 
-        que todo conteúdo gerado tenha a <span className="text-primary font-semibold">sua cara</span>.
-      </p>
-    </div>
-    <div className="grid grid-cols-2 gap-3 pt-2">
-      {[
-        { icon: Palette, label: "Sua identidade", desc: "Foto, nome e marca" },
-        { icon: Target, label: "Negócio & Voz", desc: "Nicho, público e tom" },
-      ].map(({ icon: Icon, label, desc }) => (
-        <div key={label} className="rounded-xl border border-border bg-card p-3 space-y-2">
-          <Icon className="w-5 h-5 text-primary mx-auto" />
-          <p className="text-[11px] font-bold text-foreground">{label}</p>
-          <p className="text-[10px] text-muted-foreground">{desc}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const StepIdentity = ({
-  profile, updateField, fileInputRef, uploading, onAvatarUpload,
+const StepPhotoAndText = ({
+  profile, fileInputRef, uploading, onAvatarUpload, rawText, setRawText, parsing,
 }: {
   profile: any;
-  updateField: (f: string, v: string) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
   uploading: boolean;
   onAvatarUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  rawText: string;
+  setRawText: (v: string) => void;
+  parsing: boolean;
 }) => (
   <div className="space-y-6">
     <div className="text-center space-y-2">
-      <Palette className="w-8 h-8 text-primary mx-auto" />
-      <h2 className="text-2xl font-black tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-        Sua identidade
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        Como você quer aparecer nos seus carrosséis?
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+        className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto"
+      >
+        <Sparkles className="w-7 h-7 text-primary" />
+      </motion.div>
+      <h1 className="text-2xl font-black tracking-tight">
+        Vamos configurar seu perfil
+      </h1>
+      <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+        Envie sua foto e cole um texto sobre você/seu negócio — a IA preenche todo o resto.
       </p>
     </div>
 
-    {/* Avatar */}
+    {/* Avatar upload */}
     <div className="flex justify-center">
       <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
         <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-dashed border-primary/40 bg-card flex items-center justify-center transition-all group-hover:border-primary">
@@ -327,206 +301,116 @@ const StepIdentity = ({
       <p className="text-[11px] text-destructive text-center">* Foto obrigatória</p>
     )}
 
-    {/* Name & Handle */}
-    <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Nome de exibição *</Label>
-        <Input
-          value={profile.display_name}
-          onChange={(e) => updateField("display_name", e.target.value)}
-          placeholder="Marcus Forti"
-          className="bg-secondary border-border/50"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">@ Handle *</Label>
-        <Input
-          value={profile.handle}
-          onChange={(e) => updateField("handle", e.target.value)}
-          placeholder="@marcusforti"
-          className="bg-secondary border-border/50"
-        />
-      </div>
-    </div>
-
-    {/* Branding */}
-    <div className="grid grid-cols-2 gap-4">
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Texto de branding</Label>
-        <Input
-          value={profile.branding_text}
-          onChange={(e) => updateField("branding_text", e.target.value)}
-          placeholder="Marketing Insider"
-          className="bg-secondary border-border/50"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Sub-branding</Label>
-        <Input
-          value={profile.branding_subtext}
-          onChange={(e) => updateField("branding_subtext", e.target.value)}
-          placeholder="Conteúdo com IA"
-          className="bg-secondary border-border/50"
-        />
-      </div>
-    </div>
-  </div>
-);
-
-const StepBusinessAndVoice = ({
-  profile, updateField, rawText, setRawText, parsing, onParse,
-}: {
-  profile: any;
-  updateField: (f: string, v: string) => void;
-  rawText: string;
-  setRawText: (v: string) => void;
-  parsing: boolean;
-  onParse: () => void;
-}) => (
-  <div className="space-y-6">
-    <div className="text-center space-y-2">
-      <Target className="w-8 h-8 text-primary mx-auto" />
-      <h2 className="text-2xl font-black tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>
-        Seu posicionamento
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        Nicho, público e tom de voz — tudo que a IA precisa pra criar por você
-      </p>
-    </div>
-
-    {/* AI Auto-fill */}
+    {/* Text for AI */}
     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Wand2 className="w-4 h-4 text-primary" />
-        <span className="text-xs font-bold text-primary">Atalho: Preencha tudo com IA</span>
+        <span className="text-xs font-bold text-primary">Conte sobre você e seu negócio</span>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Cole qualquer texto sobre seu negócio e a IA preenche todos os campos abaixo.
+        Cole qualquer texto: bio do Instagram, descrição do negócio, sobre mim do site… A IA vai extrair nome, nicho, público, tom de voz e tudo mais.
       </p>
       <Textarea
         value={rawText}
         onChange={(e) => setRawText(e.target.value)}
-        placeholder="Cole aqui sobre seu negócio, público, como você fala..."
-        rows={3}
+        placeholder="Ex: Sou o Marcus Forti, mentor de marketing digital. Ajudo empreendedores a escalar seus negócios usando estratégias de conteúdo e IA. Meu público são donos de negócios digitais que faturam entre 10k e 100k/mês..."
+        rows={5}
         className="bg-secondary border-border/50 resize-none text-sm"
+        disabled={parsing}
       />
-      <Button
-        onClick={onParse}
-        disabled={parsing || rawText.trim().length < 10}
-        variant="outline"
-        size="sm"
-        className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/10"
-      >
-        {parsing ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Analisando...</> : <><Sparkles className="w-3.5 h-3.5" /> Preencher com IA</>}
-      </Button>
+      <p className="text-[10px] text-muted-foreground">Mínimo 10 caracteres</p>
     </div>
+  </div>
+);
 
-    <div className="relative flex items-center gap-3">
-      <div className="flex-1 h-px bg-border" />
-      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">ou preencha manualmente</span>
-      <div className="flex-1 h-px bg-border" />
-    </div>
+/* ─── Step 2: Review & Edit ─── */
 
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Nicho *</Label>
-          <Input
-            value={profile.niche}
-            onChange={(e) => updateField("niche", e.target.value)}
-            placeholder="Marketing digital, coaching..."
-            className="bg-secondary border-border/50"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Tom de voz *</Label>
-          <Input
-            value={profile.tone_of_voice}
-            onChange={(e) => updateField("tone_of_voice", e.target.value)}
-            placeholder="Direto, provocativo..."
-            className="bg-secondary border-border/50"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {["Direto e provocativo", "Técnico e educacional", "Leve e inspirador", "Profissional e sério"].map((t) => (
-          <button
-            key={t}
-            onClick={() => updateField("tone_of_voice", t)}
-            className="text-[10px] px-2.5 py-1 rounded-full border border-border bg-card hover:border-primary/50 hover:text-primary transition-colors"
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Público-alvo *</Label>
-        <Textarea
-          value={profile.target_audience}
-          onChange={(e) => updateField("target_audience", e.target.value)}
-          placeholder="Quem é seu público? O que eles sentem e querem?"
-          rows={2}
-          className="bg-secondary border-border/50 resize-none"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Proposta de valor *</Label>
-        <Textarea
-          value={profile.value_proposition}
-          onChange={(e) => updateField("value_proposition", e.target.value)}
-          placeholder="O que você entrega de único? Qual a transformação?"
-          rows={2}
-          className="bg-secondary border-border/50 resize-none"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Inimigo em comum</Label>
-          <Textarea
-            value={profile.common_enemy}
-            onChange={(e) => updateField("common_enemy", e.target.value)}
-            placeholder="O que vocês combatem juntos?"
-            rows={2}
-            className="bg-secondary border-border/50 resize-none"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Crenças e valores</Label>
-          <Textarea
-            value={profile.beliefs}
-            onChange={(e) => updateField("beliefs", e.target.value)}
-            placeholder="Suas convicções sobre o mercado"
-            rows={2}
-            className="bg-secondary border-border/50 resize-none"
-          />
-        </div>
-      </div>
+const StepReview = ({
+  profile, updateField,
+}: {
+  profile: any;
+  updateField: (f: string, v: string) => void;
+}) => (
+  <div className="space-y-5">
+    <div className="text-center space-y-2">
+      <Target className="w-8 h-8 text-primary mx-auto" />
+      <h2 className="text-2xl font-black tracking-tight">
+        Confira e ajuste
+      </h2>
+      <p className="text-sm text-muted-foreground">
+        A IA preencheu tudo — revise e ajuste o que quiser antes de começar.
+      </p>
     </div>
 
     {/* Preview card */}
-    {profile.display_name && (
-      <div className="rounded-xl border border-border bg-card p-4 space-y-2">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Preview do seu perfil</p>
-        <div className="flex items-center gap-3">
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} className="w-10 h-10 rounded-full object-cover" />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-              <User className="w-5 h-5 text-muted-foreground" />
-            </div>
-          )}
-          <div>
-            <p className="text-sm font-bold">{profile.display_name}</p>
-            <p className="text-[11px] text-muted-foreground">{profile.handle}</p>
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center gap-3">
+        {profile.avatar_url ? (
+          <img src={profile.avatar_url} className="w-12 h-12 rounded-full object-cover" />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
+            <User className="w-6 h-6 text-muted-foreground" />
           </div>
+        )}
+        <div className="flex-1">
+          <Input
+            value={profile.display_name}
+            onChange={(e) => updateField("display_name", e.target.value)}
+            placeholder="Seu nome *"
+            className="bg-transparent border-none p-0 h-auto text-sm font-bold focus-visible:ring-0"
+          />
+          <Input
+            value={profile.handle}
+            onChange={(e) => updateField("handle", e.target.value)}
+            placeholder="@handle *"
+            className="bg-transparent border-none p-0 h-auto text-[11px] text-muted-foreground focus-visible:ring-0"
+          />
         </div>
-        {profile.niche && <p className="text-[11px] text-muted-foreground">📌 {profile.niche}</p>}
       </div>
-    )}
+    </div>
+
+    <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Marca</Label>
+        <Input value={profile.branding_text} onChange={(e) => updateField("branding_text", e.target.value)} placeholder="Nome da marca" className="bg-secondary border-border/50 text-sm" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Sub-marca</Label>
+        <Input value={profile.branding_subtext} onChange={(e) => updateField("branding_subtext", e.target.value)} placeholder="Tagline" className="bg-secondary border-border/50 text-sm" />
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Nicho *</Label>
+        <Input value={profile.niche} onChange={(e) => updateField("niche", e.target.value)} placeholder="Seu nicho" className="bg-secondary border-border/50 text-sm" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Tom de voz *</Label>
+        <Input value={profile.tone_of_voice} onChange={(e) => updateField("tone_of_voice", e.target.value)} placeholder="Direto, provocativo..." className="bg-secondary border-border/50 text-sm" />
+      </div>
+    </div>
+
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">Público-alvo *</Label>
+      <Textarea value={profile.target_audience} onChange={(e) => updateField("target_audience", e.target.value)} placeholder="Quem é seu público?" rows={2} className="bg-secondary border-border/50 resize-none text-sm" />
+    </div>
+
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">Proposta de valor *</Label>
+      <Textarea value={profile.value_proposition} onChange={(e) => updateField("value_proposition", e.target.value)} placeholder="O que você entrega de único?" rows={2} className="bg-secondary border-border/50 resize-none text-sm" />
+    </div>
+
+    <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Inimigo em comum</Label>
+        <Textarea value={profile.common_enemy} onChange={(e) => updateField("common_enemy", e.target.value)} placeholder="O que combatem juntos?" rows={2} className="bg-secondary border-border/50 resize-none text-sm" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs text-muted-foreground">Crenças e valores</Label>
+        <Textarea value={profile.beliefs} onChange={(e) => updateField("beliefs", e.target.value)} placeholder="Suas convicções" rows={2} className="bg-secondary border-border/50 resize-none text-sm" />
+      </div>
+    </div>
   </div>
 );
 
