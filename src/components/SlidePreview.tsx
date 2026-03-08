@@ -89,8 +89,29 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const isColorBg = bgStyle === "color";
   const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
   
-  // When color or fullimage mode, force text-only layout in templates
-  const forceTextOnly = bgStyle === "color" || bgStyle === "fullimage";
+  // Only fullimage forces text-only (image becomes bg). Color mode keeps images visible.
+  const forceTextOnly = bgStyle === "fullimage";
+
+  // For color bg mode, detect if the chosen color is light to invert text colors
+  const colorBgIsLight = isColorBg && (() => {
+    const parts = (so.bgColor || "0 0% 6%").split(" ");
+    const lightness = parseFloat(parts[2] || "6");
+    return lightness > 55;
+  })();
+
+  // Override text colors when using a solid color bg
+  const effectiveStyles = isColorBg ? {
+    ...styles,
+    bg: slideBgColor,
+    title: colorBgIsLight ? "hsl(0 0% 8%)" : "hsl(0 0% 100%)",
+    body: colorBgIsLight ? "hsl(0 0% 30%)" : "hsl(0 0% 70%)",
+    branding: colorBgIsLight ? "hsl(0 0% 50%)" : "hsl(0 0% 55%)",
+    counterBg: colorBgIsLight ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.15)",
+    counterText: colorBgIsLight ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.8)",
+    handleBg: colorBgIsLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)",
+    borderLight: colorBgIsLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+    mutedBg: colorBgIsLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+  } : styles;
 
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden" style={{ aspectRatio: "4/5" }}>
