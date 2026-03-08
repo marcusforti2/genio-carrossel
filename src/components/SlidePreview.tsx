@@ -194,7 +194,7 @@ interface TemplateProps {
 }
 
 /* ── Media renderer (image or video) ── */
-const SlideMedia = ({ slide, style }: { slide: SlideData; style?: React.CSSProperties }) => {
+const SlideMedia = memo(({ slide, style }: { slide: SlideData; style?: React.CSSProperties }) => {
   if (slide.mediaType === "video" && slide.videoUrl) {
     return <video src={slide.videoUrl} autoPlay loop muted playsInline style={style} />;
   }
