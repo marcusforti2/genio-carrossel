@@ -69,14 +69,14 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       handleBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
     };
   }, [theme.bgMode, theme.accentColor]);
-  const Avatar = () =>
+  const avatarNode = useMemo(() =>
     carousel.avatarUrl ? (
       <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 80, height: 80, border: `3px solid ${styles.accent}` }} />
     ) : (
       <div className="rounded-full flex items-center justify-center" style={{ width: 80, height: 80, background: `${styles.accent}33`, border: `3px solid ${styles.accent}55` }}>
         <User style={{ width: 36, height: 36, color: `${styles.accent}aa` }} />
       </div>
-    );
+    ), [carousel.avatarUrl, styles.accent]);
 
   const footerHandle = carousel.profileHandle || "";
   const footerBranding = carousel.brandingText || "";
