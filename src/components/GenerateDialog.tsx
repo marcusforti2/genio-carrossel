@@ -420,8 +420,8 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
             </div>
 
 
-            {/* Image upload section */}
-            <div className="border-t border-border pt-4">
+            {/* Image upload section - only for image mode */}
+            {mediaType === "image" && <div className="border-t border-border pt-4">
               <p className="text-xs font-bold text-foreground mb-3 flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-primary" />
                 Imagens (opcional)
