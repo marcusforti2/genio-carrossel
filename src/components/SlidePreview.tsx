@@ -589,4 +589,4 @@ const SlideFooter = ({ carousel, styles, footerHandle, footerBranding, invertCol
   </div>
 );
 
-export default SlidePreview;
+export default memo(SlidePreview);
