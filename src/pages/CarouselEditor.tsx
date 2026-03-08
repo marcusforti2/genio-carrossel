@@ -26,7 +26,6 @@ const CarouselEditor = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [viewMode, setViewMode] = useState<"editor" | "canvas">("editor");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"slide" | "design" | "profile" | "footer">("slide");
   const [initialLoading, setInitialLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
