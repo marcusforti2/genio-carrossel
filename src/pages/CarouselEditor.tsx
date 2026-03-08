@@ -8,7 +8,7 @@ import CaptionButton from "@/components/CaptionButton";
 import CanvasView from "@/components/CanvasView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft, Pencil, Palette, UserCircle, Type } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, User, LogOut, LayoutGrid, Monitor, Menu, X, Save, Check, Loader2 as Loader, ArrowLeft, Pencil } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProjectAutosave, Project } from "@/hooks/useProjectAutosave";
