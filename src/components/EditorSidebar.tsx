@@ -27,6 +27,7 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
   const [videoResults, setVideoResults] = useState<Array<{ id: number; url: string; thumbnail: string; duration: number; user: string }>>([]);
   const [searchingVideo, setSearchingVideo] = useState(false);
   const [showVideoSearch, setShowVideoSearch] = useState(false);
+  const [previewVideo, setPreviewVideo] = useState<{ url: string; thumbnail: string; user: string } | null>(null);
 
   const generateImage = async () => {
     setImgLoading(true);
