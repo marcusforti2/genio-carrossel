@@ -1,6 +1,6 @@
 import { SlideData, CarouselData, DesignStyle } from "@/types/carousel";
 import { User, Loader2 } from "lucide-react";
-import { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect, memo } from "react";
 
 interface SlidePreviewProps {
   slide: SlideData;
