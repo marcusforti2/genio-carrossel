@@ -185,33 +185,63 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
       }));
 
       // Assign uploaded images first, then fetch remaining from Pexels
-      setLoadingStatus("Aplicando imagens...");
+      setLoadingStatus(mediaType === "video" ? "Buscando vídeos..." : "Aplicando imagens...");
 
-      let uploadIdx = 0;
-      const imagePromises = slides.map((slide: any) => {
-        if (slide.type === "cta") return Promise.resolve(undefined);
-        // Use uploaded image if available
-        if (uploadIdx < uploadedImages.length) {
-          const img = uploadedImages[uploadIdx];
-          uploadIdx++;
-          return Promise.resolve(img);
-        }
-        // Otherwise fetch from Pexels
-        return fetchPexelsImage(slide.title, topic.trim(), slide._imageQuery);
-      });
+      if (mediaType === "video") {
+        // Fetch videos from Pexels for each slide
+        const videoPromises = slides.map(async (slide: any) => {
+          if (slide.type === "cta") return undefined;
+          try {
+            const { data: vData, error: vError } = await supabase.functions.invoke("search-pexels-videos", {
+              body: { query: slide._imageQuery || slide.title, perPage: 3, topic: topic.trim() },
+            });
+            if (vError || !vData?.videos?.length) return undefined;
+            const video = vData.videos[Math.floor(Math.random() * vData.videos.length)];
+            return video;
+          } catch {
+            return undefined;
+          }
+        });
 
-      setLoadingStatus("Buscando imagens restantes...");
-      const images = await Promise.all(imagePromises);
+        const videos = await Promise.all(videoPromises);
+        const slidesWithMedia: SlideData[] = slides.map((slide: any, i: number) => {
+          const { _imageQuery, ...clean } = slide;
+          const video = videos[i];
+          if (video) {
+            return { ...clean, videoUrl: video.url, videoThumbnail: video.thumbnail, imageUrl: video.thumbnail };
+          }
+          return clean;
+        });
 
-      const slidesWithImages: SlideData[] = slides.map((slide: any, i: number) => {
-        const { _imageQuery, ...clean } = slide;
-        return { ...clean, imageUrl: images[i] || undefined };
-      });
+        const designStyle: DesignStyle = { template, fontFamily, titleSize, bodySize };
+        const theme: CarouselTheme = { bgMode, accentColor, accentName };
+        onGenerated(slidesWithMedia, data.caption || "", designStyle, theme);
+        toast.success("Carrossel gerado com vídeos!");
+      } else {
+        let uploadIdx = 0;
+        const imagePromises = slides.map((slide: any) => {
+          if (slide.type === "cta") return Promise.resolve(undefined);
+          if (uploadIdx < uploadedImages.length) {
+            const img = uploadedImages[uploadIdx];
+            uploadIdx++;
+            return Promise.resolve(img);
+          }
+          return fetchPexelsImage(slide.title, topic.trim(), slide._imageQuery);
+        });
 
-      const designStyle: DesignStyle = { template, fontFamily, titleSize, bodySize };
-      const theme: CarouselTheme = { bgMode, accentColor, accentName };
-      onGenerated(slidesWithImages, data.caption || "", designStyle, theme);
-      toast.success("Carrossel gerado com imagens!");
+        setLoadingStatus("Buscando imagens restantes...");
+        const images = await Promise.all(imagePromises);
+
+        const slidesWithImages: SlideData[] = slides.map((slide: any, i: number) => {
+          const { _imageQuery, ...clean } = slide;
+          return { ...clean, imageUrl: images[i] || undefined };
+        });
+
+        const designStyle: DesignStyle = { template, fontFamily, titleSize, bodySize };
+        const theme: CarouselTheme = { bgMode, accentColor, accentName };
+        onGenerated(slidesWithImages, data.caption || "", designStyle, theme);
+        toast.success("Carrossel gerado com imagens!");
+      }
       onOpenChange(false);
       setTopic("");
       setUploadedImages([]);
