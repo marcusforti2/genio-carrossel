@@ -327,4 +327,4 @@ const EditorSidebar = ({
   );
 };
 
-export default EditorSidebar;
+export default memo(EditorSidebar);
