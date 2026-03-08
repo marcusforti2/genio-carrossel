@@ -259,7 +259,7 @@ const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, foot
    EDITORIAL TEMPLATE
    ═══════════════════════════════════════════ */
 const EditorialContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, footerHandle, footerBranding, forceTextOnly }: TemplateProps) => {
-  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.imageLoading);
+  const hasImg = !forceTextOnly && slide.hasImage && (slide.imageUrl || slide.videoUrl || slide.imageLoading);
   const isTextOnly = !hasImg;
   const titleFs = isTextOnly ? 76 * titleScale : 56 * titleScale;
   const bodyFs = (isTextOnly ? 36 : 34) * bodyScale;
