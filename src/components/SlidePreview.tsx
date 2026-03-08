@@ -186,7 +186,7 @@ interface TemplateProps {
   fontFam: string;
   titleScale: number;
   bodyScale: number;
-  Avatar: React.FC;
+  avatarNode: React.ReactNode;
   footerHandle: string;
   footerBranding: string;
   forceTextOnly?: boolean;
