@@ -98,12 +98,13 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     if (!q.trim()) return;
     setSearchingVideo(true);
     setShowVideoSearch(true);
+    const contextParts = [slide.title, slide.body].filter(Boolean).join(" — ");
     try {
       const { data, error } = await supabase.functions.invoke("search-pexels-videos", {
         body: {
-          query: q,
+          query: query || videoSearchQuery || contextParts,
           perPage: 6,
-          topic: carousel.brandingText || carousel.profileName || "",
+          topic: [carousel.brandingText, carousel.profileName, carousel.niche].filter(Boolean).join(", "),
         },
       });
       if (error) throw error;
