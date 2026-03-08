@@ -415,7 +415,7 @@ const BoldContent = ({ slide, styles, carousel, fontFam, titleScale, bodyScale, 
         </div>
       )}
 
-      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors={isTextOnly} />
+      <SlideFooter carousel={carousel} styles={styles} footerHandle={footerHandle} footerBranding={footerBranding} invertColors={isTextOnly && !isColorBg} />
     </div>
   );
 };
