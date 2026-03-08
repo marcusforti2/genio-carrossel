@@ -95,20 +95,27 @@ const CarouselEditor = () => {
     }
   }, [user]);
 
-  const updateSlide = (index: number, slide: SlideData) => {
-    const newSlides = [...carousel.slides];
-    newSlides[index] = slide;
-    setCarousel({ ...carousel, slides: newSlides });
-  };
+  const updateSlide = useCallback((index: number, slide: SlideData) => {
+    setCarousel(prev => {
+      const newSlides = [...prev.slides];
+      newSlides[index] = slide;
+      return { ...prev, slides: newSlides };
+    });
+  }, []);
 
-  const deleteSlide = (index: number) => {
-    if (carousel.slides.length <= 1) return;
-    const newSlides = carousel.slides.filter((_, i) => i !== index);
-    setCarousel({ ...carousel, slides: newSlides });
-    if (selectedSlide >= newSlides.length) setSelectedSlide(newSlides.length - 1);
-  };
+  const deleteSlide = useCallback((index: number) => {
+    setCarousel(prev => {
+      if (prev.slides.length <= 1) return prev;
+      const newSlides = prev.slides.filter((_, i) => i !== index);
+      return { ...prev, slides: newSlides };
+    });
+    setSelectedSlide(prev => {
+      // We need current slides length, but since state is batched, use a safe approach
+      return (idx: number) => idx;
+    });
+  }, []);
 
-  const addSlide = () => {
+  const addSlide = useCallback(() => {
     const newSlide: SlideData = {
       id: crypto.randomUUID(),
       type: "content",
@@ -116,9 +123,9 @@ const CarouselEditor = () => {
       body: "Desenvolva seu argumento aqui. Seja provocativo, direto e autêntico.",
       hasImage: true,
     };
-    setCarousel({ ...carousel, slides: [...carousel.slides, newSlide] });
-    setSelectedSlide(carousel.slides.length);
-  };
+    setCarousel(prev => ({ ...prev, slides: [...prev.slides, newSlide] }));
+    setSelectedSlide(prev => prev + 1);
+  }, []);
 
   const handleAIGenerated = (slides: SlideData[], newCaption: string, designStyle?: any, theme?: any) => {
     setCarousel({
