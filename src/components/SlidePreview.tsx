@@ -89,8 +89,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const isColorBg = bgStyle === "color";
   const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
   
-  // Only fullimage forces text-only (image becomes bg). Color mode keeps images visible.
-  const forceTextOnly = bgStyle === "fullimage";
+  // Fullimage: image becomes bg. Color: solid color only, no images.
+  const forceTextOnly = bgStyle === "fullimage" || bgStyle === "color";
 
   // For color bg mode, detect if the chosen color is light to invert text colors
   const colorBgIsLight = isColorBg && (() => {
