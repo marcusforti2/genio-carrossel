@@ -104,7 +104,7 @@ const OnboardingPage = () => {
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case 0: return !!profile.avatar_url && rawText.trim().length >= 10;
+      case 0: return !!profile.avatar_url && !!profile.handle.trim() && rawText.trim().length >= 10;
       case 1: return !!profile.display_name.trim() && !!profile.handle.trim() && !!profile.niche.trim() && !!profile.target_audience.trim() && !!profile.tone_of_voice.trim() && !!profile.value_proposition.trim();
       default: return true;
     }
@@ -183,6 +183,7 @@ const OnboardingPage = () => {
                   rawText={rawText}
                   setRawText={setRawText}
                   parsing={parsing}
+                  updateField={updateField}
                 />
               )}
               {step === 1 && (
@@ -243,7 +244,7 @@ const OnboardingPage = () => {
 /* ─── Step 1: Photo + Text ─── */
 
 const StepPhotoAndText = ({
-  profile, fileInputRef, uploading, onAvatarUpload, rawText, setRawText, parsing,
+  profile, fileInputRef, uploading, onAvatarUpload, rawText, setRawText, parsing, updateField,
 }: {
   profile: any;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -252,6 +253,7 @@ const StepPhotoAndText = ({
   rawText: string;
   setRawText: (v: string) => void;
   parsing: boolean;
+  updateField: (f: string, v: string) => void;
 }) => (
   <div className="space-y-6">
     <div className="text-center space-y-2">
@@ -267,20 +269,20 @@ const StepPhotoAndText = ({
         Vamos configurar seu perfil
       </h1>
       <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-        Envie sua foto e cole um texto sobre você/seu negócio — a IA preenche todo o resto.
+        Sua foto, seu @ e um texto sobre você — a IA cuida do resto.
       </p>
     </div>
 
-    {/* Avatar upload */}
-    <div className="flex justify-center">
-      <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-        <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-dashed border-primary/40 bg-card flex items-center justify-center transition-all group-hover:border-primary">
+    {/* Avatar + Handle row */}
+    <div className="flex items-center gap-4">
+      <div className="relative group cursor-pointer shrink-0" onClick={() => fileInputRef.current?.click()}>
+        <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-primary/40 bg-card flex items-center justify-center transition-all group-hover:border-primary">
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className="flex flex-col items-center gap-1">
-              <Camera className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="text-[10px] text-muted-foreground group-hover:text-primary">Enviar foto</span>
+              <Camera className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+              <span className="text-[9px] text-muted-foreground group-hover:text-primary">Enviar foto</span>
             </div>
           )}
           {uploading && (
@@ -290,16 +292,28 @@ const StepPhotoAndText = ({
           )}
         </div>
         {profile.avatar_url && (
-          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
-            <CheckCircle2 className="w-4 h-4 text-primary-foreground" />
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-lg">
+            <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
         )}
         <input ref={fileInputRef} type="file" accept="image/*" onChange={onAvatarUpload} className="hidden" />
       </div>
+
+      <div className="flex-1 space-y-2">
+        {!profile.avatar_url && (
+          <p className="text-[10px] text-destructive">* Foto obrigatória</p>
+        )}
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">Seu @ *</Label>
+          <Input
+            value={profile.handle}
+            onChange={(e) => updateField("handle", e.target.value)}
+            placeholder="@seuhandle"
+            className="bg-secondary border-border/50 text-sm"
+          />
+        </div>
+      </div>
     </div>
-    {!profile.avatar_url && (
-      <p className="text-[11px] text-destructive text-center">* Foto obrigatória</p>
-    )}
 
     {/* Text for AI */}
     <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
@@ -308,7 +322,7 @@ const StepPhotoAndText = ({
         <span className="text-xs font-bold text-primary">Conte sobre você e seu negócio</span>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Cole qualquer texto: bio do Instagram, descrição do negócio, sobre mim do site… A IA vai extrair nome, nicho, público, tom de voz e tudo mais.
+        Cole qualquer texto: bio do Instagram, descrição do negócio, sobre mim do site… A IA vai extrair nome, nicho, público, tom de voz e tudo mais automaticamente.
       </p>
       <Textarea
         value={rawText}
