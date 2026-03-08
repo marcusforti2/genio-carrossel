@@ -252,7 +252,7 @@ const FullImageContent = ({ slide, carousel, styles, fontFam, titleScale, bodySc
 /* ═══════════════════════════════════════════
    COVER SLIDE
    ═══════════════════════════════════════════ */
-const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, Avatar, footerHandle }: TemplateProps) => (
+const CoverSlide = ({ slide, carousel, styles, fontFam, titleScale, avatarNode, footerHandle }: TemplateProps) => (
   <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", height: "100%", position: "relative" }}>
     {slide.mediaType === "video" && slide.videoUrl ? (
       <video src={slide.videoUrl} autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
