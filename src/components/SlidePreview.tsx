@@ -85,7 +85,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
   // Determine background style
   const bgStyle = so.bgStyle || "theme";
-  const isFullImage = bgStyle === "fullimage" && slide.imageUrl;
+  const isFullImage = bgStyle === "fullimage" && (slide.imageUrl || slide.videoUrl);
   const isColorBg = bgStyle === "color";
   const slideBgColor = isColorBg ? `hsl(${so.bgColor || "0 0% 6%"})` : styles.bg;
   
