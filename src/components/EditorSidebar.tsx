@@ -174,10 +174,15 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
         </div>
       )}
 
-      {/* Background style for all slides */}
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">Fundo do slide</Label>
-        <div className="flex gap-1.5">
+      {/* ── Fundo & Mídia ── */}
+      <div className="space-y-3 rounded-lg border border-border bg-card/50 p-3">
+        <div className="flex items-center gap-2">
+          <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Fundo & Mídia</span>
+        </div>
+
+        {/* Background style tabs */}
+        <div className="flex gap-1">
           {([
             { id: "theme" as const, label: "Tema" },
             { id: "color" as const, label: "Cor sólida" },
@@ -186,7 +191,7 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
             <button
               key={opt.id}
               onClick={() => onUpdate({ ...slide, styleOverride: { ...slide.styleOverride, bgStyle: opt.id } })}
-              className={`flex-1 py-2 rounded-md border transition-all text-[10px] font-semibold ${
+              className={`flex-1 py-1.5 rounded-md border transition-all text-[10px] font-semibold ${
                 (slide.styleOverride?.bgStyle || "theme") === opt.id
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/30"
@@ -197,9 +202,9 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
           ))}
         </div>
 
-        {/* Color presets when "Cor sólida" is selected */}
+        {/* Color presets */}
         {slide.styleOverride?.bgStyle === "color" && (
-          <div className="grid grid-cols-5 gap-1.5 pt-1">
+          <div className="grid grid-cols-5 gap-1.5">
             {[
               { name: "Preto", color: "0 0% 8%" },
               { name: "Marinho", color: "220 30% 12%" },
@@ -224,126 +229,84 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
           </div>
         )}
 
-        {/* Hint for fullimage mode */}
+        {/* Fullimage hint */}
         {slide.styleOverride?.bgStyle === "fullimage" && !slide.imageUrl && !slide.videoUrl && (
-          <p className="text-[9px] text-muted-foreground/70 pt-1">
-            Adicione uma imagem ou vídeo ao slide para usar como fundo em tela cheia.
+          <p className="text-[9px] text-muted-foreground/70">
+            Adicione uma imagem ou vídeo abaixo para usar como fundo em tela cheia.
           </p>
         )}
-      </div>
 
-      <div className="flex items-center justify-between py-1">
-        <Label className="text-xs text-muted-foreground">Com imagem</Label>
-        <Switch
-          checked={slide.hasImage}
-          onCheckedChange={(checked) => onUpdate({ ...slide, hasImage: checked })}
-        />
-      </div>
+        {/* Separator */}
+        <div className="border-t border-border/50" />
 
-      {/* Pexels search */}
-      <div className="space-y-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full gap-2 text-xs"
-          disabled={searching}
-          onClick={() => searchPexels(slide.title)}
-        >
-          {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-          {searching ? "Buscando..." : "Buscar foto real (Pexels)"}
-        </Button>
-
-        {showSearch && (
-          <div className="space-y-2">
-            <div className="flex gap-1.5">
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por tema..."
-                className="bg-secondary border-border/50 text-xs h-8"
-                onKeyDown={(e) => e.key === "Enter" && searchPexels()}
-              />
-              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => { setShowSearch(false); setSearchResults([]); }}>
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-
-            {searchResults.length > 0 && (
-              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto">
-                {searchResults.map((photo) => (
-                  <button
-                    key={photo.id}
-                    onClick={() => selectPhoto(photo)}
-                    className="rounded-md overflow-hidden border border-border hover:border-primary transition-colors relative group"
-                  >
-                    <img src={photo.thumbnail} alt={photo.alt} className="w-full h-16 object-cover" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-[8px] text-white font-medium">Usar</span>
-                    </div>
-                  </button>
-                ))}
+        {/* Media preview (if exists) */}
+        {(slide.imageUrl || slide.videoUrl) && (
+          <div className="rounded-md overflow-hidden border border-border">
+            {slide.mediaType === "video" && slide.videoUrl ? (
+              <div className="relative">
+                <video src={slide.videoUrl} autoPlay loop muted playsInline className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
+                <div className="absolute top-1 right-1 bg-black/70 rounded px-1.5 py-0.5 flex items-center gap-1">
+                  <Video className="w-3 h-3 text-white" />
+                  <span className="text-[9px] text-white font-medium">Vídeo</span>
+                </div>
               </div>
+            ) : (
+              <img src={slide.imageUrl} alt="Slide" className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
             )}
-            <p className="text-[8px] text-muted-foreground/60 text-center">Fotos por Pexels</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-[10px] text-muted-foreground"
+              onClick={() => onUpdate({ ...slide, imageUrl: undefined, hasImage: false, videoUrl: undefined, videoThumbnail: undefined, mediaType: undefined })}
+            >
+              Remover {slide.mediaType === "video" ? "vídeo" : "imagem"}
+            </Button>
           </div>
         )}
-      </div>
 
-      {/* Pexels video search */}
-      <div className="space-y-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full gap-2 text-xs"
-          disabled={searchingVideo}
-          onClick={() => searchPexelsVideos(slide.title)}
-        >
-          {searchingVideo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Video className="w-3.5 h-3.5" />}
-          {searchingVideo ? "Buscando..." : "Buscar vídeo (Pexels)"}
-        </Button>
+        {/* Media actions - compact grid */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-[10px] h-8"
+            disabled={searching}
+            onClick={() => searchPexels(slide.title)}
+          >
+            {searching ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+            Foto Pexels
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-[10px] h-8"
+            disabled={searchingVideo}
+            onClick={() => searchPexelsVideos(slide.title)}
+          >
+            {searchingVideo ? <Loader2 className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
+            Vídeo Pexels
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-[10px] h-8"
+            onClick={() => document.getElementById(`upload-${slide.id}`)?.click()}
+          >
+            <Upload className="w-3 h-3" />
+            Upload
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-[10px] h-8"
+            disabled={imgLoading}
+            onClick={generateImage}
+          >
+            {imgLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImagePlus className="w-3 h-3" />}
+            Gerar com IA
+          </Button>
+        </div>
 
-        {showVideoSearch && (
-          <div className="space-y-2">
-            <div className="flex gap-1.5">
-              <Input
-                value={videoSearchQuery}
-                onChange={(e) => setVideoSearchQuery(e.target.value)}
-                placeholder="Buscar vídeo por tema..."
-                className="bg-secondary border-border/50 text-xs h-8"
-                onKeyDown={(e) => e.key === "Enter" && searchPexelsVideos()}
-              />
-              <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => { setShowVideoSearch(false); setVideoResults([]); }}>
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-
-            {videoResults.length > 0 && (
-              <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto">
-                {videoResults.map((video) => (
-                  <button
-                    key={video.id}
-                    onClick={() => selectVideo(video)}
-                    className="rounded-md overflow-hidden border border-border hover:border-primary transition-colors relative group"
-                  >
-                    <img src={video.thumbnail} alt="" className="w-full h-16 object-cover" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center flex-col gap-0.5">
-                      <Video className="w-3.5 h-3.5 text-white" />
-                      <span className="text-[8px] text-white font-medium">{video.duration}s</span>
-                    </div>
-                    <div className="absolute top-0.5 right-0.5 bg-black/70 rounded px-1">
-                      <Video className="w-2.5 h-2.5 text-white" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-            <p className="text-[8px] text-muted-foreground/60 text-center">Vídeos por Pexels</p>
-          </div>
-        )}
-      </div>
-
-      {/* Upload manual */}
-      <div>
         <input
           type="file"
           accept="image/*"
@@ -352,10 +315,7 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-              toast.error("Imagem muito grande (máx 5MB)");
-              return;
-            }
+            if (file.size > 5 * 1024 * 1024) { toast.error("Imagem muito grande (máx 5MB)"); return; }
             const reader = new FileReader();
             reader.onload = () => {
               onUpdate({ ...slide, imageUrl: reader.result as string, hasImage: true });
@@ -365,52 +325,72 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
             e.target.value = "";
           }}
         />
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full gap-2 text-xs"
-          onClick={() => document.getElementById(`upload-${slide.id}`)?.click()}
-        >
-          <Upload className="w-3.5 h-3.5" />
-          Subir imagem manual
-        </Button>
-      </div>
 
-      {/* AI Image button */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full gap-2 text-xs"
-        disabled={imgLoading}
-        onClick={generateImage}
-      >
-        {imgLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
-        {imgLoading ? "Gerando imagem..." : "Gerar imagem com IA"}
-      </Button>
-
-      {(slide.imageUrl || slide.videoUrl) && (
-        <div className="rounded-md overflow-hidden border border-border">
-          {slide.mediaType === "video" && slide.videoUrl ? (
-            <div className="relative">
-              <video src={slide.videoUrl} autoPlay loop muted playsInline className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
-              <div className="absolute top-1 right-1 bg-black/70 rounded px-1.5 py-0.5 flex items-center gap-1">
-                <Video className="w-3 h-3 text-white" />
-                <span className="text-[9px] text-white font-medium">Vídeo</span>
-              </div>
+        {/* Pexels photo search results */}
+        {showSearch && (
+          <div className="space-y-1.5">
+            <div className="flex gap-1.5">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar por tema..."
+                className="bg-secondary border-border/50 text-xs h-7"
+                onKeyDown={(e) => e.key === "Enter" && searchPexels()}
+              />
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => { setShowSearch(false); setSearchResults([]); }}>
+                <X className="w-3 h-3" />
+              </Button>
             </div>
-          ) : (
-            <img src={slide.imageUrl} alt="Slide" className="w-full object-cover" style={{ aspectRatio: "16/10" }} />
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-[10px] text-muted-foreground"
-            onClick={() => onUpdate({ ...slide, imageUrl: undefined, videoUrl: undefined, videoThumbnail: undefined, mediaType: undefined })}
-          >
-            Remover {slide.mediaType === "video" ? "vídeo" : "imagem"}
-          </Button>
-        </div>
-      )}
+            {searchResults.length > 0 && (
+              <div className="grid grid-cols-3 gap-1 max-h-36 overflow-y-auto">
+                {searchResults.map((photo) => (
+                  <button key={photo.id} onClick={() => selectPhoto(photo)} className="rounded overflow-hidden border border-border hover:border-primary transition-colors relative group">
+                    <img src={photo.thumbnail} alt={photo.alt} className="w-full h-12 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-[7px] text-white font-medium">Usar</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-[7px] text-muted-foreground/60 text-center">Fotos por Pexels</p>
+          </div>
+        )}
+
+        {/* Pexels video search results */}
+        {showVideoSearch && (
+          <div className="space-y-1.5">
+            <div className="flex gap-1.5">
+              <Input
+                value={videoSearchQuery}
+                onChange={(e) => setVideoSearchQuery(e.target.value)}
+                placeholder="Buscar vídeo..."
+                className="bg-secondary border-border/50 text-xs h-7"
+                onKeyDown={(e) => e.key === "Enter" && searchPexelsVideos()}
+              />
+              <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => { setShowVideoSearch(false); setVideoResults([]); }}>
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+            {videoResults.length > 0 && (
+              <div className="grid grid-cols-3 gap-1 max-h-36 overflow-y-auto">
+                {videoResults.map((video) => (
+                  <button key={video.id} onClick={() => selectVideo(video)} className="rounded overflow-hidden border border-border hover:border-primary transition-colors relative group">
+                    <img src={video.thumbnail} alt="" className="w-full h-12 object-cover" />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Video className="w-3 h-3 text-white" />
+                    </div>
+                    <div className="absolute top-0.5 right-0.5 bg-black/70 rounded px-1">
+                      <span className="text-[7px] text-white">{video.duration}s</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <p className="text-[7px] text-muted-foreground/60 text-center">Vídeos por Pexels</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
