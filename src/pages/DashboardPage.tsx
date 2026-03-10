@@ -36,6 +36,8 @@ const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [showLimitWall, setShowLimitWall] = useState(false);
+  const { count: carouselCount, remaining, limitReached, FREE_LIMIT } = useCarouselLimit();
 
   const fetchProjects = useCallback(async () => {
     if (!user) return;
