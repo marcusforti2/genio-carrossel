@@ -70,7 +70,22 @@ export interface CarouselTheme {
   bgMode: "dark" | "light";
   accentColor: string;
   accentName: string;
+  bgColor?: string;
+  bgColorName?: string;
 }
+
+export const BG_COLOR_PRESETS = [
+  { name: "Escuro", color: "0 0% 6.5%", mode: "dark" as const },
+  { name: "Claro", color: "0 0% 96%", mode: "light" as const },
+  { name: "Cinza", color: "0 0% 22%", mode: "dark" as const },
+  { name: "Vermelho", color: "1 70% 35%", mode: "dark" as const },
+  { name: "Laranja", color: "25 85% 40%", mode: "dark" as const },
+  { name: "Amarelo", color: "45 90% 50%", mode: "light" as const },
+  { name: "Verde", color: "142 60% 30%", mode: "dark" as const },
+  { name: "Azul", color: "217 70% 35%", mode: "dark" as const },
+  { name: "Roxo", color: "263 55% 35%", mode: "dark" as const },
+  { name: "Rosa", color: "330 60% 40%", mode: "dark" as const },
+];
 
 export interface FooterConfig {
   showBranding: boolean;

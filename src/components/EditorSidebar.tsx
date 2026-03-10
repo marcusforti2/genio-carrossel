@@ -1,5 +1,5 @@
 import { useState, useCallback, memo } from "react";
-import { SlideData, CarouselData, ACCENT_PRESETS, DesignStyle } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, BG_COLOR_PRESETS, DesignStyle } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
