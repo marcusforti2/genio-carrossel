@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal,
+  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -17,6 +17,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import GenerateDialog from "@/components/GenerateDialog";
+import CarouselLimitWall from "@/components/CarouselLimitWall";
+import { useCarouselLimit } from "@/hooks/useCarouselLimit";
 import { SlideData, DesignStyle, createDefaultCarousel } from "@/types/carousel";
 
 interface ProjectItem {
@@ -34,6 +36,8 @@ const DashboardPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [showLimitWall, setShowLimitWall] = useState(false);
+  const { count: carouselCount, remaining, limitReached, FREE_LIMIT } = useCarouselLimit();
 
   const fetchProjects = useCallback(async () => {
     if (!user) return;
@@ -183,12 +187,38 @@ const DashboardPage = () => {
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {projects.length} {projects.length === 1 ? "carrossel" : "carrosséis"} criados
+              <span className="ml-2 text-primary font-semibold">({remaining} grátis restantes)</span>
             </p>
           </div>
-          <Button onClick={() => setGenerateOpen(true)} className="gap-2 text-sm h-10 px-5">
-            <Sparkles className="w-4 h-4" />
-            Criar novo carrossel
+          <Button
+            onClick={() => {
+              if (limitReached) {
+                setShowLimitWall(true);
+              } else {
+                setGenerateOpen(true);
+              }
+            }}
+            className="gap-2 text-sm h-10 px-5"
+          >
+            {limitReached ? <Lock className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+            {limitReached ? "Limite atingido" : "Criar novo carrossel"}
           </Button>
+        </div>
+
+        {/* Usage progress bar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Uso gratuito</span>
+            <span className="text-[10px] font-bold text-primary">{carouselCount}/{FREE_LIMIT}</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-[hsl(20,90%,60%)]"
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(100, (carouselCount / FREE_LIMIT) * 100)}%` }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+          </div>
         </div>
 
         {/* Search */}
@@ -309,6 +339,15 @@ const DashboardPage = () => {
         onOpenChange={setGenerateOpen}
         onGenerated={handleGenerated}
       />
+
+      {/* Limit Wall */}
+      {showLimitWall && (
+        <CarouselLimitWall
+          count={carouselCount}
+          limit={FREE_LIMIT}
+          onClose={() => setShowLimitWall(false)}
+        />
+      )}
     </div>
   );
 };
