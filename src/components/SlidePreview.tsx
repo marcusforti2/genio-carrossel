@@ -79,7 +79,7 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
       borderLight: isLightBg ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
       handleBg: isLightBg ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)",
     };
-  }, [theme.bgMode, theme.accentColor, globalBgColor]);
+  }, [theme.bgMode, theme.accentColor, globalBgColor, slideLevelBgColor]);
   const avatarNode = useMemo(() =>
     carousel.avatarUrl ? (
       <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 80, height: 80, border: `3px solid ${styles.accent}` }} />
