@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal,
+  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -17,6 +17,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import GenerateDialog from "@/components/GenerateDialog";
+import CarouselLimitWall from "@/components/CarouselLimitWall";
+import { useCarouselLimit } from "@/hooks/useCarouselLimit";
 import { SlideData, DesignStyle, createDefaultCarousel } from "@/types/carousel";
 
 interface ProjectItem {
