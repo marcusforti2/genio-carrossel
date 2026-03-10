@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, User, Sun, Moon, Type, Palette, Pencil, UserCircle, ChevronDown } from "lucide-react";
+import { Plus, User, Type, Palette, Pencil, UserCircle, ChevronDown } from "lucide-react";
 import SlideEditorPanel from "@/components/SlideEditorPanel";
 import SlideDesignOverrides from "@/components/SlideDesignOverrides";
 

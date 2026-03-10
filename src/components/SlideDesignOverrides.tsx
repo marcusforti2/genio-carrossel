@@ -1,7 +1,7 @@
 import { SlideData, CarouselData, ACCENT_PRESETS, BG_COLOR_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride } from "@/types/carousel";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, LayoutTemplate } from "lucide-react";
+import { LayoutTemplate } from "lucide-react";
 
 interface SlideDesignOverridesProps {
   slide: SlideData;
