@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Zap, Palette, Download, Lock, ArrowRight, Star, CheckCircle2, Instagram, ChevronDown, Play, Layers, MousePointerClick } from "lucide-react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { Sparkles, Zap, Palette, Download, Lock, ArrowRight, Star, CheckCircle2, Instagram, ChevronDown, Play, Layers, MousePointerClick, Shield, Clock, TrendingUp, Heart, Users, MessageSquare } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useCallback } from "react";
 import heroMockup from "@/assets/hero-mockup.jpg";
 import instagramLifestyle from "@/assets/instagram-lifestyle.jpg";
 import aiAbstract from "@/assets/ai-abstract.jpg";
@@ -41,6 +41,39 @@ const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: str
   return <span ref={ref}>{count}{suffix}</span>;
 };
 
+/* ── Typewriter Effect ── */
+const TypewriterText = ({ words }: { words: string[] }) => {
+  const [currentWord, setCurrentWord] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const word = words[currentWord];
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        setDisplayed(word.slice(0, displayed.length + 1));
+        if (displayed.length === word.length) {
+          setTimeout(() => setIsDeleting(true), 1800);
+        }
+      } else {
+        setDisplayed(word.slice(0, displayed.length - 1));
+        if (displayed.length === 0) {
+          setIsDeleting(false);
+          setCurrentWord((prev) => (prev + 1) % words.length);
+        }
+      }
+    }, isDeleting ? 40 : 80);
+    return () => clearTimeout(timeout);
+  }, [displayed, isDeleting, currentWord, words]);
+
+  return (
+    <span className="bg-gradient-to-r from-primary via-primary to-[hsl(20,90%,60%)] bg-clip-text text-transparent">
+      {displayed}
+      <span className="animate-pulse text-primary">|</span>
+    </span>
+  );
+};
+
 /* ── Data ── */
 const features = [
   { icon: Sparkles, title: "IA que entende seu negócio", description: "Gere carrosséis completos com textos persuasivos baseados no seu perfil, nicho e tom de voz.", image: aiAbstract },
@@ -56,9 +89,9 @@ const steps = [
 ];
 
 const testimonials = [
-  { name: "Lucas M.", role: "Mentor de Negócios", text: "Economizo 3h por semana com carrosséis que antes eu fazia no Canva.", avatar: "LM" },
-  { name: "Ana C.", role: "Social Media", text: "Meus clientes não acreditam que foi feito por IA. A qualidade é absurda.", avatar: "AC" },
-  { name: "Pedro R.", role: "Infoprodutor", text: "De longe a melhor ferramenta de carrossel que já usei. Simples e rápida.", avatar: "PR" },
+  { name: "Lucas M.", role: "Mentor de Negócios", text: "Economizo 3h por semana com carrosséis que antes eu fazia no Canva. Resultado absurdo.", avatar: "LM", highlight: "3h economizadas/semana" },
+  { name: "Ana C.", role: "Social Media", text: "Meus clientes não acreditam que foi feito por IA. A qualidade é absurda e entrego 5x mais rápido.", avatar: "AC", highlight: "5x mais rápido" },
+  { name: "Pedro R.", role: "Infoprodutor", text: "De longe a melhor ferramenta de carrossel que já usei. Simples, rápida e o engajamento triplicou.", avatar: "PR", highlight: "3x mais engajamento" },
 ];
 
 const faqs = [
@@ -66,39 +99,53 @@ const faqs = [
   { q: "Quais formatos de exportação estão disponíveis?", a: "PNG em alta resolução (3x) e PDF otimizado. Perfeito para Instagram, LinkedIn e outras plataformas." },
   { q: "Quantos carrosséis posso criar?", a: "Não existe limite. Crie quantos carrosséis quiser, sem restrições." },
   { q: "A ferramenta funciona no celular?", a: "Sim! O editor é totalmente responsivo e funciona como um app instalável no seu celular." },
+  { q: "Posso personalizar os templates?", a: "Sim! Cada template pode ser totalmente personalizado — cores, fontes, tamanhos, imagens e textos de cada slide individualmente." },
 ];
 
 const stats = [
   { value: 50, suffix: "+", label: "Clientes ativos" },
   { value: 30, suffix: "s", label: "Para criar um carrossel" },
   { value: 3, suffix: "x", label: "Resolução de exportação" },
+  { value: 98, suffix: "%", label: "Satisfação dos clientes" },
+];
+
+const painPoints = [
+  { icon: Clock, before: "3+ horas no Canva por carrossel", after: "30 segundos com IA" },
+  { icon: MessageSquare, before: "Textos genéricos sem engajamento", after: "Copywriting persuasivo personalizado" },
+  { icon: TrendingUp, before: "Engajamento baixo e inconsistente", after: "Conteúdo otimizado para conversão" },
 ];
 
 /* ── FAQ Item ── */
-const FaqItem = ({ q, a }: { q: string; a: string }) => {
+const FaqItem = ({ q, a, index }: { q: string; a: string; index: number }) => {
   const [open, setOpen] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="border border-border rounded-xl overflow-hidden"
+      transition={{ delay: index * 0.05 }}
+      className="border border-border rounded-xl overflow-hidden hover:border-primary/20 transition-colors"
     >
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-secondary/50 transition-colors"
       >
         <span className="text-sm font-semibold pr-4">{q}</span>
-        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform shrink-0 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 shrink-0 ${open ? "rotate-180" : ""}`} />
       </button>
-      <motion.div
-        initial={false}
-        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
-        transition={{ duration: 0.25, ease: "easeInOut" }}
-        className="overflow-hidden"
-      >
-        <p className="px-5 pb-4 text-xs text-muted-foreground leading-relaxed">{a}</p>
-      </motion.div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <p className="px-5 pb-4 text-xs text-muted-foreground leading-relaxed">{a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
@@ -113,6 +160,22 @@ const FloatingParticle = ({ delay, x, y, size }: { delay: number; x: string; y: 
   />
 );
 
+/* ── Urgency Banner ── */
+const UrgencyBanner = () => (
+  <motion.div
+    initial={{ y: -40, opacity: 0 }}
+    animate={{ y: 0, opacity: 1 }}
+    transition={{ delay: 2, duration: 0.5 }}
+    className="fixed top-14 left-0 right-0 z-40 bg-primary/90 backdrop-blur-sm py-1.5 text-center"
+  >
+    <p className="text-[11px] font-semibold text-primary-foreground flex items-center justify-center gap-2">
+      <Zap className="w-3 h-3" />
+      Acesso exclusivo para membros do Grupo Forti — Vagas limitadas
+      <Zap className="w-3 h-3" />
+    </p>
+  </motion.div>
+);
+
 const LandingPage = () => {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
@@ -120,8 +183,13 @@ const LandingPage = () => {
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
+  const goToAuth = useCallback(() => navigate("/auth"), [navigate]);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* ── Urgency Banner ── */}
+      <UrgencyBanner />
+
       {/* ── Nav ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/40 backdrop-blur-2xl bg-background/70">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 h-14">
@@ -133,8 +201,8 @@ const LandingPage = () => {
             <span className="text-[10px] font-medium text-muted-foreground border border-border rounded px-1.5 py-0.5 uppercase tracking-wider">by Forti</span>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("/auth")}>Entrar</Button>
-            <Button size="sm" className="text-xs gap-1.5 shadow-lg shadow-primary/20" onClick={() => navigate("/auth")}>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={goToAuth}>Entrar</Button>
+            <Button size="sm" className="text-xs gap-1.5 shadow-lg shadow-primary/20" onClick={goToAuth}>
               Começar agora <ArrowRight className="w-3 h-3" />
             </Button>
           </div>
@@ -142,22 +210,19 @@ const LandingPage = () => {
       </nav>
 
       {/* ── Hero ── */}
-      <section ref={heroRef} className="pt-28 pb-8 px-5 relative min-h-[90vh] flex items-center">
-        {/* Particles */}
+      <section ref={heroRef} className="pt-32 pb-8 px-5 relative min-h-[92vh] flex items-center">
         <FloatingParticle delay={0} x="10%" y="20%" size={6} />
         <FloatingParticle delay={1} x="85%" y="30%" size={4} />
         <FloatingParticle delay={2} x="70%" y="60%" size={8} />
         <FloatingParticle delay={0.5} x="25%" y="70%" size={5} />
         <FloatingParticle delay={1.5} x="50%" y="15%" size={7} />
 
-        {/* Gradient blobs */}
         <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-primary/8 rounded-full blur-[150px] -z-10 animate-pulse" />
         <div className="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] -z-10" />
 
         <div className="max-w-6xl mx-auto w-full">
           <motion.div style={{ y: heroY, opacity: heroOpacity }}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Left - Text */}
               <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -171,19 +236,7 @@ const LandingPage = () => {
 
                 <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-black leading-[1.05] tracking-tight mb-6">
                   Carrosséis que{" "}
-                  <span className="relative inline-block">
-                    <span className="bg-gradient-to-r from-primary via-primary to-[hsl(20,90%,60%)] bg-clip-text text-transparent">vendem</span>
-                    <motion.svg
-                      className="absolute -bottom-1 left-0 w-full"
-                      viewBox="0 0 200 8"
-                      fill="none"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ delay: 0.8, duration: 0.8 }}
-                    >
-                      <motion.path d="M2 6C50 2 150 2 198 6" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
-                    </motion.svg>
-                  </span>
+                  <TypewriterText words={["vendem", "engajam", "convertem", "escalam"]} />
                   <br />
                   criados por IA.
                 </h1>
@@ -194,7 +247,8 @@ const LandingPage = () => {
                   transition={{ delay: 0.4 }}
                   className="text-base text-muted-foreground max-w-md mb-8 leading-relaxed"
                 >
-                  Transforme qualquer ideia em um carrossel profissional para Instagram em segundos.
+                  Transforme qualquer ideia em um carrossel profissional para Instagram em{" "}
+                  <span className="text-foreground font-semibold">30 segundos</span>.
                   Textos persuasivos, design impecável, pronto para postar.
                 </motion.p>
 
@@ -206,8 +260,8 @@ const LandingPage = () => {
                 >
                   <Button
                     size="lg"
-                    className="text-sm gap-2 h-12 px-8 rounded-xl shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-shadow"
-                    onClick={() => navigate("/auth")}
+                    className="text-sm gap-2 h-12 px-8 rounded-xl shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] transition-all"
+                    onClick={goToAuth}
                   >
                     <Sparkles className="w-4 h-4" />
                     Criar meu primeiro carrossel
@@ -223,7 +277,7 @@ const LandingPage = () => {
                   </Button>
                 </motion.div>
 
-                {/* Social proof */}
+                {/* Social proof micro-bar */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -265,11 +319,9 @@ const LandingPage = () => {
                     className="w-full h-auto group-hover:scale-[1.02] transition-transform duration-700"
                     loading="eager"
                   />
-                  {/* Shine effect */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 </div>
 
-                {/* Floating badges */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, x: -20 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -299,14 +351,12 @@ const LandingPage = () => {
                   </div>
                 </motion.div>
 
-                {/* Glow */}
                 <div className="absolute -inset-6 -z-10 rounded-3xl bg-primary/5 blur-3xl" />
               </motion.div>
             </div>
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -321,6 +371,25 @@ const LandingPage = () => {
             <div className="w-1 h-1.5 rounded-full bg-muted-foreground/60" />
           </motion.div>
         </motion.div>
+      </section>
+
+      {/* ── Logos / Trust Bar ── */}
+      <section className="py-8 px-5 border-t border-border/20">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+            {[
+              { icon: Shield, text: "Dados protegidos" },
+              { icon: Zap, text: "Sem limite de uso" },
+              { icon: Heart, text: "+50 clientes satisfeitos" },
+              { icon: Download, text: "Exportação ilimitada" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 text-muted-foreground/70">
+                <item.icon className="w-4 h-4" />
+                <span className="text-[11px] font-medium">{item.text}</span>
+              </div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
       {/* ── Carousel Preview ── */}
@@ -349,18 +418,65 @@ const LandingPage = () => {
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <p className="text-[9px] text-primary-foreground font-bold">Slide {i + 1}</p>
+                    </div>
                   </motion.div>
                 ))}
               </div>
             </div>
+            <p className="text-center text-[10px] text-muted-foreground mt-3">
+              ↑ Gerado em 30 segundos. Pronto para postar no Instagram.
+            </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ── Pain Points → Solution ── */}
+      <section className="py-20 px-5 border-t border-border/50 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent -z-10" />
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+            <p className="text-xs text-primary font-bold uppercase tracking-widest mb-3">O problema</p>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
+              Você ainda perde{" "}
+              <span className="bg-gradient-to-r from-destructive to-[hsl(20,90%,60%)] bg-clip-text text-transparent">horas</span>
+              {" "}criando carrosséis?
+            </h2>
+          </motion.div>
+
+          <div className="space-y-4">
+            {painPoints.map((p, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-2xl border border-border bg-card p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+              >
+                <div className="w-11 h-11 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+                  <p.icon className="w-5 h-5 text-destructive" />
+                </div>
+                <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-6">
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground line-through decoration-destructive/50">{p.before}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-primary hidden sm:block shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-primary">{p.after}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── Stats ── */}
       <section className="py-16 px-5 border-t border-border/30">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-3 gap-6 sm:gap-12">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-12">
             {stats.map((s, i) => (
               <motion.div
                 key={i}
@@ -394,9 +510,7 @@ const LandingPage = () => {
             </motion.div>
           </div>
 
-          {/* Feature bento grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Main feature - spans 2 cols */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -421,7 +535,6 @@ const LandingPage = () => {
               </div>
             </motion.div>
 
-            {/* Other features */}
             {features.slice(1).map((f, i) => (
               <motion.div
                 key={i}
@@ -446,7 +559,6 @@ const LandingPage = () => {
       <section id="como-funciona" className="py-20 px-5 border-t border-border/50 relative">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Image */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -480,7 +592,6 @@ const LandingPage = () => {
               <div className="absolute -inset-4 -z-10 rounded-3xl bg-primary/3 blur-3xl" />
             </motion.div>
 
-            {/* Steps */}
             <div className="order-1 lg:order-2">
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                 <p className="text-xs text-primary font-bold uppercase tracking-widest mb-3">Como funciona</p>
@@ -514,6 +625,25 @@ const LandingPage = () => {
                   </motion.div>
                 ))}
               </div>
+
+              {/* Inline CTA */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+                className="mt-10"
+              >
+                <Button
+                  size="lg"
+                  className="text-sm gap-2 h-12 px-8 rounded-xl shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] transition-all"
+                  onClick={goToAuth}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Experimentar agora
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -537,14 +667,19 @@ const LandingPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="rounded-2xl border border-border bg-card p-6 space-y-4 hover:border-primary/20 transition-colors duration-500 group"
+                className="rounded-2xl border border-border bg-card p-6 space-y-4 hover:border-primary/20 transition-colors duration-500 group relative overflow-hidden"
               >
+                {/* Highlight badge */}
+                <div className="absolute top-4 right-4 bg-primary/10 border border-primary/20 rounded-lg px-2.5 py-1">
+                  <p className="text-[9px] font-bold text-primary">{t.highlight}</p>
+                </div>
+
                 <div className="flex gap-0.5">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star key={s} className="w-3.5 h-3.5 text-primary fill-primary" />
                   ))}
                 </div>
-                <p className="text-sm text-foreground leading-relaxed">"{t.text}"</p>
+                <p className="text-sm text-foreground leading-relaxed pr-16 sm:pr-0">"{t.text}"</p>
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-secondary flex items-center justify-center text-xs font-bold group-hover:from-primary/30 transition-colors">
                     {t.avatar}
@@ -571,7 +706,7 @@ const LandingPage = () => {
           </motion.div>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <FaqItem key={i} q={faq.q} a={faq.a} />
+              <FaqItem key={i} q={faq.q} a={faq.a} index={i} />
             ))}
           </div>
         </div>
@@ -581,7 +716,6 @@ const LandingPage = () => {
       <section className="py-20 px-5">
         <div className="max-w-4xl mx-auto">
           <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 sm:p-14 text-center relative overflow-hidden">
-            {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3" />
             <div className="absolute bottom-0 left-0 w-60 h-60 bg-primary/8 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/3" />
 
@@ -602,15 +736,15 @@ const LandingPage = () => {
 
                 <Button
                   size="lg"
-                  className="text-sm gap-2 h-13 px-10 rounded-xl text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-shadow"
-                  onClick={() => navigate("/auth")}
+                  className="text-sm gap-2 h-13 px-10 rounded-xl text-base shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] transition-all"
+                  onClick={goToAuth}
                 >
                   <Sparkles className="w-5 h-5" />
                   Acessar a plataforma
                 </Button>
 
                 <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
-                  {["Sem limite de carrosséis", "Exportação em alta qualidade", "IA personalizada"].map((t) => (
+                  {["Sem limite de carrosséis", "Exportação em alta qualidade", "IA personalizada", "Suporte exclusivo"].map((t) => (
                     <div key={t} className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                       <span className="text-[11px] text-muted-foreground">{t}</span>
