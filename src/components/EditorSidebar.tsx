@@ -1,10 +1,10 @@
 import { useState, useCallback, memo } from "react";
-import { SlideData, CarouselData, ACCENT_PRESETS, DesignStyle } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, BG_COLOR_PRESETS, DesignStyle } from "@/types/carousel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Plus, User, Sun, Moon, Type, Palette, Pencil, UserCircle, ChevronDown } from "lucide-react";
+import { Plus, User, Type, Palette, Pencil, UserCircle, ChevronDown } from "lucide-react";
 import SlideEditorPanel from "@/components/SlideEditorPanel";
 import SlideDesignOverrides from "@/components/SlideDesignOverrides";
 
@@ -102,30 +102,32 @@ const EditorSidebar = ({
           <SectionHeader icon={Palette} label="Design Global" open={openSections.design} onToggle={() => toggleSection("design")} />
           <CollapsibleContent>
             <div className="space-y-5 pb-3">
-              {/* BG mode */}
+              {/* BG color */}
               <div className="space-y-2">
-                <Label className="text-[10px] text-muted-foreground/70">Fundo</Label>
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => updateTheme({ bgMode: "dark" })}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border transition-all text-[10px] font-semibold ${
-                      carousel.theme.bgMode === "dark"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/50"
-                    }`}
-                  >
-                    <Moon className="w-3 h-3" /> Escuro
-                  </button>
-                  <button
-                    onClick={() => updateTheme({ bgMode: "light" })}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border transition-all text-[10px] font-semibold ${
-                      carousel.theme.bgMode === "light"
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary text-muted-foreground hover:border-muted-foreground/50"
-                    }`}
-                  >
-                    <Sun className="w-3 h-3" /> Claro
-                  </button>
+                <Label className="text-[10px] text-muted-foreground/70">Cor de Fundo</Label>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {BG_COLOR_PRESETS.map((preset) => {
+                    const isSelected = carousel.theme.bgColor === preset.color ||
+                      (!carousel.theme.bgColor && preset.name === "Escuro" && carousel.theme.bgMode === "dark") ||
+                      (!carousel.theme.bgColor && preset.name === "Claro" && carousel.theme.bgMode === "light");
+                    return (
+                      <button
+                        key={preset.name}
+                        onClick={() => updateTheme({ bgMode: preset.mode, bgColor: preset.color, bgColorName: preset.name })}
+                        className={`flex flex-col items-center gap-1 py-1.5 rounded-md border transition-all ${
+                          isSelected
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        <div
+                          className="w-5 h-5 rounded-full border border-border/50"
+                          style={{ background: `hsl(${preset.color})` }}
+                        />
+                        <span className="text-[8px] text-muted-foreground">{preset.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

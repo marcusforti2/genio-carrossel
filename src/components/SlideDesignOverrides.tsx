@@ -1,7 +1,7 @@
-import { SlideData, CarouselData, ACCENT_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride } from "@/types/carousel";
+import { SlideData, CarouselData, ACCENT_PRESETS, BG_COLOR_PRESETS, DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, DesignStyle, SlideStyleOverride } from "@/types/carousel";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, LayoutTemplate } from "lucide-react";
+import { LayoutTemplate } from "lucide-react";
 
 interface SlideDesignOverridesProps {
   slide: SlideData;
@@ -41,26 +41,33 @@ const SlideDesignOverrides = ({ slide, onUpdate, carousel }: SlideDesignOverride
         )}
       </div>
 
-      {/* BG mode */}
+      {/* BG color */}
       <div className="space-y-1.5">
         <Label className="text-[10px] text-muted-foreground/70">Fundo</Label>
-        <div className="flex gap-1.5">
-          <button
-            onClick={() => updateOverride({ bgMode: "dark" })}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border transition-all text-[10px] font-semibold ${
-              effectiveBg === "dark" ? "border-primary bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground"
-            } ${so.bgMode === "dark" ? "ring-1 ring-primary/50" : ""}`}
-          >
-            <Moon className="w-3 h-3" /> Escuro
-          </button>
-          <button
-            onClick={() => updateOverride({ bgMode: "light" })}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md border transition-all text-[10px] font-semibold ${
-              effectiveBg === "light" ? "border-primary bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground"
-            } ${so.bgMode === "light" ? "ring-1 ring-primary/50" : ""}`}
-          >
-            <Sun className="w-3 h-3" /> Claro
-          </button>
+        <div className="grid grid-cols-5 gap-1.5">
+          {BG_COLOR_PRESETS.map((preset) => {
+            const isSelected = so.bgMode === preset.mode && so.bgColor === preset.color;
+            const isEffective = !so.bgColor && !so.bgMode &&
+              ((carousel.theme.bgColor === preset.color) ||
+               (!carousel.theme.bgColor && preset.name === "Escuro" && carousel.theme.bgMode === "dark") ||
+               (!carousel.theme.bgColor && preset.name === "Claro" && carousel.theme.bgMode === "light"));
+            return (
+              <button
+                key={preset.name}
+                onClick={() => updateOverride({ bgMode: preset.mode, bgColor: preset.color })}
+                className={`flex flex-col items-center gap-1 py-1.5 rounded-md border transition-all ${
+                  isSelected
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/50"
+                    : isEffective
+                    ? "border-primary/30 bg-primary/5"
+                    : "border-border hover:border-muted-foreground/30"
+                }`}
+              >
+                <div className="w-4 h-4 rounded-full border border-border/50" style={{ background: `hsl(${preset.color})` }} />
+                <span className="text-[7px] text-muted-foreground">{preset.name}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
