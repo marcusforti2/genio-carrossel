@@ -58,8 +58,8 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
 
   const styles = useMemo(() => {
     const isDark = theme.bgMode === "dark";
-    // Use custom bgColor if set, otherwise default
-    const bgHsl = globalBgColor || (isDark ? "0 0% 6.5%" : "0 0% 96%");
+    // Use per-slide bgColor if set, then global bgColor, then default
+    const bgHsl = slideLevelBgColor || globalBgColor || (isDark ? "0 0% 6.5%" : "0 0% 96%");
     const bgLightness = parseFloat(bgHsl.split(" ")[2] || "6");
     const isLightBg = bgLightness > 45;
 
