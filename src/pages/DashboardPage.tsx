@@ -339,6 +339,15 @@ const DashboardPage = () => {
         onOpenChange={setGenerateOpen}
         onGenerated={handleGenerated}
       />
+
+      {/* Limit Wall */}
+      {showLimitWall && (
+        <CarouselLimitWall
+          count={carouselCount}
+          limit={FREE_LIMIT}
+          onClose={() => setShowLimitWall(false)}
+        />
+      )}
     </div>
   );
 };
