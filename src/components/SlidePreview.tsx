@@ -50,9 +50,11 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const titleScale = ds.titleSize === "impacto" ? 1.35 : ds.titleSize === "grande" ? 1.15 : 1;
   const bodyScale = ds.bodySize === "grande" ? 1.3 : ds.bodySize === "medio" ? 1 : 0.8;
 
-  // Detect if global bg color is a custom color (not default dark/light)
+  // Per-slide bgColor override (from new BG_COLOR_PRESETS override on slide)
+  const slideLevelBgColor = so.bgColor; // from SlideDesignOverrides color presets
+  
+  // Detect if global bg color is a custom color
   const globalBgColor = globalTheme.bgColor;
-  const hasCustomGlobalBg = globalBgColor && globalBgColor !== "0 0% 6.5%" && globalBgColor !== "0 0% 96%";
 
   const styles = useMemo(() => {
     const isDark = theme.bgMode === "dark";
