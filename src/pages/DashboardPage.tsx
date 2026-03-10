@@ -187,12 +187,38 @@ const DashboardPage = () => {
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {projects.length} {projects.length === 1 ? "carrossel" : "carrosséis"} criados
+              <span className="ml-2 text-primary font-semibold">({remaining} grátis restantes)</span>
             </p>
           </div>
-          <Button onClick={() => setGenerateOpen(true)} className="gap-2 text-sm h-10 px-5">
-            <Sparkles className="w-4 h-4" />
-            Criar novo carrossel
+          <Button
+            onClick={() => {
+              if (limitReached) {
+                setShowLimitWall(true);
+              } else {
+                setGenerateOpen(true);
+              }
+            }}
+            className="gap-2 text-sm h-10 px-5"
+          >
+            {limitReached ? <Lock className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+            {limitReached ? "Limite atingido" : "Criar novo carrossel"}
           </Button>
+        </div>
+
+        {/* Usage progress bar */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Uso gratuito</span>
+            <span className="text-[10px] font-bold text-primary">{carouselCount}/{FREE_LIMIT}</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-[hsl(20,90%,60%)]"
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(100, (carouselCount / FREE_LIMIT) * 100)}%` }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            />
+          </div>
         </div>
 
         {/* Search */}
