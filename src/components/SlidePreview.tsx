@@ -50,25 +50,34 @@ const SlidePreview = ({ slide, carousel, slideIndex, totalSlides }: SlidePreview
   const titleScale = ds.titleSize === "impacto" ? 1.35 : ds.titleSize === "grande" ? 1.15 : 1;
   const bodyScale = ds.bodySize === "grande" ? 1.3 : ds.bodySize === "medio" ? 1 : 0.8;
 
+  // Detect if global bg color is a custom color (not default dark/light)
+  const globalBgColor = globalTheme.bgColor;
+  const hasCustomGlobalBg = globalBgColor && globalBgColor !== "0 0% 6.5%" && globalBgColor !== "0 0% 96%";
+
   const styles = useMemo(() => {
     const isDark = theme.bgMode === "dark";
+    // Use custom bgColor if set, otherwise default
+    const bgHsl = globalBgColor || (isDark ? "0 0% 6.5%" : "0 0% 96%");
+    const bgLightness = parseFloat(bgHsl.split(" ")[2] || "6");
+    const isLightBg = bgLightness > 45;
+
     return {
-      bg: isDark ? "hsl(0 0% 6.5%)" : "hsl(0 0% 96%)",
-      title: isDark ? "hsl(0 0% 100%)" : "hsl(0 0% 8%)",
-      body: isDark ? "hsl(0 0% 70%)" : "hsl(0 0% 35%)",
-      branding: isDark ? "hsl(0 0% 50%)" : "hsl(0 0% 55%)",
+      bg: `hsl(${bgHsl})`,
+      title: isLightBg ? "hsl(0 0% 8%)" : "hsl(0 0% 100%)",
+      body: isLightBg ? "hsl(0 0% 30%)" : "hsl(0 0% 70%)",
+      branding: isLightBg ? "hsl(0 0% 45%)" : "hsl(0 0% 50%)",
       accent: `hsl(${theme.accentColor})`,
       tagBg: `hsl(${theme.accentColor})`,
       tagFg: "hsl(0 0% 100%)",
-      overlayFrom: isDark ? "rgba(20,20,20,0.3)" : "rgba(240,240,240,0.3)",
-      overlayTo: isDark ? "rgba(17,17,17,0.92)" : "rgba(245,245,245,0.92)",
-      counterBg: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
-      counterText: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)",
-      mutedBg: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-      borderLight: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
-      handleBg: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+      overlayFrom: isLightBg ? "rgba(240,240,240,0.3)" : "rgba(20,20,20,0.3)",
+      overlayTo: isLightBg ? "rgba(245,245,245,0.92)" : "rgba(17,17,17,0.92)",
+      counterBg: isLightBg ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.15)",
+      counterText: isLightBg ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.8)",
+      mutedBg: isLightBg ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+      borderLight: isLightBg ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.08)",
+      handleBg: isLightBg ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.1)",
     };
-  }, [theme.bgMode, theme.accentColor]);
+  }, [theme.bgMode, theme.accentColor, globalBgColor]);
   const avatarNode = useMemo(() =>
     carousel.avatarUrl ? (
       <img src={carousel.avatarUrl} alt="Avatar" className="rounded-full object-cover" style={{ width: 80, height: 80, border: `3px solid ${styles.accent}` }} />
