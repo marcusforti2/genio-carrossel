@@ -27,7 +27,74 @@ async function getAuthenticatedUser(req: Request) {
   return null;
 }
 
-// MCP Tool definitions
+// ── Carousel schema docs (exposed to Claude Code) ──
+
+const CAROUSEL_DATA_SCHEMA = {
+  type: "object",
+  description: `Full CarouselData object. The app renders each slide as an Instagram carousel card (1080x1350).
+Design templates: editorial, moderno, bold, minimal.
+Font families: serif, sans.
+Title sizes: normal, grande, impacto.
+Body sizes: pequeno, medio, grande.
+BG modes: dark, light.
+Accent presets (HSL): "1 83% 55%" (red), "25 95% 53%" (orange), "45 93% 47%" (yellow), "142 71% 45%" (green), "217 91% 60%" (blue), "263 70% 50%" (purple), "330 81% 60%" (pink), "0 0% 90%" (white).
+Slide types: cover (first), content (middle), cta (last/optional).`,
+  properties: {
+    profileName: { type: "string", description: "Author name shown on slides" },
+    profileHandle: { type: "string", description: "@handle shown on slides" },
+    brandingText: { type: "string", description: "Brand name in footer" },
+    brandingSubtext: { type: "string", description: "Tagline in footer" },
+    avatarUrl: { type: "string", description: "Avatar image URL (optional)" },
+    theme: {
+      type: "object",
+      properties: {
+        bgMode: { type: "string", enum: ["dark", "light"] },
+        accentColor: { type: "string", description: "HSL values e.g. '217 91% 60%'" },
+        accentName: { type: "string" },
+        bgColor: { type: "string", description: "Optional custom bg HSL" },
+      },
+      required: ["bgMode", "accentColor", "accentName"],
+    },
+    footer: {
+      type: "object",
+      properties: {
+        showBranding: { type: "boolean" },
+        showHandle: { type: "boolean" },
+        showCta: { type: "boolean" },
+        ctaText: { type: "string" },
+      },
+    },
+    designStyle: {
+      type: "object",
+      properties: {
+        template: { type: "string", enum: ["editorial", "moderno", "bold", "minimal"] },
+        fontFamily: { type: "string", enum: ["serif", "sans"] },
+        titleSize: { type: "string", enum: ["normal", "grande", "impacto"] },
+        bodySize: { type: "string", enum: ["pequeno", "medio", "grande"] },
+      },
+      required: ["template", "fontFamily", "titleSize", "bodySize"],
+    },
+    slides: {
+      type: "array",
+      description: "Array of slides. First should be type 'cover', middle ones 'content', optionally last one 'cta'.",
+      items: {
+        type: "object",
+        properties: {
+          type: { type: "string", enum: ["cover", "content", "cta"] },
+          title: { type: "string", description: "Slide headline (keep punchy, max ~15 words)" },
+          body: { type: "string", description: "Slide body text (content slides, ~40-80 words)" },
+          hasImage: { type: "boolean", description: "Whether slide has a background/side image" },
+          imageUrl: { type: "string", description: "Optional image URL" },
+        },
+        required: ["type", "title", "body", "hasImage"],
+      },
+    },
+  },
+  required: ["profileName", "profileHandle", "theme", "designStyle", "slides"],
+};
+
+// ── MCP Tool definitions ──
+
 const TOOLS = [
   {
     name: "list_projects",
@@ -45,7 +112,7 @@ const TOOLS = [
   },
   {
     name: "create_project",
-    description: "Create a new carousel project",
+    description: "Create a new carousel project with raw data. Prefer generate_carousel for creating content-ready carousels.",
     inputSchema: {
       type: "object",
       properties: {
@@ -56,6 +123,47 @@ const TOOLS = [
     },
   },
   {
+    name: "generate_carousel",
+    description: `Generate a complete Instagram carousel project ready to view/export. 
+Fetches the user's profile (name, handle, branding, niche, audience, tone) and builds a full CarouselData with the app's standard structure.
+You provide the topic and slide content; the tool fills in profile info, IDs, and saves it as a project.
+IMPORTANT: Write titles that are punchy hooks (max ~15 words). Body text should be ~40-80 words per content slide. 
+Use 4-6 slides total (1 cover + 2-4 content + optional CTA).`,
+    inputSchema: {
+      type: "object",
+      properties: {
+        topic: { type: "string", description: "Overall carousel topic/hook (used as project title)" },
+        slides: {
+          type: "array",
+          description: "Slide definitions. First = cover, middle = content, last can be cta.",
+          items: {
+            type: "object",
+            properties: {
+              type: { type: "string", enum: ["cover", "content", "cta"], description: "cover for first slide, content for middle, cta for final call-to-action" },
+              title: { type: "string", description: "Headline text" },
+              body: { type: "string", description: "Body text (empty string for cover)" },
+              hasImage: { type: "boolean", description: "true to show image area on slide" },
+            },
+            required: ["type", "title", "body"],
+          },
+        },
+        template: { type: "string", enum: ["editorial", "moderno", "bold", "minimal"], description: "Design template (default: bold)" },
+        fontFamily: { type: "string", enum: ["serif", "sans"], description: "Font (default: sans)" },
+        titleSize: { type: "string", enum: ["normal", "grande", "impacto"], description: "Title size (default: grande)" },
+        bodySize: { type: "string", enum: ["pequeno", "medio", "grande"], description: "Body size (default: grande)" },
+        bgMode: { type: "string", enum: ["dark", "light"], description: "Background mode (default: dark)" },
+        accentColor: { type: "string", description: "Accent HSL e.g. '217 91% 60%' (default: red)" },
+        accentName: { type: "string", description: "Accent name (default: Vermelho)" },
+      },
+      required: ["topic", "slides"],
+    },
+  },
+  {
+    name: "get_carousel_schema",
+    description: "Returns the full CarouselData JSON schema so you know exactly how to structure carousel data for create_project or update_project.",
+    inputSchema: { type: "object", properties: {}, required: [] },
+  },
+  {
     name: "update_project",
     description: "Update an existing project",
     inputSchema: {
@@ -63,7 +171,7 @@ const TOOLS = [
       properties: {
         project_id: { type: "string", description: "Project UUID" },
         title: { type: "string", description: "New title" },
-        data: { type: "object", description: "Updated carousel data" },
+        data: CAROUSEL_DATA_SCHEMA,
       },
       required: ["project_id"],
     },
@@ -79,7 +187,7 @@ const TOOLS = [
   },
   {
     name: "get_profile",
-    description: "Get the user profile (brand info, niche, audience, etc.)",
+    description: "Get the user profile (brand info, niche, audience, tone, etc.). Use this to personalize carousel content.",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
@@ -128,6 +236,89 @@ async function handleToolCall(toolName: string, args: any, userId: string, supab
       if (error) throw error;
       return data;
     }
+    case "generate_carousel": {
+      // Fetch profile
+      const { data: profile } = await supabase
+        .from("profiles").select("*").eq("user_id", userId).single();
+
+      const profileName = profile?.display_name || "";
+      const profileHandle = profile?.handle || "";
+      const brandingText = profile?.branding_text || "";
+      const brandingSubtext = profile?.branding_subtext || "";
+      const avatarUrl = profile?.avatar_url || "";
+
+      const carouselId = crypto.randomUUID();
+      const slides = (args.slides || []).map((s: any) => ({
+        id: crypto.randomUUID(),
+        type: s.type || "content",
+        title: s.title || "",
+        body: s.body || "",
+        hasImage: s.hasImage ?? (s.type === "cover" ? true : s.type === "content"),
+      }));
+
+      const carouselData = {
+        id: carouselId,
+        profileName,
+        profileHandle,
+        brandingText,
+        brandingSubtext,
+        avatarUrl,
+        theme: {
+          bgMode: args.bgMode || "dark",
+          accentColor: args.accentColor || "1 83% 55%",
+          accentName: args.accentName || "Vermelho",
+        },
+        footer: {
+          showBranding: true,
+          showHandle: true,
+          showCta: true,
+          ctaText: "Arrasta para o lado >",
+        },
+        designStyle: {
+          template: args.template || "bold",
+          fontFamily: args.fontFamily || "sans",
+          titleSize: args.titleSize || "grande",
+          bodySize: args.bodySize || "grande",
+        },
+        slides,
+      };
+
+      const { data, error } = await supabase
+        .from("projects")
+        .insert({ user_id: userId, title: args.topic, data: carouselData })
+        .select().single();
+      if (error) throw error;
+
+      return {
+        message: "Carousel created successfully! Open the app to preview and export.",
+        project: data,
+        slides_count: slides.length,
+        template: carouselData.designStyle.template,
+        profile_applied: !!profile,
+      };
+    }
+    case "get_carousel_schema": {
+      return {
+        schema: CAROUSEL_DATA_SCHEMA,
+        tips: [
+          "First slide should be type 'cover' with a punchy hook title",
+          "Content slides: compelling title + ~40-80 word body",
+          "Optional last slide type 'cta' for call-to-action",
+          "4-6 slides is ideal for engagement",
+          "Use get_profile first to personalize with the user's brand info",
+          "accentColor uses HSL format without hsl() wrapper, e.g. '217 91% 60%'",
+        ],
+        example: {
+          topic: "5 erros que matam seu LinkedIn",
+          slides: [
+            { type: "cover", title: "5 erros que estão matando seu LinkedIn.", body: "", hasImage: true },
+            { type: "content", title: "Erro #1: Perfil sem foto profissional.", body: "Perfis sem foto recebem 14x menos visualizações...", hasImage: false },
+            { type: "content", title: "Erro #2: Headline genérica.", body: "\"Profissional dedicado\" não diz nada...", hasImage: false },
+            { type: "cta", title: "Quer corrigir esses erros?", body: "Salva esse post e compartilha com quem precisa ouvir isso.", hasImage: false },
+          ],
+        },
+      };
+    }
     case "update_project": {
       const update: any = {};
       if (args.title) update.title = args.title;
@@ -172,12 +363,10 @@ serve(async (req) => {
     const body = await req.json();
     const { jsonrpc, id, method, params } = body;
 
-    // MCP uses JSON-RPC 2.0
     if (jsonrpc !== "2.0") {
       return jsonRpc(id, null, { code: -32600, message: "Invalid JSON-RPC version" });
     }
 
-    // Initialize - no auth needed
     if (method === "initialize") {
       return jsonRpc(id, {
         protocolVersion: "2024-11-05",
@@ -190,12 +379,10 @@ serve(async (req) => {
       return jsonRpc(id, {});
     }
 
-    // List tools - no auth needed
     if (method === "tools/list") {
       return jsonRpc(id, { tools: TOOLS });
     }
 
-    // Tool calls - auth required
     if (method === "tools/call") {
       const auth = await getAuthenticatedUser(req);
       if (!auth) {
