@@ -164,6 +164,15 @@ const DashboardPage = () => {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => navigate("/api")}
+              className="text-xs gap-1.5 text-muted-foreground"
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">API</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate("/profile")}
               className="text-xs gap-1.5 text-muted-foreground"
             >
