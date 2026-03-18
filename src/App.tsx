@@ -75,6 +75,7 @@ const App = () => (
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/editor" element={<ProtectedRoute><CarouselEditor /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/api" element={<ProtectedRoute><ApiDocsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
