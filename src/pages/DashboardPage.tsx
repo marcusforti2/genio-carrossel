@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock,
+  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock, Code2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -161,6 +161,15 @@ const DashboardPage = () => {
             <span className="text-[9px] font-medium text-muted-foreground border border-border rounded px-1.5 py-0.5 uppercase tracking-wider">by Forti</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/api")}
+              className="text-xs gap-1.5 text-muted-foreground"
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">API</span>
+            </Button>
             <Button
               variant="ghost"
               size="sm"
