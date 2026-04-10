@@ -4,7 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -21,12 +27,21 @@ interface AdminUser {
     niche: string;
   } | null;
   roles: string[];
+  credits: { total_limit: number };
+  project_count: number;
 }
 
 interface Stats {
   total_users: number;
   total_projects: number;
   new_users_7d: number;
+}
+
+interface ProjectItem {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const AdminPage = () => {
@@ -36,6 +51,15 @@ const AdminPage = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Credits dialog
+  const [creditsUser, setCreditsUser] = useState<AdminUser | null>(null);
+  const [newLimit, setNewLimit] = useState("");
+
+  // Projects dialog
+  const [projectsUser, setProjectsUser] = useState<AdminUser | null>(null);
+  const [userProjects, setUserProjects] = useState<ProjectItem[]>([]);
+  const [projectsLoading, setProjectsLoading] = useState(false);
 
   const callAdmin = async (action: string, method = "GET", body?: Record<string, unknown>) => {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users/${action}`;
@@ -86,6 +110,36 @@ const AdminPage = () => {
     }
   };
 
+  const handleSetCredits = async () => {
+    if (!creditsUser) return;
+    const limit = parseInt(newLimit);
+    if (isNaN(limit) || limit < 0) {
+      toast({ title: "Valor inválido", variant: "destructive" });
+      return;
+    }
+    const res = await callAdmin("set-credits", "POST", { user_id: creditsUser.id, total_limit: limit });
+    if (res.success) {
+      toast({ title: `Limite atualizado para ${limit}` });
+      setCreditsUser(null);
+      fetchData();
+    } else {
+      toast({ title: "Erro", description: res.error, variant: "destructive" });
+    }
+  };
+
+  const handleViewProjects = async (u: AdminUser) => {
+    setProjectsUser(u);
+    setProjectsLoading(true);
+    const res = await callAdmin(`user-projects?user_id=${u.id}`);
+    setUserProjects(res.projects || []);
+    setProjectsLoading(false);
+  };
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", {
+      day: "2-digit", month: "short", year: "numeric",
+    });
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -103,10 +157,11 @@ const AdminPage = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Painel Admin</h1>
-            <p className="text-sm text-muted-foreground">Gerencie usuários e monitore a plataforma</p>
+            <p className="text-sm text-muted-foreground">Gerencie usuários, créditos e monitore a plataforma</p>
           </div>
         </div>
 
+        {/* Stats */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
@@ -139,20 +194,22 @@ const AdminPage = () => {
           </div>
         )}
 
+        {/* Users Table */}
         <Card>
           <CardHeader>
             <CardTitle className="text-foreground">Usuários ({users.length})</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Usuário</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Nicho</TableHead>
+                  <TableHead>Créditos</TableHead>
+                  <TableHead>Projetos</TableHead>
                   <TableHead>Papéis</TableHead>
                   <TableHead>Cadastro</TableHead>
-                  <TableHead>Último login</TableHead>
                   <TableHead>Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -175,7 +232,28 @@ const AdminPage = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{u.profile?.niche || "—"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-[150px] truncate">{u.profile?.niche || "—"}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => {
+                          setCreditsUser(u);
+                          setNewLimit(String(u.credits.total_limit));
+                        }}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline cursor-pointer"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        {u.project_count}/{u.credits.total_limit}
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        onClick={() => handleViewProjects(u)}
+                        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        {u.project_count}
+                      </button>
+                    </TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
                         {u.roles.length > 0 ? (
@@ -196,10 +274,7 @@ const AdminPage = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {new Date(u.created_at).toLocaleDateString("pt-BR")}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString("pt-BR") : "—"}
+                      {formatDate(u.created_at)}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
@@ -231,6 +306,76 @@ const AdminPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Credits Dialog */}
+      <Dialog open={!!creditsUser} onOpenChange={() => setCreditsUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajustar créditos</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Usuário: <strong className="text-foreground">{creditsUser?.profile?.display_name || creditsUser?.email}</strong>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Uso atual: <strong className="text-foreground">{creditsUser?.project_count}</strong> projetos
+            </p>
+            <div>
+              <label className="text-sm font-medium text-foreground">Novo limite de carrosséis</label>
+              <Input
+                type="number"
+                min={0}
+                value={newLimit}
+                onChange={(e) => setNewLimit(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreditsUser(null)}>Cancelar</Button>
+            <Button onClick={handleSetCredits}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Projects Dialog */}
+      <Dialog open={!!projectsUser} onOpenChange={() => setProjectsUser(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Projetos de {projectsUser?.profile?.display_name || projectsUser?.email}
+            </DialogTitle>
+          </DialogHeader>
+          {projectsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : userProjects.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Nenhum projeto encontrado.</p>
+          ) : (
+            <div className="max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Criado em</TableHead>
+                    <TableHead>Atualizado em</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {userProjects.map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell className="text-sm font-medium text-foreground">{p.title}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{formatDate(p.created_at)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{formatDate(p.updated_at)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
