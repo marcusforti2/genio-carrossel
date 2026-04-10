@@ -54,7 +54,8 @@ const AdminPage = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 50;
   // Credits dialog
   const [creditsUser, setCreditsUser] = useState<AdminUser | null>(null);
   const [newLimit, setNewLimit] = useState("");
@@ -81,7 +82,7 @@ const AdminPage = () => {
   const fetchData = async () => {
     setLoading(true);
     const [usersRes, statsRes] = await Promise.all([
-      callAdmin("list"),
+      callAdmin(`list?page=${page}&limit=${PAGE_SIZE}`),
       callAdmin("stats"),
     ]);
     if (usersRes.users) setUsers(usersRes.users);
@@ -91,7 +92,7 @@ const AdminPage = () => {
 
   useEffect(() => {
     if (session) fetchData();
-  }, [session]);
+  }, [session, page]);
 
   const handleSetRole = async (userId: string, role: string, action: "add" | "remove") => {
     const res = await callAdmin("set-role", "POST", { user_id: userId, role, action });
@@ -307,6 +308,30 @@ const AdminPage = () => {
                 ))}
               </TableBody>
             </Table>
+            {/* Pagination */}
+            <div className="flex items-center justify-between pt-4">
+              <p className="text-sm text-muted-foreground">
+                Página {page} • {users.length} usuários exibidos
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage(p => p - 1)}
+                >
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={users.length < PAGE_SIZE}
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  Próxima
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

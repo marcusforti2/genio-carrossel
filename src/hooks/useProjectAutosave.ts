@@ -21,6 +21,7 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef<string>("");
+  const [ready, setReady] = useState(false);
 
   const serialize = useCallback(() => {
     return JSON.stringify({ ...carousel, _caption: caption });
@@ -37,7 +38,7 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
 
   // Autosave with 3s debounce
   useEffect(() => {
-    if (!user) return;
+    if (!user || !ready) return;
     const current = serialize();
     if (current === lastSavedRef.current) return;
 
@@ -76,7 +77,7 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [carousel, caption, projectId, projectTitle, user, serialize, updateUrlWithProjectId]);
+  }, [carousel, caption, projectId, projectTitle, user, serialize, updateUrlWithProjectId, ready]);
 
   const loadProject = useCallback((project: Project) => {
     setProjectId(project.id);
@@ -104,5 +105,6 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
     saveStatus,
     loadProject,
     newProject,
+    markReady: () => setReady(true),
   };
 }

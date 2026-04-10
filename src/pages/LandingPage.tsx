@@ -97,7 +97,7 @@ const testimonials = [
 const faqs = [
   { q: "Preciso saber design para usar?", a: "Não! A IA gera tudo automaticamente — textos, layout e cores. Você só precisa descrever o tema." },
   { q: "Quais formatos de exportação estão disponíveis?", a: "PNG em alta resolução (3x) e PDF otimizado. Perfeito para Instagram, LinkedIn e outras plataformas." },
-  { q: "Quantos carrosséis posso criar?", a: "Não existe limite. Crie quantos carrosséis quiser, sem restrições." },
+  { q: "Quantos carrosséis posso criar?", a: "Você começa com 15 carrosséis gratuitos. Precisa de mais? Entre em contato e liberamos créditos adicionais para sua conta." },
   { q: "A ferramenta funciona no celular?", a: "Sim! O editor é totalmente responsivo e funciona como um app instalável no seu celular." },
   { q: "Posso personalizar os templates?", a: "Sim! Cada template pode ser totalmente personalizado — cores, fontes, tamanhos, imagens e textos de cada slide individualmente." },
 ];
@@ -744,7 +744,7 @@ const LandingPage = () => {
                 </Button>
 
                 <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
-                  {["Sem limite de carrosséis", "Exportação em alta qualidade", "IA personalizada", "Suporte exclusivo"].map((t) => (
+                  {["15 carrosséis grátis", "Exportação em alta qualidade", "IA personalizada", "Suporte exclusivo"].map((t) => (
                     <div key={t} className="flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                       <span className="text-[11px] text-muted-foreground">{t}</span>
