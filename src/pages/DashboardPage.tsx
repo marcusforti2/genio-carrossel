@@ -122,6 +122,7 @@ const DashboardPage = () => {
     }
     toast.success("Projeto duplicado!");
     fetchProjects();
+    refreshLimits();
   };
 
   const handleDelete = async () => {
@@ -134,6 +135,7 @@ const DashboardPage = () => {
     toast.success("Projeto deletado!");
     setDeleteId(null);
     fetchProjects();
+    refreshLimits();
   };
 
   const formatDate = useCallback((d: string) =>
