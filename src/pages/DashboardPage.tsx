@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock, Code2, Shield,
+  LayoutGrid, CreditCard, Clock, ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
