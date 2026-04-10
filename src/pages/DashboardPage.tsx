@@ -244,6 +244,51 @@ const DashboardPage = () => {
           </div>
         </div>
 
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          {/* Total Projects */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <LayoutGrid className="w-4 h-4" />
+              <span className="text-[11px] uppercase tracking-wider font-medium">Total de Projetos</span>
+            </div>
+            <p className="text-3xl font-black text-foreground">{projects.length}</p>
+          </div>
+
+          {/* Credits */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <CreditCard className="w-4 h-4" />
+              <span className="text-[11px] uppercase tracking-wider font-medium">Créditos Restantes</span>
+            </div>
+            <p className="text-3xl font-black text-foreground">
+              {remaining}
+              <span className="text-sm font-medium text-muted-foreground ml-1">/ {FREE_LIMIT}</span>
+            </p>
+          </div>
+
+          {/* Last Edited */}
+          <div className="rounded-xl border border-border bg-card p-5 space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span className="text-[11px] uppercase tracking-wider font-medium">Último Editado</span>
+            </div>
+            {projects.length > 0 ? (
+              <button
+                onClick={() => handleOpen(projects[0].id)}
+                className="group flex items-center gap-2 w-full text-left"
+              >
+                <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                  {projects[0].title}
+                </p>
+                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary flex-shrink-0 transition-colors" />
+              </button>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhum projeto ainda</p>
+            )}
+          </div>
+        </div>
+
         {/* Search */}
         {projects.length > 0 && (
           <div className="relative mb-6 max-w-sm">
