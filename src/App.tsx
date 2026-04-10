@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfileComplete } from "@/hooks/useProfileComplete";
+import { useAdmin } from "@/hooks/useAdmin";
 import React, { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -16,6 +17,7 @@ const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +62,15 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdmin();
+  if (loading || adminLoading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/auth" replace />;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -76,6 +87,7 @@ const App = () => (
             <Route path="/editor" element={<ProtectedRoute><CarouselEditor /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/api" element={<ProtectedRoute><ApiDocsPage /></ProtectedRoute>} />
+            <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
