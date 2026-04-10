@@ -39,6 +39,7 @@ const CarouselEditor = () => {
     saveStatus,
     loadProject,
     newProject,
+    markReady,
   } = useProjectAutosave(carousel, caption);
 
   // Auto-load profile data
@@ -89,9 +90,11 @@ const CarouselEditor = () => {
           toast.error("Projeto não encontrado");
         }
         setInitialLoading(false);
+        markReady();
       })();
     } else {
       setInitialLoading(false);
+      markReady();
     }
   }, [user]);
 
