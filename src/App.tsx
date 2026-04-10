@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useProfileComplete } from "@/hooks/useProfileComplete";
+import { useAdmin } from "@/hooks/useAdmin";
 import React, { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
