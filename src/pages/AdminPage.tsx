@@ -63,6 +63,7 @@ const AdminPage = () => {
   const [projectsUser, setProjectsUser] = useState<AdminUser | null>(null);
   const [userProjects, setUserProjects] = useState<ProjectItem[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
+  const [expandedProject, setExpandedProject] = useState<ProjectItem | null>(null);
 
   const callAdmin = async (action: string, method = "GET", body?: Record<string, unknown>) => {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users/${action}`;
