@@ -21,6 +21,7 @@ export function useProjectAutosave(carousel: CarouselData, caption: string) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef<string>("");
+  const [ready, setReady] = useState(false);
 
   const serialize = useCallback(() => {
     return JSON.stringify({ ...carousel, _caption: caption });
