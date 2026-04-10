@@ -9,10 +9,12 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye,
+  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye, ChevronLeft,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import SlidePreview from "@/components/SlidePreview";
+import { CarouselData } from "@/types/carousel";
 
 interface AdminUser {
   id: string;
@@ -40,6 +42,7 @@ interface Stats {
 interface ProjectItem {
   id: string;
   title: string;
+  data: CarouselData | null;
   created_at: string;
   updated_at: string;
 }
@@ -60,6 +63,7 @@ const AdminPage = () => {
   const [projectsUser, setProjectsUser] = useState<AdminUser | null>(null);
   const [userProjects, setUserProjects] = useState<ProjectItem[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
+  const [expandedProject, setExpandedProject] = useState<ProjectItem | null>(null);
 
   const callAdmin = async (action: string, method = "GET", body?: Record<string, unknown>) => {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users/${action}`;
@@ -339,39 +343,92 @@ const AdminPage = () => {
       </Dialog>
 
       {/* Projects Dialog */}
-      <Dialog open={!!projectsUser} onOpenChange={() => setProjectsUser(null)}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={!!projectsUser} onOpenChange={() => { setProjectsUser(null); setExpandedProject(null); }}>
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>
-              Projetos de {projectsUser?.profile?.display_name || projectsUser?.email}
-            </DialogTitle>
+            {expandedProject ? (
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setExpandedProject(null)}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <DialogTitle className="truncate">{expandedProject.title}</DialogTitle>
+              </div>
+            ) : (
+              <DialogTitle>
+                Projetos de {projectsUser?.profile?.display_name || projectsUser?.email}
+              </DialogTitle>
+            )}
           </DialogHeader>
+
           {projectsLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
+          ) : expandedProject ? (
+            // Expanded: show all slide cards in a grid
+            <div className="overflow-y-auto flex-1 py-2">
+              {expandedProject.data?.slides && expandedProject.data.slides.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {expandedProject.data.slides.map((slide, idx) => (
+                    <div key={slide.id || idx} className="rounded-lg overflow-hidden border border-border bg-muted/30">
+                      <div className="aspect-[4/5]">
+                        <SlidePreview
+                          slide={slide}
+                          carousel={expandedProject.data as CarouselData}
+                          slideIndex={idx}
+                          totalSlides={expandedProject.data!.slides.length}
+                        />
+                      </div>
+                      <div className="p-2 border-t border-border">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{slide.type} • Slide {idx + 1}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">Sem slides neste projeto.</p>
+              )}
+            </div>
           ) : userProjects.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">Nenhum projeto encontrado.</p>
           ) : (
-            <div className="max-h-[400px] overflow-y-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead>Criado em</TableHead>
-                    <TableHead>Atualizado em</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {userProjects.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="text-sm font-medium text-foreground">{p.title}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{formatDate(p.created_at)}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{formatDate(p.updated_at)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            // Project list with first slide preview
+            <div className="overflow-y-auto flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {userProjects.map((p) => {
+                  const carousel = p.data as CarouselData | null;
+                  const firstSlide = carousel?.slides?.[0];
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setExpandedProject(p)}
+                      className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/10 transition-colors text-left cursor-pointer"
+                    >
+                      {firstSlide && carousel ? (
+                        <div className="w-20 h-25 flex-shrink-0 rounded overflow-hidden border border-border">
+                          <div className="aspect-[4/5]">
+                            <SlidePreview
+                              slide={firstSlide}
+                              carousel={carousel}
+                              slideIndex={0}
+                              totalSlides={carousel.slides.length}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-25 flex-shrink-0 rounded bg-muted flex items-center justify-center">
+                          <FolderOpen className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{p.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{carousel?.slides?.length || 0} slides</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(p.updated_at)}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </DialogContent>

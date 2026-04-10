@@ -124,7 +124,7 @@ serve(async (req) => {
 
       const { data, error } = await supabaseAdmin
         .from("projects")
-        .select("id, title, created_at, updated_at")
+        .select("id, title, data, created_at, updated_at")
         .eq("user_id", targetUserId)
         .order("updated_at", { ascending: false })
         .limit(50);
