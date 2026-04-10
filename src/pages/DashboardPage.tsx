@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock, Code2,
+  Copy, Trash2, Loader2, LogOut, User, FolderOpen, Search, Sparkles, MoreHorizontal, Lock, Code2, Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -30,6 +31,7 @@ interface ProjectItem {
 
 const DashboardPage = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -161,6 +163,17 @@ const DashboardPage = () => {
             <span className="text-[9px] font-medium text-muted-foreground border border-border rounded px-1.5 py-0.5 uppercase tracking-wider">by Forti</span>
           </div>
           <div className="flex items-center gap-2">
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/admin")}
+                className="text-xs gap-1.5 text-muted-foreground"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Admin</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
