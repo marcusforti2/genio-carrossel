@@ -237,12 +237,12 @@ const AdminPage = () => {
                       <button
                         onClick={() => {
                           setCreditsUser(u);
-                          setNewLimit(String(u.credits.total_limit));
+                          setNewLimit(String(u.credits?.total_limit ?? 15));
                         }}
                         className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline cursor-pointer"
                       >
                         <CreditCard className="w-3.5 h-3.5" />
-                        {u.project_count}/{u.credits.total_limit}
+                        {u.project_count}/{u.credits?.total_limit ?? 15}
                       </button>
                     </TableCell>
                     <TableCell>
