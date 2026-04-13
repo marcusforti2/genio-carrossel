@@ -91,12 +91,14 @@ const AdminPage = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [usersRes, statsRes] = await Promise.all([
+    const [usersRes, statsRes, chartsRes] = await Promise.all([
       callAdmin(`list?page=${page}&limit=${PAGE_SIZE}`),
       callAdmin("stats"),
+      callAdmin("charts"),
     ]);
     if (usersRes.users) setUsers(usersRes.users);
     if (statsRes.total_users !== undefined) setStats(statsRes);
+    if (chartsRes.users_per_week) setChartsData(chartsRes);
     setLoading(false);
   };
 
