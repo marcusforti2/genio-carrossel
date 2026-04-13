@@ -42,6 +42,12 @@ interface Stats {
   new_users_7d: number;
 }
 
+interface ChartsData {
+  users_per_week: { week: string; count: number }[];
+  projects_per_day: { day: string; count: number }[];
+  credits_usage: { label: string; count: number }[];
+}
+
 interface ProjectItem {
   id: string;
   title: string;
