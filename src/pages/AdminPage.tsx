@@ -68,6 +68,7 @@ const AdminPage = () => {
   // Credits dialog
   const [creditsUser, setCreditsUser] = useState<AdminUser | null>(null);
   const [newLimit, setNewLimit] = useState("");
+  const [chartsData, setChartsData] = useState<ChartsData | null>(null);
 
   // Projects dialog
   const [projectsUser, setProjectsUser] = useState<AdminUser | null>(null);
