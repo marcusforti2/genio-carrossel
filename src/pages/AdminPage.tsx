@@ -15,6 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import SlidePreview from "@/components/SlidePreview";
 import { CarouselData } from "@/types/carousel";
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 
 interface AdminUser {
   id: string;
