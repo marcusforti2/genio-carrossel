@@ -159,6 +159,74 @@ serve(async (req) => {
       });
     }
 
+    // GET /admin-users/charts
+    if (action === "charts" && req.method === "GET") {
+      // 1. Users per week (last 12 weeks)
+      const { data: { users: allUsers } } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const now = new Date();
+      const weeksData: { week: string; count: number }[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const weekStart = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd = new Date(now.getTime() - (i - 1) * 7 * 24 * 60 * 60 * 1000);
+        const label = `${weekStart.getDate().toString().padStart(2, "0")}/${(weekStart.getMonth() + 1).toString().padStart(2, "0")}`;
+        const count = (allUsers || []).filter((u) => {
+          const d = new Date(u.created_at);
+          return d >= weekStart && d < weekEnd;
+        }).length;
+        weeksData.push({ week: label, count });
+      }
+
+      // 2. Projects per day (last 30 days)
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: recentProjects } = await supabaseAdmin
+        .from("projects")
+        .select("created_at")
+        .gte("created_at", thirtyDaysAgo)
+        .order("created_at", { ascending: true });
+
+      const dayMap: Record<string, number> = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        const key = `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}`;
+        dayMap[key] = 0;
+      }
+      (recentProjects || []).forEach((p: any) => {
+        const d = new Date(p.created_at);
+        const key = `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}`;
+        if (key in dayMap) dayMap[key]++;
+      });
+      const projectsPerDay = Object.entries(dayMap).map(([day, count]) => ({ day, count }));
+
+      // 3. Credits usage distribution
+      const { data: credits } = await supabaseAdmin.from("user_credits").select("user_id, total_limit");
+      const { data: projectCounts } = await supabaseAdmin.from("projects").select("user_id");
+      const usageMap: Record<string, number> = {};
+      (projectCounts || []).forEach((p: any) => {
+        usageMap[p.user_id] = (usageMap[p.user_id] || 0) + 1;
+      });
+
+      const creditsBuckets = [
+        { label: "0%", min: 0, max: 0.01, count: 0 },
+        { label: "1-25%", min: 0.01, max: 0.26, count: 0 },
+        { label: "26-50%", min: 0.26, max: 0.51, count: 0 },
+        { label: "51-75%", min: 0.51, max: 0.76, count: 0 },
+        { label: "76-99%", min: 0.76, max: 1.0, count: 0 },
+        { label: "100%", min: 1.0, max: Infinity, count: 0 },
+      ];
+      (credits || []).forEach((c: any) => {
+        const used = usageMap[c.user_id] || 0;
+        const ratio = c.total_limit > 0 ? used / c.total_limit : 0;
+        const bucket = creditsBuckets.find((b) => ratio >= b.min && ratio < b.max);
+        if (bucket) bucket.count++;
+      });
+
+      return json({
+        users_per_week: weeksData,
+        projects_per_day: projectsPerDay,
+        credits_usage: creditsBuckets.map((b) => ({ label: b.label, count: b.count })),
+      });
+    }
+
     return json({ error: "Not found" }, 404);
   } catch (e) {
     console.error("[admin-users]", e);

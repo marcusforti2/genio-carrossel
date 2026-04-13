@@ -15,6 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import SlidePreview from "@/components/SlidePreview";
 import { CarouselData } from "@/types/carousel";
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 
 interface AdminUser {
   id: string;
@@ -39,6 +42,12 @@ interface Stats {
   new_users_7d: number;
 }
 
+interface ChartsData {
+  users_per_week: { week: string; count: number }[];
+  projects_per_day: { day: string; count: number }[];
+  credits_usage: { label: string; count: number }[];
+}
+
 interface ProjectItem {
   id: string;
   title: string;
@@ -59,6 +68,7 @@ const AdminPage = () => {
   // Credits dialog
   const [creditsUser, setCreditsUser] = useState<AdminUser | null>(null);
   const [newLimit, setNewLimit] = useState("");
+  const [chartsData, setChartsData] = useState<ChartsData | null>(null);
 
   // Projects dialog
   const [projectsUser, setProjectsUser] = useState<AdminUser | null>(null);
@@ -81,12 +91,14 @@ const AdminPage = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [usersRes, statsRes] = await Promise.all([
+    const [usersRes, statsRes, chartsRes] = await Promise.all([
       callAdmin(`list?page=${page}&limit=${PAGE_SIZE}`),
       callAdmin("stats"),
+      callAdmin("charts"),
     ]);
     if (usersRes.users) setUsers(usersRes.users);
     if (statsRes.total_users !== undefined) setStats(statsRes);
+    if (chartsRes.users_per_week) setChartsData(chartsRes);
     setLoading(false);
   };
 
@@ -199,7 +211,72 @@ const AdminPage = () => {
           </div>
         )}
 
-        {/* Users Table */}
+        {/* Charts */}
+        {chartsData && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Novos Usuários por Semana</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={chartsData.users_per_week}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                    <XAxis dataKey="week" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Bar dataKey="count" name="Usuários" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Projetos por Dia (30d)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={chartsData.projects_per_day}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                    <XAxis dataKey="day" tick={{ fontSize: 10 }} interval={4} className="fill-muted-foreground" />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Line dataKey="count" name="Projetos" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Uso de Créditos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={chartsData.credits_usage}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                    <XAxis dataKey="label" tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Bar dataKey="count" name="Usuários" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+
         <Card>
           <CardHeader>
             <CardTitle className="text-foreground">Usuários ({users.length})</CardTitle>
