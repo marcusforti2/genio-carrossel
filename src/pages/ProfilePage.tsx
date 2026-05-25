@@ -21,6 +21,9 @@ interface ProfileData {
   beliefs: string;
   tone_of_voice: string;
   value_proposition: string;
+  positioning_thesis: string;
+  manifesto: string;
+  hooks: string;
   avatar_url: string;
   knowledge_base: string;
 }
@@ -80,6 +83,9 @@ Comece agora me perguntando sobre o item 1.`;
     beliefs: "",
     tone_of_voice: "",
     value_proposition: "",
+    positioning_thesis: "",
+    manifesto: "",
+    hooks: "",
     avatar_url: "",
     knowledge_base: "",
   });
@@ -105,6 +111,9 @@ Comece agora me perguntando sobre o item 1.`;
           beliefs: data.beliefs || "",
           tone_of_voice: data.tone_of_voice || "",
           value_proposition: data.value_proposition || "",
+          positioning_thesis: (data as any).positioning_thesis || "",
+          manifesto: (data as any).manifesto || "",
+          hooks: (data as any).hooks || "",
           avatar_url: data.avatar_url || "",
           knowledge_base: (data as any).knowledge_base || "",
         });
@@ -308,6 +317,9 @@ Comece agora me perguntando sobre o item 1.`;
         beliefs: data.beliefs || profile.beliefs,
         tone_of_voice: data.tone_of_voice || profile.tone_of_voice,
         value_proposition: data.value_proposition || profile.value_proposition,
+        positioning_thesis: data.positioning_thesis || profile.positioning_thesis,
+        manifesto: data.manifesto || profile.manifesto,
+        hooks: data.hooks || profile.hooks,
       };
       setProfile(updated);
 
@@ -602,6 +614,9 @@ Comece agora me perguntando sobre o item 1.`;
             <FieldArea label="Crenças e valores" value={profile.beliefs} onChange={(v) => updateField("beliefs", v)} placeholder="Quais são suas crenças fortes sobre seu mercado?" />
             <FieldArea label="Tom de voz" value={profile.tone_of_voice} onChange={(v) => updateField("tone_of_voice", v)} placeholder="Ex: Provocativo, direto, sem rodeios, com ironia inteligente..." required />
             <FieldArea label="Proposta de valor" value={profile.value_proposition} onChange={(v) => updateField("value_proposition", v)} placeholder="O que você entrega de único? Qual a transformação?" required />
+            <FieldArea label="Tese de posicionamento" value={profile.positioning_thesis} onChange={(v) => updateField("positioning_thesis", v)} placeholder="A ideia central, contraintuitiva, que define como você vê o mercado" />
+            <FieldArea label="Manifesto" value={profile.manifesto} onChange={(v) => updateField("manifesto", v)} placeholder="No que você acredita, contra o que se posiciona, o que defende" />
+            <FieldArea label="Ganchos prontos" value={profile.hooks} onChange={(v) => updateField("hooks", v)} placeholder="Um gancho por linha — para abrir carrosséis" />
           </div>
         </section>
 

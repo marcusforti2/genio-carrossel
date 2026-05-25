@@ -1,0 +1,4 @@
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS positioning_thesis text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS manifesto text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS hooks text NOT NULL DEFAULT '';

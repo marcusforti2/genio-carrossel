@@ -44,6 +44,9 @@ const OnboardingPage = () => {
     beliefs: "",
     tone_of_voice: "",
     value_proposition: "",
+    positioning_thesis: "",
+    manifesto: "",
+    hooks: "",
   });
 
   const updateField = (field: string, value: string) => {
@@ -128,6 +131,9 @@ const OnboardingPage = () => {
         beliefs: data.beliefs || prev.beliefs,
         tone_of_voice: data.tone_of_voice || prev.tone_of_voice,
         value_proposition: data.value_proposition || prev.value_proposition,
+        positioning_thesis: data.positioning_thesis || prev.positioning_thesis,
+        manifesto: data.manifesto || prev.manifesto,
+        hooks: data.hooks || prev.hooks,
       }));
       toast.success("Perfil preenchido pela IA! Confira e ajuste no próximo passo.");
       setStep(1);
@@ -535,6 +541,21 @@ const StepReview = ({
         <Label className="text-xs text-muted-foreground">Crenças e valores</Label>
         <Textarea value={profile.beliefs} onChange={(e) => updateField("beliefs", e.target.value)} placeholder="Suas convicções" rows={2} className="bg-secondary border-border/50 resize-none text-sm" />
       </div>
+    </div>
+
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">Tese de posicionamento</Label>
+      <Textarea value={profile.positioning_thesis} onChange={(e) => updateField("positioning_thesis", e.target.value)} placeholder="A ideia central que define como você vê o mercado" rows={3} className="bg-secondary border-border/50 resize-none text-sm" />
+    </div>
+
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">Manifesto</Label>
+      <Textarea value={profile.manifesto} onChange={(e) => updateField("manifesto", e.target.value)} placeholder="No que você acredita, contra o que se posiciona" rows={4} className="bg-secondary border-border/50 resize-none text-sm" />
+    </div>
+
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">Ganchos prontos</Label>
+      <Textarea value={profile.hooks} onChange={(e) => updateField("hooks", e.target.value)} placeholder="Um gancho por linha" rows={5} className="bg-secondary border-border/50 resize-none text-sm" />
     </div>
   </div>
 );
