@@ -283,6 +283,8 @@ const OnboardingPage = () => {
 
 const StepPhotoAndText = ({
   profile, fileInputRef, uploading, onAvatarUpload, rawText, setRawText, parsing, updateField,
+  docFileInputRef, extractingFile, uploadedFileName, onDocUpload, onCopyPrompt, promptCopied,
+  showGuide, setShowGuide,
 }: {
   profile: any;
   fileInputRef: React.RefObject<HTMLInputElement>;
@@ -292,6 +294,14 @@ const StepPhotoAndText = ({
   setRawText: (v: string) => void;
   parsing: boolean;
   updateField: (f: string, v: string) => void;
+  docFileInputRef: React.RefObject<HTMLInputElement>;
+  extractingFile: boolean;
+  uploadedFileName: string | null;
+  onDocUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCopyPrompt: () => void;
+  promptCopied: boolean;
+  showGuide: boolean;
+  setShowGuide: (v: boolean) => void;
 }) => (
   <div className="space-y-6">
     <div className="text-center space-y-2">
