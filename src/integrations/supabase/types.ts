@@ -93,9 +93,12 @@ export type Database = {
           created_at: string
           display_name: string
           handle: string
+          hooks: string
           id: string
           knowledge_base: string | null
+          manifesto: string
           niche: string
+          positioning_thesis: string
           target_audience: string
           tone_of_voice: string
           updated_at: string
@@ -111,9 +114,12 @@ export type Database = {
           created_at?: string
           display_name?: string
           handle?: string
+          hooks?: string
           id?: string
           knowledge_base?: string | null
+          manifesto?: string
           niche?: string
+          positioning_thesis?: string
           target_audience?: string
           tone_of_voice?: string
           updated_at?: string
@@ -129,9 +135,12 @@ export type Database = {
           created_at?: string
           display_name?: string
           handle?: string
+          hooks?: string
           id?: string
           knowledge_base?: string | null
+          manifesto?: string
           niche?: string
+          positioning_thesis?: string
           target_audience?: string
           tone_of_voice?: string
           updated_at?: string
