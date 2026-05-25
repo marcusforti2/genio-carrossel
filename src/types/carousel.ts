@@ -78,13 +78,23 @@ export const BG_COLOR_PRESETS = [
   { name: "Escuro", color: "0 0% 6.5%", mode: "dark" as const },
   { name: "Claro", color: "0 0% 96%", mode: "light" as const },
   { name: "Cinza", color: "0 0% 22%", mode: "dark" as const },
+  { name: "Grafite", color: "220 13% 14%", mode: "dark" as const },
+  { name: "Bege", color: "35 30% 88%", mode: "light" as const },
+  { name: "Marrom", color: "25 45% 22%", mode: "dark" as const },
+  { name: "Café", color: "20 30% 30%", mode: "dark" as const },
   { name: "Vermelho", color: "1 70% 35%", mode: "dark" as const },
+  { name: "Bordô", color: "350 65% 25%", mode: "dark" as const },
   { name: "Laranja", color: "25 85% 40%", mode: "dark" as const },
   { name: "Amarelo", color: "45 90% 50%", mode: "light" as const },
   { name: "Verde", color: "142 60% 30%", mode: "dark" as const },
+  { name: "Esmeralda", color: "160 70% 25%", mode: "dark" as const },
   { name: "Azul", color: "217 70% 35%", mode: "dark" as const },
+  { name: "Navy", color: "220 70% 18%", mode: "dark" as const },
+  { name: "Ciano", color: "190 75% 35%", mode: "dark" as const },
   { name: "Roxo", color: "263 55% 35%", mode: "dark" as const },
+  { name: "Violeta", color: "280 60% 30%", mode: "dark" as const },
   { name: "Rosa", color: "330 60% 40%", mode: "dark" as const },
+  { name: "Pêssego", color: "20 70% 75%", mode: "light" as const },
 ];
 
 export interface FooterConfig {
@@ -112,11 +122,20 @@ export const ACCENT_PRESETS = [
   { name: "Laranja", color: "25 95% 53%" },
   { name: "Amarelo", color: "45 93% 47%" },
   { name: "Verde", color: "142 71% 45%" },
+  { name: "Esmeralda", color: "160 70% 45%" },
+  { name: "Ciano", color: "190 85% 50%" },
   { name: "Azul", color: "217 91% 60%" },
+  { name: "Navy", color: "220 70% 35%" },
   { name: "Roxo", color: "263 70% 50%" },
+  { name: "Violeta", color: "280 75% 60%" },
   { name: "Rosa", color: "330 81% 60%" },
+  { name: "Magenta", color: "320 85% 55%" },
+  { name: "Marrom", color: "25 55% 40%" },
+  { name: "Café", color: "20 40% 30%" },
+  { name: "Bege", color: "35 50% 70%" },
   { name: "Branco", color: "0 0% 90%" },
 ];
+
 
 export const createDefaultCarousel = (): CarouselData => ({
   id: crypto.randomUUID(),

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, User, Type, Palette, Pencil, UserCircle, ChevronDown } from "lucide-react";
 import SlideEditorPanel from "@/components/SlideEditorPanel";
 import SlideDesignOverrides from "@/components/SlideDesignOverrides";
+import CustomColorPicker from "@/components/CustomColorPicker";
 
 
 
@@ -128,8 +129,18 @@ const EditorSidebar = ({
                       </button>
                     );
                   })}
+                  <CustomColorPicker
+                    value={carousel.theme.bgColor || (carousel.theme.bgMode === "light" ? "0 0% 96%" : "0 0% 6.5%")}
+                    onChange={(hsl) => {
+                      // Estimate mode from lightness
+                      const l = parseFloat(hsl.split(" ")[2]);
+                      const mode = l > 50 ? "light" : "dark";
+                      updateTheme({ bgMode: mode, bgColor: hsl, bgColorName: "Custom" });
+                    }}
+                  />
                 </div>
               </div>
+
 
               {/* Accent color */}
               <div className="space-y-2">
@@ -149,7 +160,12 @@ const EditorSidebar = ({
                       <span className="text-[8px] text-muted-foreground">{preset.name}</span>
                     </button>
                   ))}
+                  <CustomColorPicker
+                    value={carousel.theme.accentColor}
+                    onChange={(hsl) => updateTheme({ accentColor: hsl, accentName: "Custom" })}
+                  />
                 </div>
+
               </div>
             </div>
           </CollapsibleContent>
