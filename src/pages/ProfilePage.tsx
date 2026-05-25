@@ -163,21 +163,33 @@ const ProfilePage = () => {
         return;
       }
 
-      setProfile((prev) => ({
-        ...prev,
-        display_name: data.display_name || prev.display_name,
-        handle: data.handle || prev.handle,
-        branding_text: data.branding_text || prev.branding_text,
-        branding_subtext: data.branding_subtext || prev.branding_subtext,
-        niche: data.niche || prev.niche,
-        target_audience: data.target_audience || prev.target_audience,
-        common_enemy: data.common_enemy || prev.common_enemy,
-        beliefs: data.beliefs || prev.beliefs,
-        tone_of_voice: data.tone_of_voice || prev.tone_of_voice,
-        value_proposition: data.value_proposition || prev.value_proposition,
-      }));
+      const updated = {
+        ...profile,
+        display_name: data.display_name || profile.display_name,
+        handle: data.handle || profile.handle,
+        branding_text: data.branding_text || profile.branding_text,
+        branding_subtext: data.branding_subtext || profile.branding_subtext,
+        niche: data.niche || profile.niche,
+        target_audience: data.target_audience || profile.target_audience,
+        common_enemy: data.common_enemy || profile.common_enemy,
+        beliefs: data.beliefs || profile.beliefs,
+        tone_of_voice: data.tone_of_voice || profile.tone_of_voice,
+        value_proposition: data.value_proposition || profile.value_proposition,
+      };
+      setProfile(updated);
 
-      toast.success("Perfil preenchido pela IA! Revise e salve.");
+      // Auto-save after AI fill
+      const { error: saveError } = await supabase
+        .from("profiles")
+        .upsert({ ...updated, user_id: user!.id }, { onConflict: "user_id" });
+
+      if (saveError) {
+        console.error("Auto-save error:", saveError);
+        toast.success("Perfil preenchido pela IA! Revise e clique em Salvar.");
+      } else {
+        toast.success("Perfil preenchido e salvo automaticamente! ✨");
+        setRawText("");
+      }
     } catch (e: any) {
       console.error(e);
       toast.error("Erro ao processar texto. Tente novamente.");
@@ -185,6 +197,7 @@ const ProfilePage = () => {
       setParsing(false);
     }
   };
+
 
   const updateField = (field: keyof ProfileData, value: string) => {
     setProfile((prev) => ({ ...prev, [field]: value }));
