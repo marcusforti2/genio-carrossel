@@ -129,8 +129,18 @@ const EditorSidebar = ({
                       </button>
                     );
                   })}
+                  <CustomColorPicker
+                    value={carousel.theme.bgColor || (carousel.theme.bgMode === "light" ? "0 0% 96%" : "0 0% 6.5%")}
+                    onChange={(hsl) => {
+                      // Estimate mode from lightness
+                      const l = parseFloat(hsl.split(" ")[2]);
+                      const mode = l > 50 ? "light" : "dark";
+                      updateTheme({ bgMode: mode, bgColor: hsl, bgColorName: "Custom" });
+                    }}
+                  />
                 </div>
               </div>
+
 
               {/* Accent color */}
               <div className="space-y-2">
