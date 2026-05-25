@@ -277,6 +277,10 @@ const AdminPage = () => {
           </div>
         )}
 
+        <WhatsAppSettings />
+
+
+
 
         <Card>
           <CardHeader>
