@@ -317,6 +317,9 @@ Comece agora me perguntando sobre o item 1.`;
         beliefs: data.beliefs || profile.beliefs,
         tone_of_voice: data.tone_of_voice || profile.tone_of_voice,
         value_proposition: data.value_proposition || profile.value_proposition,
+        positioning_thesis: data.positioning_thesis || profile.positioning_thesis,
+        manifesto: data.manifesto || profile.manifesto,
+        hooks: data.hooks || profile.hooks,
       };
       setProfile(updated);
 
