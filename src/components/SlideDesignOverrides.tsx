@@ -99,8 +99,13 @@ const SlideDesignOverrides = ({ slide, onUpdate, carousel }: SlideDesignOverride
               <span className="text-[8px] text-muted-foreground">{preset.name}</span>
             </button>
           ))}
+          <CustomColorPicker
+            value={effectiveAccent}
+            onChange={(hsl) => updateOverride({ accentColor: hsl, accentName: "Custom" })}
+          />
         </div>
       </div>
+
     </div>
   );
 };
