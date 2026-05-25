@@ -32,7 +32,10 @@ const ProfilePage = () => {
   const [parsing, setParsing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [rawText, setRawText] = useState("");
+  const [extractingFile, setExtractingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docFileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<ProfileData>({
     display_name: "",
     handle: "",
