@@ -9,8 +9,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye, ChevronLeft,
+  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye, ChevronLeft, UserPlus,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import SlidePreview from "@/components/SlidePreview";
