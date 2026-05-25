@@ -457,6 +457,60 @@ Comece agora me perguntando sobre o item 1.`;
               A IA vai ler, interpretar e preencher todos os campos automaticamente.
             </p>
 
+            {/* Guia: usar ChatGPT/Claude para montar o texto */}
+            <div className="rounded-lg border border-primary/30 bg-background/40 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowGuide((v) => !v)}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left hover:bg-primary/5 transition-colors"
+              >
+                <span className="flex items-center gap-2 text-xs font-medium">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  Não sabe o que escrever? Deixa o ChatGPT/Claude montar pra você
+                </span>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showGuide ? "rotate-180" : ""}`} />
+              </button>
+
+              {showGuide && (
+                <div className="px-3 pb-3 space-y-3 border-t border-primary/20">
+                  <ol className="text-[11px] text-muted-foreground space-y-1.5 mt-3 list-decimal list-inside">
+                    <li>Copie o prompt abaixo no botão.</li>
+                    <li>Abra o <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> e cole numa conversa nova.</li>
+                    <li>Responda as perguntas que a IA te fizer (vai ser uma conversa guiada).</li>
+                    <li>No fim, ela vai gerar um texto completo. Copie esse texto.</li>
+                    <li>Volte aqui, cole no campo abaixo e clique em <strong className="text-foreground">Preencher perfil com IA</strong>.</li>
+                  </ol>
+
+                  <div className="relative">
+                    <pre className="text-[10px] leading-relaxed bg-secondary/60 border border-border/50 rounded-md p-3 pr-10 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-muted-foreground">
+{AI_PROMPT_TEMPLATE}
+                    </pre>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleCopyPrompt}
+                      className="absolute top-2 right-2 h-7 gap-1 text-[10px]"
+                    >
+                      {promptCopied ? (
+                        <>
+                          <Check className="w-3 h-3" />
+                          Copiado
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          Copiar prompt
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+
+
             {/* Upload doc button */}
             <div className="flex items-center gap-2">
               <Button
