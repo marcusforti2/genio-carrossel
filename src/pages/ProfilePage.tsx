@@ -36,6 +36,36 @@ const ProfilePage = () => {
   const [extractingFile, setExtractingFile] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [kbExtracting, setKbExtracting] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+
+  const AI_PROMPT_TEMPLATE = `Você é um especialista em branding pessoal e posicionamento digital. Vou te contar sobre mim, meu negócio e meu trabalho, e preciso que você organize TUDO em um texto único, completo e bem estruturado, que eu vou colar em uma ferramenta de IA que cria carrosséis para o Instagram.
+
+O texto final precisa cobrir, em parágrafos corridos (sem títulos, sem bullet points), os seguintes pontos:
+
+1. Quem eu sou (nome completo, o que faço profissionalmente, minha história curta).
+2. Minha marca / empresa (nome, tagline, do que se trata).
+3. Meu nicho de atuação (em 1-2 frases bem específicas).
+4. Meu público-alvo detalhado (quem são, o que sentem, o que querem, o que os frustra).
+5. O "inimigo em comum" entre mim e meu público (o que combatemos juntos, contra o que lutamos no mercado).
+6. Minhas crenças e convicções fortes sobre o meu mercado (o que eu defendo, o que eu critico).
+7. Meu tom de voz para conteúdo (ex: direto, provocativo, com ironia, técnico, acolhedor...).
+8. Minha proposta de valor única (o que eu entrego de diferente, qual transformação eu gero).
+
+Antes de escrever, me faça TODAS as perguntas que precisar para entender bem cada um desses pontos. Depois, gere o texto final, em português, em tom profissional mas humano, pronto para eu copiar e colar.
+
+Comece agora me perguntando sobre o item 1.`;
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(AI_PROMPT_TEMPLATE);
+      setPromptCopied(true);
+      toast.success("Prompt copiado! Cole no ChatGPT ou Claude.");
+      setTimeout(() => setPromptCopied(false), 2500);
+    } catch {
+      toast.error("Não foi possível copiar. Selecione manualmente.");
+    }
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docFileInputRef = useRef<HTMLInputElement>(null);
   const kbFileInputRef = useRef<HTMLInputElement>(null);
