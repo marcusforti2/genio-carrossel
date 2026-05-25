@@ -293,7 +293,7 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `slide-${slideIndex + 1}.png`;
+      a.download = `${getExportBaseName(carousel)}-slide-${slideIndex + 1}.png`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`Slide ${slideIndex + 1} baixado!`);
