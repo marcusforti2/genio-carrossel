@@ -75,6 +75,36 @@ const OnboardingPage = () => {
     }
   };
 
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande (máx 10MB)"); return; }
+    setExtractingFile(true);
+    try {
+      const text = await extractFileText(file);
+      if (!text || text.length < 10) { toast.error("Não foi possível extrair texto do arquivo"); return; }
+      setRawText((prev) => (prev.trim() ? `${prev.trim()}\n\n--- ${file.name} ---\n${text}` : text));
+      setUploadedFileName(file.name);
+      toast.success(`Texto extraído de "${file.name}"`);
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao ler arquivo");
+    } finally {
+      setExtractingFile(false);
+      if (docFileInputRef.current) docFileInputRef.current.value = "";
+    }
+  };
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(AI_PROFILE_PROMPT);
+      setPromptCopied(true);
+      toast.success("Prompt copiado! Cole no ChatGPT ou Claude.");
+      setTimeout(() => setPromptCopied(false), 2500);
+    } catch {
+      toast.error("Não foi possível copiar.");
+    }
+  };
+
   const handleParseWithAI = async () => {
     if (!rawText.trim() || rawText.trim().length < 10) {
       toast.error("Cole mais texto sobre seu negócio (mínimo 10 caracteres)");
