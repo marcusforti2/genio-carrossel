@@ -213,7 +213,16 @@ const OnboardingPage = () => {
                   setRawText={setRawText}
                   parsing={parsing}
                   updateField={updateField}
+                  docFileInputRef={docFileInputRef}
+                  extractingFile={extractingFile}
+                  uploadedFileName={uploadedFileName}
+                  onDocUpload={handleDocUpload}
+                  onCopyPrompt={handleCopyPrompt}
+                  promptCopied={promptCopied}
+                  showGuide={showGuide}
+                  setShowGuide={setShowGuide}
                 />
+
               )}
               {step === 1 && (
                 <StepReview
