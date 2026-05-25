@@ -24,8 +24,13 @@ const OnboardingPage = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [parsing, setParsing] = useState(false);
+  const [extractingFile, setExtractingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [rawText, setRawText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docFileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState({
     display_name: "",
