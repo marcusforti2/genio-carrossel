@@ -160,7 +160,12 @@ const EditorSidebar = ({
                       <span className="text-[8px] text-muted-foreground">{preset.name}</span>
                     </button>
                   ))}
+                  <CustomColorPicker
+                    value={carousel.theme.accentColor}
+                    onChange={(hsl) => updateTheme({ accentColor: hsl, accentName: "Custom" })}
+                  />
                 </div>
+
               </div>
             </div>
           </CollapsibleContent>
