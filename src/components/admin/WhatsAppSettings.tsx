@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, MessageCircle, Send } from "lucide-react";
+import { Loader2, MessageCircle, Send, Check } from "lucide-react";
 
 export const WhatsAppSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [testing, setTesting] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const [evolutionUrl, setEvolutionUrl] = useState("");
@@ -18,6 +19,8 @@ export const WhatsAppSettings = () => {
   const [instance, setInstance] = useState("");
   const [number, setNumber] = useState("");
   const [autoSend, setAutoSend] = useState(true);
+  const loadedRef = useRef(false);
+  const idRef = useRef<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -25,6 +28,7 @@ export const WhatsAppSettings = () => {
         .from("admin_settings").select("*").limit(1).maybeSingle();
       if (!error && data) {
         setId(data.id);
+        idRef.current = data.id;
         setEvolutionUrl(data.evolution_url || "");
         setApiKey(data.evolution_api_key || "");
         setInstance(data.evolution_instance || "");
@@ -32,6 +36,8 @@ export const WhatsAppSettings = () => {
         setAutoSend(data.auto_send_on_export ?? true);
       }
       setLoading(false);
+      // Allow autosave only after the initial load is done
+      setTimeout(() => { loadedRef.current = true; }, 100);
     })();
   }, []);
 
