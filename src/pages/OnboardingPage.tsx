@@ -348,11 +348,8 @@ const StepPhotoAndText = ({
       </div>
 
       <div className="flex-1 space-y-2">
-        {!profile.avatar_url && (
-          <p className="text-[10px] text-destructive">* Foto obrigatória</p>
-        )}
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Seu @ *</Label>
+          <Label className="text-xs text-muted-foreground">Seu @ (opcional)</Label>
           <div className="flex items-center bg-secondary border border-border/50 rounded-md overflow-hidden">
             <span className="pl-3 text-sm text-muted-foreground select-none">@</span>
             <Input
