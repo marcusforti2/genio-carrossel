@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User, AlertCircle, CheckCircle2, Upload, FileText, X } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User, AlertCircle, CheckCircle2, Upload, FileText, X, Copy, Check, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -36,6 +36,36 @@ const ProfilePage = () => {
   const [extractingFile, setExtractingFile] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [kbExtracting, setKbExtracting] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+
+  const AI_PROMPT_TEMPLATE = `Você é um especialista em branding pessoal e posicionamento digital. Vou te contar sobre mim, meu negócio e meu trabalho, e preciso que você organize TUDO em um texto único, completo e bem estruturado, que eu vou colar em uma ferramenta de IA que cria carrosséis para o Instagram.
+
+O texto final precisa cobrir, em parágrafos corridos (sem títulos, sem bullet points), os seguintes pontos:
+
+1. Quem eu sou (nome completo, o que faço profissionalmente, minha história curta).
+2. Minha marca / empresa (nome, tagline, do que se trata).
+3. Meu nicho de atuação (em 1-2 frases bem específicas).
+4. Meu público-alvo detalhado (quem são, o que sentem, o que querem, o que os frustra).
+5. O "inimigo em comum" entre mim e meu público (o que combatemos juntos, contra o que lutamos no mercado).
+6. Minhas crenças e convicções fortes sobre o meu mercado (o que eu defendo, o que eu critico).
+7. Meu tom de voz para conteúdo (ex: direto, provocativo, com ironia, técnico, acolhedor...).
+8. Minha proposta de valor única (o que eu entrego de diferente, qual transformação eu gero).
+
+Antes de escrever, me faça TODAS as perguntas que precisar para entender bem cada um desses pontos. Depois, gere o texto final, em português, em tom profissional mas humano, pronto para eu copiar e colar.
+
+Comece agora me perguntando sobre o item 1.`;
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(AI_PROMPT_TEMPLATE);
+      setPromptCopied(true);
+      toast.success("Prompt copiado! Cole no ChatGPT ou Claude.");
+      setTimeout(() => setPromptCopied(false), 2500);
+    } catch {
+      toast.error("Não foi possível copiar. Selecione manualmente.");
+    }
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docFileInputRef = useRef<HTMLInputElement>(null);
   const kbFileInputRef = useRef<HTMLInputElement>(null);
@@ -426,6 +456,60 @@ const ProfilePage = () => {
               Cole aqui tudo sobre seu negócio — quem você é, o que faz, seu público, suas crenças, tom de voz, qualquer texto.
               A IA vai ler, interpretar e preencher todos os campos automaticamente.
             </p>
+
+            {/* Guia: usar ChatGPT/Claude para montar o texto */}
+            <div className="rounded-lg border border-primary/30 bg-background/40 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowGuide((v) => !v)}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2.5 text-left hover:bg-primary/5 transition-colors"
+              >
+                <span className="flex items-center gap-2 text-xs font-medium">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  Não sabe o que escrever? Deixa o ChatGPT/Claude montar pra você
+                </span>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showGuide ? "rotate-180" : ""}`} />
+              </button>
+
+              {showGuide && (
+                <div className="px-3 pb-3 space-y-3 border-t border-primary/20">
+                  <ol className="text-[11px] text-muted-foreground space-y-1.5 mt-3 list-decimal list-inside">
+                    <li>Copie o prompt abaixo no botão.</li>
+                    <li>Abra o <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> e cole numa conversa nova.</li>
+                    <li>Responda as perguntas que a IA te fizer (vai ser uma conversa guiada).</li>
+                    <li>No fim, ela vai gerar um texto completo. Copie esse texto.</li>
+                    <li>Volte aqui, cole no campo abaixo e clique em <strong className="text-foreground">Preencher perfil com IA</strong>.</li>
+                  </ol>
+
+                  <div className="relative">
+                    <pre className="text-[10px] leading-relaxed bg-secondary/60 border border-border/50 rounded-md p-3 pr-10 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-muted-foreground">
+{AI_PROMPT_TEMPLATE}
+                    </pre>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleCopyPrompt}
+                      className="absolute top-2 right-2 h-7 gap-1 text-[10px]"
+                    >
+                      {promptCopied ? (
+                        <>
+                          <Check className="w-3 h-3" />
+                          Copiado
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          Copiar prompt
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+
 
             {/* Upload doc button */}
             <div className="flex items-center gap-2">
