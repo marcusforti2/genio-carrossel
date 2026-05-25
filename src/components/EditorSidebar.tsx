@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, User, Type, Palette, Pencil, UserCircle, ChevronDown } from "lucide-react";
 import SlideEditorPanel from "@/components/SlideEditorPanel";
 import SlideDesignOverrides from "@/components/SlideDesignOverrides";
+import CustomColorPicker from "@/components/CustomColorPicker";
 
 
 
