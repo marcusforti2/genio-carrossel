@@ -58,6 +58,7 @@ export type Database = {
           display_name: string
           handle: string
           id: string
+          knowledge_base: string | null
           niche: string
           target_audience: string
           tone_of_voice: string
@@ -75,6 +76,7 @@ export type Database = {
           display_name?: string
           handle?: string
           id?: string
+          knowledge_base?: string | null
           niche?: string
           target_audience?: string
           tone_of_voice?: string
@@ -92,6 +94,7 @@ export type Database = {
           display_name?: string
           handle?: string
           id?: string
+          knowledge_base?: string | null
           niche?: string
           target_audience?: string
           tone_of_voice?: string
