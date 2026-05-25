@@ -181,10 +181,10 @@ serve(async (req) => {
             const baseUrl = settings.evolution_url.replace(/\/$/, "");
             const number = whatsapp.startsWith("55") ? whatsapp : `55${whatsapp}`;
             const text =
-              `🎉 Sua conta foi criada!\n\n` +
-              `Acesse: ${new URL(req.url).origin.replace("functions.", "").replace(/-functions/, "")}\n` +
+              `🎉 Sua conta no Gênio Carrossel foi criada!\n\n` +
               `📧 Email: ${email}\n` +
               `🔑 Senha: ${password}\n\n` +
+              `Acesse: https://genio-carrossel.lovable.app\n\n` +
               `Recomendamos trocar a senha no primeiro acesso.`;
             const r = await fetch(`${baseUrl}/message/sendText/${encodeURIComponent(settings.evolution_instance)}`, {
               method: "POST",
