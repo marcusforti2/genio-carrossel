@@ -13,6 +13,13 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    // Truncate knowledge base to keep prompt manageable (~12k chars max)
+    const kbRaw = (profile.knowledge_base || "").trim();
+    const MAX_KB = 12000;
+    const knowledgeBase = kbRaw.length > MAX_KB
+      ? kbRaw.slice(0, MAX_KB) + "\n...[truncado]"
+      : kbRaw;
+
     const systemPrompt = `Você é um especialista em criação de carrosséis para Instagram. Seu trabalho é criar carrosséis provocativos, com opinião forte, que geram engajamento.
 
 PERFIL DO CRIADOR:
@@ -24,8 +31,10 @@ PERFIL DO CRIADOR:
 - Crenças: ${profile.beliefs || "não definido"}
 - Tom de voz: ${profile.tone_of_voice || "direto e provocativo"}
 - Proposta de valor: ${profile.value_proposition || "não definido"}
+${knowledgeBase ? `\n=== BASE DE CONHECIMENTO DO CRIADOR ===\nUse as informações abaixo como REFERÊNCIA e CONTEXTO ao criar o carrossel. Cruze ideias, cite fatos, use exemplos, frases e referências contidas aqui SEMPRE que forem relevantes ao tema. Não copie literalmente — adapte ao formato de carrossel.\n\n${knowledgeBase}\n=== FIM DA BASE ===\n` : ""}
 
 ESTILO DE NARRATIVA: ${style || "tribunal"}
+
 
 Estilos disponíveis:
 - "tribunal": Julgar, bater no inimigo comum, ser provocativo
