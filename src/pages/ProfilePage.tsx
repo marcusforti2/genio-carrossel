@@ -388,16 +388,58 @@ const ProfilePage = () => {
           </div>
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
             <p className="text-xs text-muted-foreground">
-              Cole aqui tudo sobre seu negócio — quem você é, o que faz, seu público, suas crenças, tom de voz, qualquer texto. 
+              Cole aqui tudo sobre seu negócio — quem você é, o que faz, seu público, suas crenças, tom de voz, qualquer texto.
               A IA vai ler, interpretar e preencher todos os campos automaticamente.
             </p>
+
+            {/* Upload doc button */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => docFileInputRef.current?.click()}
+                disabled={extractingFile || parsing}
+                className="gap-1.5 text-xs"
+              >
+                {extractingFile ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Upload className="w-3.5 h-3.5" />
+                )}
+                Enviar arquivo (.pdf, .docx, .md, .txt)
+              </Button>
+              {uploadedFileName && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground bg-secondary px-2 py-1 rounded-md">
+                  <FileText className="w-3 h-3" />
+                  {uploadedFileName}
+                  <button
+                    type="button"
+                    onClick={() => { setUploadedFileName(null); setRawText(""); }}
+                    className="hover:text-destructive ml-0.5"
+                    aria-label="Remover"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <input
+                ref={docFileInputRef}
+                type="file"
+                accept=".pdf,.docx,.md,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
+                onChange={handleDocUpload}
+                className="hidden"
+              />
+            </div>
+
             <Textarea
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
-              placeholder={"Cole aqui qualquer texto sobre seu negócio...\n\nEx: Eu sou Marcus Forti, mentor de aceleração empresarial. Meu público são empreendedores que estão cansados de trabalhar sem resultado..."}
+              placeholder={"Cole aqui qualquer texto sobre seu negócio — ou envie um arquivo acima.\n\nEx: Eu sou Marcus Forti, mentor de aceleração empresarial. Meu público são empreendedores que estão cansados de trabalhar sem resultado..."}
               rows={6}
               className="bg-secondary border-border/50 resize-none text-sm"
             />
+
             <Button
               onClick={handleParseWithAI}
               disabled={parsing || rawText.trim().length < 10}
