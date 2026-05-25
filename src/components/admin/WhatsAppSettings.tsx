@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, MessageCircle, Send } from "lucide-react";
+import { Loader2, MessageCircle, Send, Check } from "lucide-react";
 
 export const WhatsAppSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [testing, setTesting] = useState(false);
   const [id, setId] = useState<string | null>(null);
   const [evolutionUrl, setEvolutionUrl] = useState("");
@@ -18,6 +19,8 @@ export const WhatsAppSettings = () => {
   const [instance, setInstance] = useState("");
   const [number, setNumber] = useState("");
   const [autoSend, setAutoSend] = useState(true);
+  const loadedRef = useRef(false);
+  const idRef = useRef<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -25,6 +28,7 @@ export const WhatsAppSettings = () => {
         .from("admin_settings").select("*").limit(1).maybeSingle();
       if (!error && data) {
         setId(data.id);
+        idRef.current = data.id;
         setEvolutionUrl(data.evolution_url || "");
         setApiKey(data.evolution_api_key || "");
         setInstance(data.evolution_instance || "");
@@ -32,10 +36,12 @@ export const WhatsAppSettings = () => {
         setAutoSend(data.auto_send_on_export ?? true);
       }
       setLoading(false);
+      // Allow autosave only after the initial load is done
+      setTimeout(() => { loadedRef.current = true; }, 100);
     })();
   }, []);
 
-  const save = async () => {
+  const save = async (silent = false) => {
     setSaving(true);
     try {
       const payload = {
@@ -45,21 +51,33 @@ export const WhatsAppSettings = () => {
         whatsapp_number: number.trim(),
         auto_send_on_export: autoSend,
       };
-      if (id) {
-        const { error } = await supabase.from("admin_settings").update(payload).eq("id", id);
+      const currentId = idRef.current;
+      if (currentId) {
+        const { error } = await supabase.from("admin_settings").update(payload).eq("id", currentId);
         if (error) throw error;
       } else {
         const { data, error } = await supabase.from("admin_settings").insert(payload).select("id").single();
         if (error) throw error;
         setId(data.id);
+        idRef.current = data.id;
       }
-      toast.success("Configurações salvas");
+      setSavedAt(Date.now());
+      if (!silent) toast.success("Configurações salvas");
     } catch (e) {
       toast.error("Erro ao salvar: " + (e as Error).message);
     } finally {
       setSaving(false);
     }
   };
+
+  // Auto-save (debounced) whenever any field changes after the initial load
+  useEffect(() => {
+    if (!loadedRef.current) return;
+    const t = setTimeout(() => { save(true); }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [evolutionUrl, apiKey, instance, number, autoSend]);
+
 
   const test = async () => {
     setTesting(true);
@@ -134,16 +152,20 @@ export const WhatsAppSettings = () => {
           <Switch checked={autoSend} onCheckedChange={setAutoSend} />
         </div>
 
-        <div className="flex gap-2">
-          <Button onClick={save} disabled={saving} className="gap-2">
-            {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            Salvar
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button onClick={() => save(false)} disabled={saving} className="gap-2">
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            Salvar agora
           </Button>
           <Button onClick={test} disabled={testing || !id} variant="outline" className="gap-2">
             {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             Enviar mensagem de teste
           </Button>
+          <span className="text-xs text-muted-foreground ml-auto">
+            {saving ? "Salvando..." : savedAt ? "✓ Salvo automaticamente" : "Auto-save ativo"}
+          </span>
         </div>
+
       </CardContent>
     </Card>
   );
