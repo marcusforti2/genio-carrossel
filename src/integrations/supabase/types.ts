@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          auto_send_on_export: boolean
+          created_at: string
+          evolution_api_key: string
+          evolution_instance: string
+          evolution_url: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+          whatsapp_number: string
+        }
+        Insert: {
+          auto_send_on_export?: boolean
+          created_at?: string
+          evolution_api_key?: string
+          evolution_instance?: string
+          evolution_url?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          whatsapp_number?: string
+        }
+        Update: {
+          auto_send_on_export?: boolean
+          created_at?: string
+          evolution_api_key?: string
+          evolution_instance?: string
+          evolution_url?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           created_at: string

@@ -18,6 +18,7 @@ import { CarouselData } from "@/types/carousel";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
+import { WhatsAppSettings } from "@/components/admin/WhatsAppSettings";
 
 interface AdminUser {
   id: string;
@@ -275,6 +276,10 @@ const AdminPage = () => {
             </Card>
           </div>
         )}
+
+        <WhatsAppSettings />
+
+
 
 
         <Card>

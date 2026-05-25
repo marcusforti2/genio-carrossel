@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { sendExportToWhatsAppIfEnabled } from "@/lib/sendToWhatsApp";
 
 interface ExportButtonsProps {
   carousel: CarouselData;
@@ -323,6 +324,10 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       } else {
         toast.success("Carrossel exportado!");
       }
+      // Send to WhatsApp if admin + enabled
+      const wa = await sendExportToWhatsAppIfEnabled(content, "carrossel.zip", "application/zip", "Carrossel exportado 🎉");
+      if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
+      else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
       console.error("[Export] Error:", e);
       toast.error("Erro ao exportar carrossel");
@@ -391,6 +396,9 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
+      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, "carrossel.pdf", "application/pdf", "Carrossel exportado em PDF 🎉");
+      if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
+      else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
       console.error("[Export] PDF error:", e);
       toast.error("Erro ao exportar PDF");
