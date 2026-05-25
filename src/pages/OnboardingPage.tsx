@@ -384,6 +384,69 @@ const StepPhotoAndText = ({
         disabled={parsing}
       />
       <p className="text-[10px] text-muted-foreground">Mínimo 10 caracteres</p>
+
+      {/* Upload arquivo */}
+      <div className="pt-2 border-t border-primary/10">
+        <button
+          type="button"
+          onClick={() => docFileInputRef.current?.click()}
+          disabled={extractingFile || parsing}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+        >
+          {extractingFile ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Extraindo texto…</>
+          ) : uploadedFileName ? (
+            <><FileText className="w-3.5 h-3.5 text-primary" /> <span className="text-primary truncate max-w-[200px]">{uploadedFileName}</span> · trocar</>
+          ) : (
+            <><Upload className="w-3.5 h-3.5" /> Ou envie um arquivo (.pdf, .docx, .txt, .md)</>
+          )}
+        </button>
+        <input
+          ref={docFileInputRef}
+          type="file"
+          accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
+          onChange={onDocUpload}
+          className="hidden"
+        />
+      </div>
+    </div>
+
+    {/* Guia ChatGPT/Claude */}
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setShowGuide(!showGuide)}
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 hover:bg-secondary/40 transition-colors"
+      >
+        <div className="flex items-center gap-2 text-left">
+          <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+          <span className="text-xs font-medium">Não sabe o que escrever? Use ChatGPT ou Claude</span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showGuide ? "rotate-180" : ""}`} />
+      </button>
+      {showGuide && (
+        <div className="px-4 pb-4 pt-1 space-y-3 border-t border-border">
+          <ol className="text-[11px] text-muted-foreground space-y-1 list-decimal list-inside">
+            <li>Copie o prompt abaixo.</li>
+            <li>Cole no <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> em uma conversa nova.</li>
+            <li>Responda as perguntas que a IA fizer.</li>
+            <li>Copie o texto final que a IA gerar e cole aqui em cima.</li>
+          </ol>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onCopyPrompt}
+            className="w-full gap-2"
+          >
+            {promptCopied ? (
+              <><Check className="w-3.5 h-3.5 text-primary" /> Prompt copiado!</>
+            ) : (
+              <><Copy className="w-3.5 h-3.5" /> Copiar prompt</>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   </div>
 );
