@@ -82,12 +82,14 @@ export const WhatsAppSettings = () => {
   const test = async () => {
     setTesting(true);
     try {
-      // Small 1x1 png test
-      const testPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
       const { data, error } = await supabase.functions.invoke("send-whatsapp-export", {
         body: {
           caption: "✅ Teste de integração WhatsApp do Gênio Carrossel",
-          files: [{ filename: "teste.png", mimetype: "image/png", base64: testPng }],
+          files: [{
+            filename: "teste.png",
+            mimetype: "image/png",
+            url: "https://placehold.co/600x600/png?text=Genio+Carrossel",
+          }],
         },
       });
       if (error) throw error;
