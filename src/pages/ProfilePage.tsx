@@ -83,6 +83,9 @@ Comece agora me perguntando sobre o item 1.`;
     beliefs: "",
     tone_of_voice: "",
     value_proposition: "",
+    positioning_thesis: "",
+    manifesto: "",
+    hooks: "",
     avatar_url: "",
     knowledge_base: "",
   });
