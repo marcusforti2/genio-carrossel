@@ -21,6 +21,20 @@ interface ExportButtonsProps {
   showLabel?: boolean;
 }
 
+// Build a safe filename slug from the first slide title
+const getExportBaseName = (carousel: CarouselData): string => {
+  const raw = carousel.slides?.[0]?.title?.trim() || "carrossel";
+  const slug = raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50);
+  const date = new Date().toISOString().slice(0, 10);
+  return `${slug || "carrossel"}-${date}`;
+};
+
 // 1px transparent PNG fallback
 const TRANSPARENT_PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQABNjN9GQAAAAlwRFlzAAAWJQAAFiUBSVIk8AAAAA0lEQVQI12P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
 
@@ -279,7 +293,7 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `slide-${slideIndex + 1}.png`;
+      a.download = `${getExportBaseName(carousel)}-slide-${slideIndex + 1}.png`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`Slide ${slideIndex + 1} baixado!`);
@@ -316,7 +330,9 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       const url = URL.createObjectURL(content);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "carrossel.zip";
+      const baseName = getExportBaseName(carousel);
+      const zipName = `${baseName}.zip`;
+      a.download = zipName;
       a.click();
       URL.revokeObjectURL(url);
       if (failed.length > 0) {
@@ -325,7 +341,7 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
         toast.success("Carrossel exportado!");
       }
       // Send to WhatsApp if admin + enabled
-      const wa = await sendExportToWhatsAppIfEnabled(content, "carrossel.zip", "application/zip", "Carrossel exportado 🎉");
+      const wa = await sendExportToWhatsAppIfEnabled(content, zipName, "application/zip", "Carrossel exportado 🎉");
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
@@ -392,11 +408,12 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "carrossel.pdf";
+      const pdfName = `${getExportBaseName(carousel)}.pdf`;
+      a.download = pdfName;
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
-      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, "carrossel.pdf", "application/pdf", "Carrossel exportado em PDF 🎉");
+      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, pdfName, "application/pdf", "Carrossel exportado em PDF 🎉");
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
