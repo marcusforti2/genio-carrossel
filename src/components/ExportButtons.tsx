@@ -21,6 +21,20 @@ interface ExportButtonsProps {
   showLabel?: boolean;
 }
 
+// Build a safe filename slug from the first slide title
+const getExportBaseName = (carousel: CarouselData): string => {
+  const raw = carousel.slides?.[0]?.title?.trim() || "carrossel";
+  const slug = raw
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50);
+  const date = new Date().toISOString().slice(0, 10);
+  return `${slug || "carrossel"}-${date}`;
+};
+
 // 1px transparent PNG fallback
 const TRANSPARENT_PIXEL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQABNjN9GQAAAAlwRFlzAAAWJQAAFiUBSVIk8AAAAA0lEQVQI12P4z8BQDwAEgAF/QualzQAAAABJRU5ErkJggg==";
 
