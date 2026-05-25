@@ -45,7 +45,10 @@ RESPONDA APENAS com JSON válido, sem markdown, neste formato exato:
   "common_enemy": "O inimigo em comum entre o criador e o público (2-3 frases). O que combatem juntos.",
   "beliefs": "Crenças e valores fortes sobre o mercado (3-5 frases). Convicções que guiam o conteúdo.",
   "tone_of_voice": "Tom de voz para conteúdo (1-2 frases). Ex: provocativo, direto, com ironia inteligente.",
-  "value_proposition": "Proposta de valor única (2-3 frases). O que entrega de diferente, qual transformação oferece."
+  "value_proposition": "Proposta de valor única (2-3 frases). O que entrega de diferente, qual transformação oferece.",
+  "positioning_thesis": "Tese de posicionamento — a ideia central, contraintuitiva e específica que define a forma única como essa pessoa enxerga o mercado (2-4 frases). Frase forte, opinativa, que poderia virar manifesto.",
+  "manifesto": "Manifesto da marca em 4-8 frases curtas e impactantes, em primeira pessoa. Declara no que acredita, contra o que se posiciona, e o que defende. Tom inspirador e direto.",
+  "hooks": "Lista de 8 ganchos prontos para abrir carrosséis no Instagram, separados por quebras de linha (\\n). Cada gancho em 1 linha, provocativo, gerando curiosidade, alinhado ao nicho e tom de voz. Sem numeração, sem aspas."
 }`,
           },
           {
