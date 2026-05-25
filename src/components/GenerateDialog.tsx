@@ -402,7 +402,7 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                 {/* Accent color */}
                 <div className="space-y-2">
                   <Label className="text-[11px] text-muted-foreground">Cor destaque</Label>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 items-center">
                     {ACCENT_PRESETS.map((preset) => (
                       <button
                         key={preset.name}
@@ -414,8 +414,14 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                         style={{ background: `hsl(${preset.color})` }}
                       />
                     ))}
+                    <CustomColorPicker
+                      value={accentColor}
+                      onChange={(hsl) => { setAccentColor(hsl); setAccentName("Custom"); }}
+                      label="Custom"
+                    />
                   </div>
                 </div>
+
               </div>
             </div>
 
