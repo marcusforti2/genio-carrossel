@@ -78,6 +78,41 @@ const AdminPage = () => {
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [expandedProject, setExpandedProject] = useState<ProjectItem | null>(null);
 
+  // Create user dialog
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ email: "", password: "", display_name: "", whatsapp: "" });
+  const [createLoading, setCreateLoading] = useState(false);
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let p = "";
+    for (let i = 0; i < 10; i++) p += chars[Math.floor(Math.random() * chars.length)];
+    setCreateForm((f) => ({ ...f, password: p }));
+  };
+
+  const handleCreateUser = async () => {
+    if (!createForm.email || !createForm.password) {
+      toast({ title: "Email e senha obrigatórios", variant: "destructive" });
+      return;
+    }
+    setCreateLoading(true);
+    const res = await callAdmin("create-user", "POST", createForm);
+    setCreateLoading(false);
+    if (res.success) {
+      const waMsg = createForm.whatsapp
+        ? res.wa_sent
+          ? " e enviado pro WhatsApp 📲"
+          : ` (WhatsApp falhou: ${res.wa_error || "erro"})`
+        : "";
+      toast({ title: `Usuário criado${waMsg}` });
+      setCreateOpen(false);
+      setCreateForm({ email: "", password: "", display_name: "", whatsapp: "" });
+      fetchData();
+    } else {
+      toast({ title: "Erro", description: res.error, variant: "destructive" });
+    }
+  };
+
   const callAdmin = async (action: string, method = "GET", body?: Record<string, unknown>) => {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users/${action}`;
     const res = await fetch(url, {
