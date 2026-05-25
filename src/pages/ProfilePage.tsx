@@ -614,6 +614,9 @@ Comece agora me perguntando sobre o item 1.`;
             <FieldArea label="Crenças e valores" value={profile.beliefs} onChange={(v) => updateField("beliefs", v)} placeholder="Quais são suas crenças fortes sobre seu mercado?" />
             <FieldArea label="Tom de voz" value={profile.tone_of_voice} onChange={(v) => updateField("tone_of_voice", v)} placeholder="Ex: Provocativo, direto, sem rodeios, com ironia inteligente..." required />
             <FieldArea label="Proposta de valor" value={profile.value_proposition} onChange={(v) => updateField("value_proposition", v)} placeholder="O que você entrega de único? Qual a transformação?" required />
+            <FieldArea label="Tese de posicionamento" value={profile.positioning_thesis} onChange={(v) => updateField("positioning_thesis", v)} placeholder="A ideia central, contraintuitiva, que define como você vê o mercado" />
+            <FieldArea label="Manifesto" value={profile.manifesto} onChange={(v) => updateField("manifesto", v)} placeholder="No que você acredita, contra o que se posiciona, o que defende" />
+            <FieldArea label="Ganchos prontos" value={profile.hooks} onChange={(v) => updateField("hooks", v)} placeholder="Um gancho por linha — para abrir carrosséis" />
           </div>
         </section>
 
