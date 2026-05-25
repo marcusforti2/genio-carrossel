@@ -57,7 +57,7 @@ const OnboardingPage = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem válida"); return; }
-    if (file.size > 2 * 1024 * 1024) { toast.error("Imagem muito grande (máx 2MB)"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Imagem muito grande (máx 5MB)"); return; }
 
     setUploading(true);
     try {

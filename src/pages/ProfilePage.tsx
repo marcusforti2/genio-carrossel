@@ -132,8 +132,8 @@ Comece agora me perguntando sobre o item 1.`;
       toast.error("Selecione uma imagem válida");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Imagem muito grande (máx 2MB)");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 5MB)");
       return;
     }
 
