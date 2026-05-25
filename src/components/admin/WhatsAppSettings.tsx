@@ -41,7 +41,7 @@ export const WhatsAppSettings = () => {
     })();
   }, []);
 
-  const save = async () => {
+  const save = async (silent = false) => {
     setSaving(true);
     try {
       const payload = {
@@ -51,21 +51,33 @@ export const WhatsAppSettings = () => {
         whatsapp_number: number.trim(),
         auto_send_on_export: autoSend,
       };
-      if (id) {
-        const { error } = await supabase.from("admin_settings").update(payload).eq("id", id);
+      const currentId = idRef.current;
+      if (currentId) {
+        const { error } = await supabase.from("admin_settings").update(payload).eq("id", currentId);
         if (error) throw error;
       } else {
         const { data, error } = await supabase.from("admin_settings").insert(payload).select("id").single();
         if (error) throw error;
         setId(data.id);
+        idRef.current = data.id;
       }
-      toast.success("Configurações salvas");
+      setSavedAt(Date.now());
+      if (!silent) toast.success("Configurações salvas");
     } catch (e) {
       toast.error("Erro ao salvar: " + (e as Error).message);
     } finally {
       setSaving(false);
     }
   };
+
+  // Auto-save (debounced) whenever any field changes after the initial load
+  useEffect(() => {
+    if (!loadedRef.current) return;
+    const t = setTimeout(() => { save(true); }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [evolutionUrl, apiKey, instance, number, autoSend]);
+
 
   const test = async () => {
     setTesting(true);
