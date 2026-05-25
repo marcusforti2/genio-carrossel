@@ -184,7 +184,7 @@ serve(async (req) => {
               `🎉 Sua conta no Gênio Carrossel foi criada!\n\n` +
               `📧 Email: ${email}\n` +
               `🔑 Senha: ${password}\n\n` +
-              `Acesse: https://genio-carrossel.lovable.app\n\n` +
+              `Acesse: https://ia-carrossel.aceleracaoforti.online\n\n` +
               `Recomendamos trocar a senha no primeiro acesso.`;
             const r = await fetch(`${baseUrl}/message/sendText/${encodeURIComponent(settings.evolution_instance)}`, {
               method: "POST",
