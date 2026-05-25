@@ -8,14 +8,15 @@ const corsHeaders = {
 
 interface FilePayload {
   filename: string;
-  base64: string; // raw base64 (no data: prefix)
   mimetype: string;
+  url?: string;     // preferred: public URL (avoids edge memory limits)
+  base64?: string;  // legacy fallback
   caption?: string;
 }
 
 interface Body {
   files: FilePayload[];
-  number?: string; // override
+  number?: string;
   caption?: string;
 }
 
@@ -87,12 +88,17 @@ Deno.serve(async (req) => {
     for (const f of body.files) {
       const isImage = f.mimetype.startsWith("image/");
       const mediatype = isImage ? "image" : "document";
+      const media = f.url || f.base64;
+      if (!media) {
+        results.push({ filename: f.filename, ok: false, error: "no url/base64 provided" });
+        continue;
+      }
 
       const payload: Record<string, unknown> = {
         number,
         mediatype,
         mimetype: f.mimetype,
-        media: f.base64,
+        media,
         fileName: f.filename,
       };
       if (body.caption || f.caption) {

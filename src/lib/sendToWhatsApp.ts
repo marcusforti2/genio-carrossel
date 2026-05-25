@@ -1,19 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const blobToBase64 = (blob: Blob): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => {
-      const result = fr.result as string;
-      const idx = result.indexOf(",");
-      resolve(idx >= 0 ? result.slice(idx + 1) : result);
-    };
-    fr.onerror = reject;
-    fr.readAsDataURL(blob);
-  });
-
 /**
  * If admin + integration enabled, sends the exported file to configured WhatsApp.
+ * Uploads to Storage first (to avoid edge function memory limits), then passes URL.
  * Silent no-op for non-admins or when not configured.
  */
 export async function sendExportToWhatsAppIfEnabled(
@@ -26,14 +15,12 @@ export async function sendExportToWhatsAppIfEnabled(
     const { data: userData } = await supabase.auth.getUser();
     if (!userData?.user) return { sent: false };
 
-    // Check admin role
     const { data: isAdmin } = await supabase.rpc("has_role", {
       _user_id: userData.user.id,
       _role: "admin",
     });
     if (!isAdmin) return { sent: false };
 
-    // Check settings
     const { data: settings } = await supabase
       .from("admin_settings").select("*").limit(1).maybeSingle();
     if (!settings || !settings.auto_send_on_export) return { sent: false };
@@ -41,11 +28,20 @@ export async function sendExportToWhatsAppIfEnabled(
       return { sent: false };
     }
 
-    const base64 = await blobToBase64(blob);
+    // Upload to Storage to avoid sending large base64 through edge function
+    const path = `${userData.user.id}/${Date.now()}-${filename}`;
+    const { error: upErr } = await supabase.storage
+      .from("whatsapp-exports")
+      .upload(path, blob, { contentType: mimetype, upsert: true });
+    if (upErr) return { sent: false, error: "Upload: " + upErr.message };
+
+    const { data: pub } = supabase.storage.from("whatsapp-exports").getPublicUrl(path);
+    const url = pub.publicUrl;
+
     const { data, error } = await supabase.functions.invoke("send-whatsapp-export", {
       body: {
         caption,
-        files: [{ filename, mimetype, base64 }],
+        files: [{ filename, mimetype, url }],
       },
     });
     if (error) return { sent: false, error: error.message };
