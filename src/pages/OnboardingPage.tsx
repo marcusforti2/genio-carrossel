@@ -131,6 +131,9 @@ const OnboardingPage = () => {
         beliefs: data.beliefs || prev.beliefs,
         tone_of_voice: data.tone_of_voice || prev.tone_of_voice,
         value_proposition: data.value_proposition || prev.value_proposition,
+        positioning_thesis: data.positioning_thesis || prev.positioning_thesis,
+        manifesto: data.manifesto || prev.manifesto,
+        hooks: data.hooks || prev.hooks,
       }));
       toast.success("Perfil preenchido pela IA! Confira e ajuste no próximo passo.");
       setStep(1);
