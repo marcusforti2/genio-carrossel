@@ -44,6 +44,9 @@ const OnboardingPage = () => {
     beliefs: "",
     tone_of_voice: "",
     value_proposition: "",
+    positioning_thesis: "",
+    manifesto: "",
+    hooks: "",
   });
 
   const updateField = (field: string, value: string) => {
