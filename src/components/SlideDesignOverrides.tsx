@@ -70,7 +70,17 @@ const SlideDesignOverrides = ({ slide, onUpdate, carousel }: SlideDesignOverride
               </button>
             );
           })}
+          <CustomColorPicker
+            size="sm"
+            value={so.bgColor || (so.bgMode === "light" ? "0 0% 96%" : carousel.theme.bgColor || "0 0% 6.5%")}
+            onChange={(hsl) => {
+              const l = parseFloat(hsl.split(" ")[2]);
+              const mode = l > 50 ? "light" : "dark";
+              updateOverride({ bgMode: mode, bgColor: hsl });
+            }}
+          />
         </div>
+
       </div>
 
       {/* Accent color */}
