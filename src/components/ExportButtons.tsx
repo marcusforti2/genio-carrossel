@@ -330,7 +330,9 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       const url = URL.createObjectURL(content);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "carrossel.zip";
+      const baseName = getExportBaseName(carousel);
+      const zipName = `${baseName}.zip`;
+      a.download = zipName;
       a.click();
       URL.revokeObjectURL(url);
       if (failed.length > 0) {
