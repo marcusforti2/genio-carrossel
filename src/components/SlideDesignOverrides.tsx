@@ -2,6 +2,8 @@ import { SlideData, CarouselData, ACCENT_PRESETS, BG_COLOR_PRESETS, DESIGN_TEMPL
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LayoutTemplate } from "lucide-react";
+import CustomColorPicker from "@/components/CustomColorPicker";
+
 
 interface SlideDesignOverridesProps {
   slide: SlideData;
