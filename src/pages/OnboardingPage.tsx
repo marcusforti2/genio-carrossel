@@ -11,8 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
   Sparkles, ArrowRight, ArrowLeft, Camera, Loader2, User,
-  CheckCircle2, Wand2, Rocket, Target,
+  CheckCircle2, Wand2, Rocket, Target, Upload, FileText, Copy, Check, ChevronDown,
 } from "lucide-react";
+import { extractFileText, AI_PROFILE_PROMPT } from "@/lib/extractFileText";
 
 const TOTAL_STEPS = 2;
 
