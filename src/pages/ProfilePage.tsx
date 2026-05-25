@@ -148,6 +148,71 @@ const ProfilePage = () => {
     setSaving(false);
   };
 
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Arquivo muito grande (máx 10MB)");
+      return;
+    }
+
+    const name = file.name.toLowerCase();
+    const isMd = name.endsWith(".md") || name.endsWith(".txt") || file.type.startsWith("text/");
+    const isPdf = name.endsWith(".pdf") || file.type === "application/pdf";
+    const isDocx = name.endsWith(".docx") || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    if (!isMd && !isPdf && !isDocx) {
+      toast.error("Formato não suportado. Use .md, .txt, .pdf ou .docx");
+      return;
+    }
+
+    setExtractingFile(true);
+    try {
+      let text = "";
+
+      if (isMd) {
+        text = await file.text();
+      } else if (isDocx) {
+        const mammoth = await import("mammoth");
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      } else if (isPdf) {
+        const pdfjs: any = await import("pdfjs-dist");
+        // @ts-ignore - worker URL
+        const workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+        pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+        const parts: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          parts.push(content.items.map((it: any) => it.str).join(" "));
+        }
+        text = parts.join("\n\n");
+      }
+
+      text = text.trim();
+      if (!text || text.length < 10) {
+        toast.error("Não foi possível extrair texto do arquivo");
+        return;
+      }
+
+      // Append to existing text if present
+      setRawText((prev) => (prev.trim() ? `${prev.trim()}\n\n--- ${file.name} ---\n${text}` : text));
+      setUploadedFileName(file.name);
+      toast.success(`Texto extraído de "${file.name}". Clique em "Preencher perfil com IA".`);
+    } catch (err: any) {
+      console.error("Doc extract error:", err);
+      toast.error("Erro ao ler arquivo. Tente outro.");
+    } finally {
+      setExtractingFile(false);
+      if (docFileInputRef.current) docFileInputRef.current.value = "";
+    }
+  };
+
   const handleParseWithAI = async () => {
     if (!rawText.trim() || rawText.trim().length < 10) {
       toast.error("Cole mais texto sobre seu negócio (mínimo 10 caracteres)");
