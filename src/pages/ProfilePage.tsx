@@ -111,6 +111,9 @@ Comece agora me perguntando sobre o item 1.`;
           beliefs: data.beliefs || "",
           tone_of_voice: data.tone_of_voice || "",
           value_proposition: data.value_proposition || "",
+          positioning_thesis: (data as any).positioning_thesis || "",
+          manifesto: (data as any).manifesto || "",
+          hooks: (data as any).hooks || "",
           avatar_url: data.avatar_url || "",
           knowledge_base: (data as any).knowledge_base || "",
         });
