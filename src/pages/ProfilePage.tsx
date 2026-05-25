@@ -520,8 +520,60 @@ const ProfilePage = () => {
             <FieldArea label="Proposta de valor" value={profile.value_proposition} onChange={(v) => updateField("value_proposition", v)} placeholder="O que você entrega de único? Qual a transformação?" required />
           </div>
         </section>
+
+        {/* Knowledge Base */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 border-b border-border pb-2">
+            <FileText className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold font-display">Base de Conhecimento</h2>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Opcional</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Cole textos, scripts, transcrições, ou envie arquivos (.md, .pdf, .docx, .txt) com conteúdo que a IA pode <strong>cruzar e usar</strong> ao gerar seus carrosséis.
+            Quanto mais contexto, mais personalizado o resultado.
+          </p>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => kbFileInputRef.current?.click()}
+              disabled={kbExtracting}
+              className="gap-1.5 text-xs"
+            >
+              {kbExtracting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+              Adicionar arquivos (.md, .pdf, .docx)
+            </Button>
+            {profile.knowledge_base && (
+              <span className="text-[10px] text-muted-foreground">
+                {profile.knowledge_base.length.toLocaleString()} caracteres na base
+              </span>
+            )}
+            <input
+              ref={kbFileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.docx,.md,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
+              onChange={handleKbUpload}
+              className="hidden"
+            />
+          </div>
+
+          <Textarea
+            value={profile.knowledge_base}
+            onChange={(e) => updateField("knowledge_base", e.target.value)}
+            placeholder="Cole aqui qualquer texto, transcrição, artigo, script, ou envie arquivos acima. A IA usará isso como contexto ao gerar carrosséis..."
+            rows={10}
+            className="bg-secondary border-border/50 resize-y text-sm font-mono"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            💡 Dica: adicione transcrições de aulas, posts antigos que funcionaram, frases que você usa muito, livros que te inspiram.
+          </p>
+        </section>
       </div>
     </div>
+
   );
 };
 
