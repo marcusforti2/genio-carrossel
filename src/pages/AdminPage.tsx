@@ -458,6 +458,68 @@ const AdminPage = () => {
         </Card>
       </div>
 
+      {/* Create User Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar novo usuário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label className="text-sm">Nome (opcional)</Label>
+              <Input
+                value={createForm.display_name}
+                onChange={(e) => setCreateForm({ ...createForm, display_name: e.target.value })}
+                placeholder="Marcus Silva"
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Email *</Label>
+              <Input
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                placeholder="usuario@exemplo.com"
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Senha *</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={generatePassword}>
+                  Gerar
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm">WhatsApp (opcional)</Label>
+              <Input
+                value={createForm.whatsapp}
+                onChange={(e) => setCreateForm({ ...createForm, whatsapp: e.target.value })}
+                placeholder="15998346245 (com DDD)"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Se preenchido, as credenciais serão enviadas pelo WhatsApp automaticamente.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCreateOpen(false)} disabled={createLoading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateUser} disabled={createLoading}>
+              {createLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Criar usuário
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       {/* Credits Dialog */}
       <Dialog open={!!creditsUser} onOpenChange={() => setCreditsUser(null)}>
         <DialogContent>
