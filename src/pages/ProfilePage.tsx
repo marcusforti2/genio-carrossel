@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User, AlertCircle, CheckCircle2, Upload, FileText, X } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sparkles, Wand2, Camera, User, AlertCircle, CheckCircle2, Upload, FileText, X, Copy, Check, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
