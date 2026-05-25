@@ -408,11 +408,12 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "carrossel.pdf";
+      const pdfName = `${getExportBaseName(carousel)}.pdf`;
+      a.download = pdfName;
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
-      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, "carrossel.pdf", "application/pdf", "Carrossel exportado em PDF 🎉");
+      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, pdfName, "application/pdf", "Carrossel exportado em PDF 🎉");
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
