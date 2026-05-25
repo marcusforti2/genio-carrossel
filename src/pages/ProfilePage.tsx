@@ -21,6 +21,9 @@ interface ProfileData {
   beliefs: string;
   tone_of_voice: string;
   value_proposition: string;
+  positioning_thesis: string;
+  manifesto: string;
+  hooks: string;
   avatar_url: string;
   knowledge_base: string;
 }
