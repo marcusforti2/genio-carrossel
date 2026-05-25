@@ -319,8 +319,12 @@ const AdminPage = () => {
 
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-foreground">Usuários ({users.length})</CardTitle>
+            <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              Criar usuário
+            </Button>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
