@@ -152,16 +152,20 @@ export const WhatsAppSettings = () => {
           <Switch checked={autoSend} onCheckedChange={setAutoSend} />
         </div>
 
-        <div className="flex gap-2">
-          <Button onClick={save} disabled={saving} className="gap-2">
-            {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            Salvar
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button onClick={() => save(false)} disabled={saving} className="gap-2">
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            Salvar agora
           </Button>
           <Button onClick={test} disabled={testing || !id} variant="outline" className="gap-2">
             {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             Enviar mensagem de teste
           </Button>
+          <span className="text-xs text-muted-foreground ml-auto">
+            {saving ? "Salvando..." : savedAt ? "✓ Salvo automaticamente" : "Auto-save ativo"}
+          </span>
         </div>
+
       </CardContent>
     </Card>
   );
