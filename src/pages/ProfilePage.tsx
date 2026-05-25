@@ -22,6 +22,7 @@ interface ProfileData {
   tone_of_voice: string;
   value_proposition: string;
   avatar_url: string;
+  knowledge_base: string;
 }
 
 const ProfilePage = () => {
@@ -34,8 +35,10 @@ const ProfilePage = () => {
   const [rawText, setRawText] = useState("");
   const [extractingFile, setExtractingFile] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [kbExtracting, setKbExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const docFileInputRef = useRef<HTMLInputElement>(null);
+  const kbFileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<ProfileData>({
     display_name: "",
     handle: "",
@@ -48,6 +51,7 @@ const ProfilePage = () => {
     tone_of_voice: "",
     value_proposition: "",
     avatar_url: "",
+    knowledge_base: "",
   });
 
   useEffect(() => {
@@ -72,8 +76,10 @@ const ProfilePage = () => {
           tone_of_voice: data.tone_of_voice || "",
           value_proposition: data.value_proposition || "",
           avatar_url: data.avatar_url || "",
+          knowledge_base: (data as any).knowledge_base || "",
         });
       }
+
       setLoading(false);
     };
     fetchProfile();
