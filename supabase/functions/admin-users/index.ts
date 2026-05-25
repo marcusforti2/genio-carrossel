@@ -143,6 +143,67 @@ serve(async (req) => {
       return json({ success: true });
     }
 
+    // POST /admin-users/create-user
+    if (action === "create-user" && req.method === "POST") {
+      const body = await req.json();
+      const email = String(body.email || "").trim().toLowerCase();
+      const password = String(body.password || "").trim();
+      const display_name = String(body.display_name || "").trim();
+      const whatsapp = String(body.whatsapp || "").replace(/\D/g, "");
+
+      if (!email || !password) return json({ error: "Email e senha são obrigatórios" }, 400);
+      if (password.length < 6) return json({ error: "Senha deve ter no mínimo 6 caracteres" }, 400);
+
+      const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: display_name ? { display_name } : {},
+      });
+      if (createErr) return json({ error: createErr.message }, 400);
+
+      // Update profile display_name if provided
+      if (display_name && created.user) {
+        await supabaseAdmin.from("profiles").update({ display_name }).eq("user_id", created.user.id);
+      }
+
+      // Try sending credentials via WhatsApp if number provided + admin settings configured
+      let waSent = false;
+      let waError: string | null = null;
+      if (whatsapp) {
+        const { data: settings } = await supabaseAdmin
+          .from("admin_settings")
+          .select("evolution_url, evolution_api_key, evolution_instance")
+          .limit(1)
+          .maybeSingle();
+        if (settings?.evolution_url && settings.evolution_api_key && settings.evolution_instance) {
+          try {
+            const baseUrl = settings.evolution_url.replace(/\/$/, "");
+            const number = whatsapp.startsWith("55") ? whatsapp : `55${whatsapp}`;
+            const text =
+              `🎉 Sua conta no Gênio Carrossel foi criada!\n\n` +
+              `📧 Email: ${email}\n` +
+              `🔑 Senha: ${password}\n\n` +
+              `Acesse: https://genio-carrossel.lovable.app\n\n` +
+              `Recomendamos trocar a senha no primeiro acesso.`;
+            const r = await fetch(`${baseUrl}/message/sendText/${encodeURIComponent(settings.evolution_instance)}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", apikey: settings.evolution_api_key },
+              body: JSON.stringify({ number, text }),
+            });
+            if (r.ok) waSent = true;
+            else waError = `Evolution API ${r.status}`;
+          } catch (e) {
+            waError = e instanceof Error ? e.message : "Erro WhatsApp";
+          }
+        } else {
+          waError = "Configuração WhatsApp não encontrada";
+        }
+      }
+
+      return json({ success: true, user_id: created.user?.id, wa_sent: waSent, wa_error: waError });
+    }
+
     // GET /admin-users/stats
     if (action === "stats" && req.method === "GET") {
       const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });

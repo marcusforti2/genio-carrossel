@@ -9,8 +9,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye, ChevronLeft,
+  Loader2, Users, FolderOpen, TrendingUp, Shield, Trash2, ArrowLeft, CreditCard, Eye, ChevronLeft, UserPlus,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import SlidePreview from "@/components/SlidePreview";
@@ -76,6 +77,41 @@ const AdminPage = () => {
   const [userProjects, setUserProjects] = useState<ProjectItem[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [expandedProject, setExpandedProject] = useState<ProjectItem | null>(null);
+
+  // Create user dialog
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ email: "", password: "", display_name: "", whatsapp: "" });
+  const [createLoading, setCreateLoading] = useState(false);
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let p = "";
+    for (let i = 0; i < 10; i++) p += chars[Math.floor(Math.random() * chars.length)];
+    setCreateForm((f) => ({ ...f, password: p }));
+  };
+
+  const handleCreateUser = async () => {
+    if (!createForm.email || !createForm.password) {
+      toast({ title: "Email e senha obrigatórios", variant: "destructive" });
+      return;
+    }
+    setCreateLoading(true);
+    const res = await callAdmin("create-user", "POST", createForm);
+    setCreateLoading(false);
+    if (res.success) {
+      const waMsg = createForm.whatsapp
+        ? res.wa_sent
+          ? " e enviado pro WhatsApp 📲"
+          : ` (WhatsApp falhou: ${res.wa_error || "erro"})`
+        : "";
+      toast({ title: `Usuário criado${waMsg}` });
+      setCreateOpen(false);
+      setCreateForm({ email: "", password: "", display_name: "", whatsapp: "" });
+      fetchData();
+    } else {
+      toast({ title: "Erro", description: res.error, variant: "destructive" });
+    }
+  };
 
   const callAdmin = async (action: string, method = "GET", body?: Record<string, unknown>) => {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-users/${action}`;
@@ -283,8 +319,12 @@ const AdminPage = () => {
 
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-foreground">Usuários ({users.length})</CardTitle>
+            <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              Criar usuário
+            </Button>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -417,6 +457,68 @@ const AdminPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create User Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Criar novo usuário</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label className="text-sm">Nome (opcional)</Label>
+              <Input
+                value={createForm.display_name}
+                onChange={(e) => setCreateForm({ ...createForm, display_name: e.target.value })}
+                placeholder="Marcus Silva"
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Email *</Label>
+              <Input
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                placeholder="usuario@exemplo.com"
+              />
+            </div>
+            <div>
+              <Label className="text-sm">Senha *</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <Button type="button" variant="outline" size="sm" onClick={generatePassword}>
+                  Gerar
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm">WhatsApp (opcional)</Label>
+              <Input
+                value={createForm.whatsapp}
+                onChange={(e) => setCreateForm({ ...createForm, whatsapp: e.target.value })}
+                placeholder="15998346245 (com DDD)"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Se preenchido, as credenciais serão enviadas pelo WhatsApp automaticamente.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCreateOpen(false)} disabled={createLoading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreateUser} disabled={createLoading}>
+              {createLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Criar usuário
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       {/* Credits Dialog */}
       <Dialog open={!!creditsUser} onOpenChange={() => setCreditsUser(null)}>
