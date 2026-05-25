@@ -15,6 +15,7 @@ import {
   DesignTemplate, FontFamily, TitleSize, BodySize,
 } from "@/types/carousel";
 import { toast } from "sonner";
+import CustomColorPicker from "@/components/CustomColorPicker";
 
 interface GenerateDialogProps {
   open: boolean;
