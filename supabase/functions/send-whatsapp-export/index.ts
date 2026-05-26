@@ -65,10 +65,20 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as Body;
-    const number = normalizeNumber(body.number || settings.whatsapp_number || "");
+
+    // Prefer the calling user's own WhatsApp number (from profile),
+    // then explicit body number, then admin fallback.
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("whatsapp_number")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const userWhats = (profile as any)?.whatsapp_number || "";
+
+    const number = normalizeNumber(userWhats || body.number || settings.whatsapp_number || "");
     if (!number) {
-      return new Response(JSON.stringify({ error: "Número de WhatsApp não definido" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ skipped: true, reason: "no_user_number" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (!body.files?.length) {

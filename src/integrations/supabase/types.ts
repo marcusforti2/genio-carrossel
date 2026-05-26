@@ -104,6 +104,7 @@ export type Database = {
           updated_at: string
           user_id: string
           value_proposition: string
+          whatsapp_number: string
         }
         Insert: {
           avatar_url?: string | null
@@ -125,6 +126,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           value_proposition?: string
+          whatsapp_number?: string
         }
         Update: {
           avatar_url?: string | null
@@ -146,6 +148,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           value_proposition?: string
+          whatsapp_number?: string
         }
         Relationships: []
       }

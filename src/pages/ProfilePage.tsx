@@ -26,6 +26,7 @@ interface ProfileData {
   hooks: string;
   avatar_url: string;
   knowledge_base: string;
+  whatsapp_number: string;
 }
 
 const ProfilePage = () => {
@@ -95,6 +96,7 @@ Formato da sua resposta agora:
     hooks: "",
     avatar_url: "",
     knowledge_base: "",
+    whatsapp_number: "",
   });
 
   useEffect(() => {
@@ -123,6 +125,7 @@ Formato da sua resposta agora:
           hooks: (data as any).hooks || "",
           avatar_url: data.avatar_url || "",
           knowledge_base: (data as any).knowledge_base || "",
+          whatsapp_number: (data as any).whatsapp_number || "",
         });
       }
 
@@ -676,6 +679,24 @@ Formato da sua resposta agora:
           />
           <p className="text-[11px] text-muted-foreground">
             💡 Dica: adicione transcrições de aulas, posts antigos que funcionaram, frases que você usa muito, livros que te inspiram.
+          </p>
+        </section>
+
+        {/* WhatsApp para receber exportações */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-display border-b border-border pb-2">WhatsApp para receber exportações</h2>
+          <p className="text-xs text-muted-foreground">
+            Toda vez que você exportar um carrossel, o <strong>GENIUS</strong> envia o arquivo + a legenda direto pro seu WhatsApp.
+            Inclua o DDI + DDD (ex: <code className="text-foreground">5511999999999</code>).
+          </p>
+          <Field
+            label="Seu número de WhatsApp"
+            value={profile.whatsapp_number}
+            onChange={(v) => updateField("whatsapp_number", v.replace(/\D/g, ""))}
+            placeholder="5511999999999"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Se ficar em branco, nenhum envio acontece pra você.
           </p>
         </section>
 
