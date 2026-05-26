@@ -18,6 +18,7 @@ import { sendExportToWhatsAppIfEnabled } from "@/lib/sendToWhatsApp";
 
 interface ExportButtonsProps {
   carousel: CarouselData;
+  caption?: string;
   showLabel?: boolean;
 }
 
