@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, GripVertical, ImagePlus, Loader2, Search, X, Upload, Image as ImageIcon, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdmin } from "@/hooks/useAdmin";
 
 interface SlideEditorPanelProps {
   slide: SlideData;
@@ -17,6 +18,7 @@ interface SlideEditorPanelProps {
 }
 
 const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: SlideEditorPanelProps) => {
+  const { isAdmin } = useAdmin();
   const [imgLoading, setImgLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ id: number; url: string; thumbnail: string; photographer: string; alt: string }>>([]);
@@ -301,7 +303,13 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
             size="sm"
             className="gap-1.5 text-[10px] h-8"
             disabled={searchingVideo}
-            onClick={() => searchPexelsVideos(slide.title)}
+            onClick={() => {
+              if (!isAdmin) {
+                toast.info("Vídeos em breve!", { description: "Esse recurso ainda não está liberado. Em breve disponível para todos." });
+                return;
+              }
+              searchPexelsVideos(slide.title);
+            }}
           >
             {searchingVideo ? <Loader2 className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
             Buscar Vídeo
