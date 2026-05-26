@@ -437,34 +437,44 @@ const ExportButtons = ({ carousel, caption, showLabel }: ExportButtonsProps) => 
           {showLabel ? "Exportar" : <span className="hidden sm:inline">Exportar</span>}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
-        <div className="px-2 py-1.5 text-[10px] text-muted-foreground border-b mb-1 leading-relaxed">
-          📄 <strong>PDF</strong>: ideal para postar no <strong>LinkedIn</strong>.<br />
-          🗂️ <strong>ZIP</strong>: imagens para carrossel no <strong>Instagram</strong>.
+      <DropdownMenuContent align="end" className="w-[min(92vw,20rem)] max-h-[70vh] overflow-y-auto p-2">
+        <div className="px-2 py-2 text-[11px] text-muted-foreground border-b mb-1 leading-snug">
+          Escolha o formato ideal para o seu post:
         </div>
-        <DropdownMenuItem onClick={downloadAll} className="gap-2 text-xs cursor-pointer">
-          <FileArchive className="w-3.5 h-3.5 shrink-0" />
-          <div className="flex flex-col">
-            <span>Baixar tudo (.zip)</span>
-            <span className="text-[9px] text-muted-foreground">Carrossel do Instagram</span>
-          </div>
-        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={hasVideo ? undefined : downloadPdf}
           disabled={hasVideo}
-          className="gap-2 text-xs cursor-pointer"
+          className="gap-2.5 cursor-pointer py-2.5 items-start"
         >
-          <FileText className="w-3.5 h-3.5 shrink-0" />
-          <div className="flex flex-col">
-            <span>Baixar PDF</span>
-            <span className="text-[9px] text-muted-foreground">Post do LinkedIn</span>
+          <FileText className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm font-medium">Baixar PDF</span>
+            <span className="text-[11px] text-muted-foreground leading-snug break-words whitespace-normal">
+              Ideal para post no LinkedIn (documento único).
+            </span>
+            {hasVideo && (
+              <span className="text-[10px] text-destructive mt-0.5">
+                Indisponível: carrossel contém vídeo.
+              </span>
+            )}
           </div>
-          {hasVideo && <span className="text-[9px] text-muted-foreground ml-auto">(tem vídeo)</span>}
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={downloadAll} className="gap-2.5 cursor-pointer py-2.5 items-start">
+          <FileArchive className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm font-medium">Baixar ZIP</span>
+            <span className="text-[11px] text-muted-foreground leading-snug break-words whitespace-normal">
+              Imagens separadas para carrossel no Instagram.
+            </span>
+          </div>
+        </DropdownMenuItem>
+        <div className="px-2 pt-2 pb-1 text-[10px] uppercase tracking-wide text-muted-foreground/70 border-t mt-1">
+          Slides individuais
+        </div>
         {carousel.slides.map((_, i) => (
-          <DropdownMenuItem key={i} onClick={() => downloadSingle(i)} className="gap-2 text-xs cursor-pointer">
-            <Image className="w-3.5 h-3.5" />
-            Slide {i + 1} (.png)
+          <DropdownMenuItem key={i} onClick={() => downloadSingle(i)} className="gap-2 text-xs cursor-pointer py-2">
+            <Image className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">Slide {i + 1} (.png)</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
