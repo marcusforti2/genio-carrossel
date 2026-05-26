@@ -146,18 +146,9 @@ Deno.serve(async (req) => {
     // Send caption as a follow-up text message (so it's copy-pasteable on WhatsApp)
     let textOk: boolean | undefined;
     if (body.caption && body.caption.trim()) {
-      try {
-        const r = await fetch(`${baseUrl}/message/sendText/${instance}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", apikey: apiKey },
-          body: JSON.stringify({ number, text: body.caption }),
-        });
-        textOk = r.ok;
-        if (!r.ok) console.error("[send-whatsapp-export] sendText failed", r.status, (await r.text()).slice(0, 300));
-      } catch (e) {
-        console.error("[send-whatsapp-export] sendText error", (e as Error).message);
-        textOk = false;
-      }
+      textOk = await sendText(`📝 *Legenda pronta pra postar:*\n\n${body.caption}\n\n— GENIUS 🤖`);
+    } else {
+      await sendText("Tudo certo por aqui! Qualquer coisa é só chamar. — *GENIUS* 🤖");
     }
 
     const success = results.every(r => r.ok);
