@@ -51,6 +51,7 @@ const fetchPexelsImage = async (query: string, topic: string, imageQuery?: strin
 
 const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, currentTheme }: GenerateDialogProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [topic, setTopic] = useState("");
   const [mediaType, setMediaType] = useState<"image" | "video">("image");
   const [style, setStyle] = useState("tribunal");
