@@ -101,11 +101,16 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
     setShowVideoSearch(true);
     const contextParts = [slide.title, slide.body].filter(Boolean).join(" — ");
     try {
+      const niche = (carousel as any)?.niche || (carousel as any)?.profileNiche;
       const { data, error } = await supabase.functions.invoke("search-pexels-videos", {
         body: {
           query: query || videoSearchQuery || contextParts,
           perPage: 6,
           topic: [carousel.brandingText, carousel.profileName].filter(Boolean).join(", "),
+          niche,
+          slideTitle: slide.title,
+          slideBody: slide.body,
+          orientation: "portrait",
         },
       });
       if (error) throw error;
