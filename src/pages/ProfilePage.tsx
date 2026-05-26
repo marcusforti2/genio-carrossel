@@ -493,12 +493,13 @@ Formato da sua resposta agora:
               {showGuide && (
                 <div className="px-3 pb-3 space-y-3 border-t border-primary/20">
                   <ol className="text-[11px] text-muted-foreground space-y-1.5 mt-3 list-decimal list-inside">
-                    <li>Copie o prompt abaixo no botão.</li>
-                    <li>Abra o <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> e cole numa conversa nova.</li>
-                    <li>Responda as perguntas que a IA te fizer (vai ser uma conversa guiada).</li>
-                    <li>No fim, ela vai gerar um texto completo. Copie esse texto.</li>
+                    <li>Clique em <strong className="text-foreground">Copiar prompt</strong>.</li>
+                    <li>Abra o <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> (de preferência logado, pra ele usar a memória que já tem de você).</li>
+                    <li>Cole numa conversa nova. Ele vai usar o que já sabe e só perguntar o que faltar.</li>
+                    <li>Responda as poucas perguntas (se houver) e copie o texto final que ele gerar.</li>
                     <li>Volte aqui, cole no campo abaixo e clique em <strong className="text-foreground">Preencher perfil com IA</strong>.</li>
                   </ol>
+
 
                   <div className="relative">
                     <pre className="text-[10px] leading-relaxed bg-secondary/60 border border-border/50 rounded-md p-3 pr-10 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-muted-foreground">
