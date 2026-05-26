@@ -682,6 +682,24 @@ Formato da sua resposta agora:
           </p>
         </section>
 
+        {/* WhatsApp para receber exportações */}
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-display border-b border-border pb-2">WhatsApp para receber exportações</h2>
+          <p className="text-xs text-muted-foreground">
+            Toda vez que você exportar um carrossel, o <strong>GENIUS</strong> envia o arquivo + a legenda direto pro seu WhatsApp.
+            Inclua o DDI + DDD (ex: <code className="text-foreground">5511999999999</code>).
+          </p>
+          <Field
+            label="Seu número de WhatsApp"
+            value={profile.whatsapp_number}
+            onChange={(v) => updateField("whatsapp_number", v.replace(/\D/g, ""))}
+            placeholder="5511999999999"
+          />
+          <p className="text-[11px] text-muted-foreground">
+            Se ficar em branco, nenhum envio acontece pra você.
+          </p>
+        </section>
+
         {/* Trocar senha */}
         <ChangePasswordSection />
       </div>
