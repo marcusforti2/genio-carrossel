@@ -342,7 +342,8 @@ const ExportButtons = ({ carousel, caption, showLabel }: ExportButtonsProps) => 
         toast.success("Carrossel exportado!");
       }
       // Send to WhatsApp if admin + enabled
-      const wa = await sendExportToWhatsAppIfEnabled(content, zipName, "application/zip", "Carrossel exportado 🎉");
+      const waMsg = caption?.trim() ? `Carrossel exportado 🎉\n\n${caption}` : "Carrossel exportado 🎉";
+      const wa = await sendExportToWhatsAppIfEnabled(content, zipName, "application/zip", waMsg);
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
