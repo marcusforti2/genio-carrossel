@@ -99,8 +99,10 @@ Deno.serve(async (req) => {
         media,
         fileName: f.filename,
       };
-      if (body.caption || f.caption) {
-        payload.caption = f.caption || body.caption;
+      // Do NOT attach body.caption here — it's sent as a separate text message below
+      // to remain easy to copy/paste on WhatsApp. Only attach a per-file caption if explicitly provided.
+      if (f.caption) {
+        payload.caption = f.caption;
       }
 
       try {
