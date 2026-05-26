@@ -481,8 +481,11 @@ const StepPhotoAndText = ({
       <div className="pt-2 border-t border-primary/10">
         <label
           htmlFor="onboarding-doc-upload"
-          disabled={extractingFile || parsing}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+          aria-disabled={extractingFile || parsing}
+          onClick={(e) => {
+            if (extractingFile || parsing) e.preventDefault();
+          }}
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-primary/30 transition-colors text-xs ${extractingFile || parsing ? "opacity-50 cursor-not-allowed text-muted-foreground" : "cursor-pointer text-muted-foreground hover:text-foreground hover:border-primary/60 hover:bg-primary/5"}`}
         >
           {extractingFile ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Extraindo texto…</>
