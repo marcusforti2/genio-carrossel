@@ -316,7 +316,13 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                   <span className={`text-xs font-semibold ${mediaType === "image" ? "text-primary" : "text-muted-foreground"}`}>Imagens</span>
                 </button>
                 <button
-                  onClick={() => setMediaType("video")}
+                  onClick={() => {
+                    if (!isAdmin) {
+                      toast.info("Vídeos em breve!", { description: "Funcionalidade ainda não liberada para sua conta." });
+                      return;
+                    }
+                    setMediaType("video");
+                  }}
                   className={`flex-1 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
                     mediaType === "video"
                       ? "border-primary bg-primary/10"
