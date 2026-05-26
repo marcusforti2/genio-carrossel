@@ -670,8 +670,12 @@ Comece agora me perguntando sobre o item 1.`;
             💡 Dica: adicione transcrições de aulas, posts antigos que funcionaram, frases que você usa muito, livros que te inspiram.
           </p>
         </section>
+
+        {/* Trocar senha */}
+        <ChangePasswordSection />
       </div>
     </div>
+
 
   );
 };
