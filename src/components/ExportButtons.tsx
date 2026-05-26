@@ -18,6 +18,7 @@ import { sendExportToWhatsAppIfEnabled } from "@/lib/sendToWhatsApp";
 
 interface ExportButtonsProps {
   carousel: CarouselData;
+  caption?: string;
   showLabel?: boolean;
 }
 
@@ -154,7 +155,7 @@ const gatherStyles = (): string => {
   return cssTexts.join("\n");
 };
 
-const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
+const ExportButtons = ({ carousel, caption, showLabel }: ExportButtonsProps) => {
   const [exporting, setExporting] = useState(false);
 
   const renderSlideToBlob = useCallback(async (preparedCarousel: CarouselData, slideIndex: number): Promise<Blob> => {
@@ -341,7 +342,8 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
         toast.success("Carrossel exportado!");
       }
       // Send to WhatsApp if admin + enabled
-      const wa = await sendExportToWhatsAppIfEnabled(content, zipName, "application/zip", "Carrossel exportado 🎉");
+      const waMsg = caption?.trim() ? `Carrossel exportado 🎉\n\n${caption}` : "Carrossel exportado 🎉";
+      const wa = await sendExportToWhatsAppIfEnabled(content, zipName, "application/zip", waMsg);
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
@@ -413,7 +415,8 @@ const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
-      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, pdfName, "application/pdf", "Carrossel exportado em PDF 🎉");
+      const waMsgPdf = caption?.trim() ? `Carrossel exportado em PDF 🎉\n\n${caption}` : "Carrossel exportado em PDF 🎉";
+      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, pdfName, "application/pdf", waMsgPdf);
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {

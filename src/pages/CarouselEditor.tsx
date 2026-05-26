@@ -261,7 +261,7 @@ const CarouselEditor = () => {
           {/* Desktop-only action buttons */}
           <div className="hidden sm:flex items-center gap-1">
             <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} />
-            <ExportButtons carousel={carousel} />
+            <ExportButtons carousel={carousel} caption={caption} />
           </div>
           <Button size="sm" className="text-xs gap-1 h-8 px-2 sm:px-3 hidden sm:flex" onClick={() => setGenerateOpen(true)}>
             <Sparkles className="w-3.5 h-3.5" />
@@ -420,7 +420,7 @@ const CarouselEditor = () => {
               Gerar IA
             </Button>
             <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} showLabel />
-            <ExportButtons carousel={carousel} showLabel />
+            <ExportButtons carousel={carousel} caption={caption} showLabel />
           </div>
 
           {/* Bottom actions */}

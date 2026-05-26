@@ -50,19 +50,17 @@ Deno.serve(async (req) => {
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
-    if (!isAdmin) {
-      return new Response(JSON.stringify({ error: "Admin only" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const { data: settings, error: sErr } = await admin
       .from("admin_settings").select("*").limit(1).maybeSingle();
     if (sErr) throw sErr;
-    if (!settings || !settings.evolution_url || !settings.evolution_api_key || !settings.evolution_instance) {
-      return new Response(JSON.stringify({ error: "Evolution API não configurada" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!settings || !settings.auto_send_on_export) {
+      return new Response(JSON.stringify({ skipped: true, reason: "disabled" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (!settings.evolution_url || !settings.evolution_api_key || !settings.evolution_instance) {
+      return new Response(JSON.stringify({ skipped: true, reason: "not_configured" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -121,8 +119,25 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Send caption as a follow-up text message (so it's copy-pasteable on WhatsApp)
+    let textOk: boolean | undefined;
+    if (body.caption && body.caption.trim()) {
+      try {
+        const r = await fetch(`${baseUrl}/message/sendText/${instance}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: apiKey },
+          body: JSON.stringify({ number, text: body.caption }),
+        });
+        textOk = r.ok;
+        if (!r.ok) console.error("[send-whatsapp-export] sendText failed", r.status, (await r.text()).slice(0, 300));
+      } catch (e) {
+        console.error("[send-whatsapp-export] sendText error", (e as Error).message);
+        textOk = false;
+      }
+    }
+
     const success = results.every(r => r.ok);
-    return new Response(JSON.stringify({ success, results, number }), {
+    return new Response(JSON.stringify({ success, results, number, textOk }), {
       status: success ? 200 : 207,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
