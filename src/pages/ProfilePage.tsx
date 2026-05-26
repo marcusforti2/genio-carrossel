@@ -96,6 +96,7 @@ Formato da sua resposta agora:
     hooks: "",
     avatar_url: "",
     knowledge_base: "",
+    whatsapp_number: "",
   });
 
   useEffect(() => {
