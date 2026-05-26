@@ -9,6 +9,7 @@ import { Sparkles, Loader2, LayoutTemplate, Type, ALargeSmall, Sun, Moon, Palett
 import RealisticSlidePreview from "@/components/RealisticSlidePreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import {
   SlideData, DesignStyle, CarouselTheme,
   DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, BODY_SIZES, ACCENT_PRESETS,
