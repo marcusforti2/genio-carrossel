@@ -143,6 +143,16 @@ serve(async (req) => {
       return json({ success: true });
     }
 
+    // POST /admin-users/set-password
+    if (action === "set-password" && req.method === "POST") {
+      const { user_id, password } = await req.json();
+      if (!user_id || !password) return json({ error: "user_id and password required" }, 400);
+      if (String(password).length < 6) return json({ error: "Senha deve ter no mínimo 6 caracteres" }, 400);
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(user_id, { password });
+      if (error) return json({ error: error.message }, 400);
+      return json({ success: true });
+    }
+
     // POST /admin-users/create-user
     if (action === "create-user" && req.method === "POST") {
       const body = await req.json();
