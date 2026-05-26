@@ -69,7 +69,10 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
           perPage: 6,
           topic: [carousel.brandingText, carousel.profileName].filter(Boolean).join(", "),
           bgMode: carousel.theme?.bgMode || "dark",
-          niche: "",
+          niche: carousel.niche || "",
+          slideTitle: slide.title || "",
+          slideBody: slide.body || "",
+          orientation: "portrait",
         },
       });
       if (error) throw error;
