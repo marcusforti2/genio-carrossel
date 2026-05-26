@@ -125,6 +125,7 @@ Formato da sua resposta agora:
           hooks: (data as any).hooks || "",
           avatar_url: data.avatar_url || "",
           knowledge_base: (data as any).knowledge_base || "",
+          whatsapp_number: (data as any).whatsapp_number || "",
         });
       }
 
