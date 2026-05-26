@@ -698,4 +698,47 @@ const FieldArea = ({ label, value, onChange, placeholder, required }: { label: s
   </div>
 );
 
+const ChangePasswordSection = () => {
+  const [pwd, setPwd] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwd.length < 6) return toast.error("A senha precisa ter pelo menos 6 caracteres.");
+    if (pwd !== confirm) return toast.error("As senhas não conferem.");
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: pwd });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Senha atualizada!");
+    setPwd("");
+    setConfirm("");
+  };
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-bold font-display">Trocar senha</h2>
+      </div>
+      <form onSubmit={handleChange} className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Nova senha</Label>
+            <Input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="••••••••" minLength={6} className="bg-secondary border-border/50" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Confirmar senha</Label>
+            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" minLength={6} className="bg-secondary border-border/50" />
+          </div>
+        </div>
+        <Button type="submit" size="sm" disabled={saving || !pwd || !confirm} className="gap-1.5">
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+          Atualizar senha
+        </Button>
+      </form>
+    </section>
+  );
+};
+
 export default ProfilePage;
