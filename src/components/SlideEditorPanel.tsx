@@ -18,6 +18,7 @@ interface SlideEditorPanelProps {
 }
 
 const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: SlideEditorPanelProps) => {
+  const { isAdmin } = useAdmin();
   const [imgLoading, setImgLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ id: number; url: string; thumbnail: string; photographer: string; alt: string }>>([]);
