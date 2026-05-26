@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, GripVertical, ImagePlus, Loader2, Search, X, Upload, Image as ImageIcon, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAdmin } from "@/hooks/useAdmin";
 
 interface SlideEditorPanelProps {
   slide: SlideData;
