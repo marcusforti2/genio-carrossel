@@ -155,7 +155,7 @@ const gatherStyles = (): string => {
   return cssTexts.join("\n");
 };
 
-const ExportButtons = ({ carousel, showLabel }: ExportButtonsProps) => {
+const ExportButtons = ({ carousel, caption, showLabel }: ExportButtonsProps) => {
   const [exporting, setExporting] = useState(false);
 
   const renderSlideToBlob = useCallback(async (preparedCarousel: CarouselData, slideIndex: number): Promise<Blob> => {
