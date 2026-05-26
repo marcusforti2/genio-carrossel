@@ -16,6 +16,83 @@ import {
 import { extractFileText, AI_PROFILE_PROMPT } from "@/lib/extractFileText";
 
 const TOTAL_STEPS = 2;
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+const MAX_DOC_SIZE = 10 * 1024 * 1024;
+
+const readImageFile = (file: File) => new Promise<HTMLImageElement>((resolve, reject) => {
+  const objectUrl = URL.createObjectURL(file);
+  const image = new Image();
+
+  image.onload = () => {
+    URL.revokeObjectURL(objectUrl);
+    resolve(image);
+  };
+
+  image.onerror = () => {
+    URL.revokeObjectURL(objectUrl);
+    reject(new Error("Não foi possível ler a imagem selecionada."));
+  };
+
+  image.src = objectUrl;
+});
+
+const compressAvatarIfNeeded = async (file: File) => {
+  if (file.size <= MAX_AVATAR_SIZE) return file;
+
+  const image = await readImageFile(file);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Não foi possível preparar a imagem para upload.");
+  }
+
+  let width = image.width;
+  let height = image.height;
+  const maxDimension = 1800;
+
+  if (width > height && width > maxDimension) {
+    height = Math.round((height * maxDimension) / width);
+    width = maxDimension;
+  } else if (height >= width && height > maxDimension) {
+    width = Math.round((width * maxDimension) / height);
+    height = maxDimension;
+  }
+
+  let quality = 0.9;
+  let attempts = 0;
+  let blob: Blob | null = null;
+
+  while (attempts < 8) {
+    canvas.width = width;
+    canvas.height = height;
+    context.clearRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+
+    blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", quality);
+    });
+
+    if (blob && blob.size <= MAX_AVATAR_SIZE) {
+      return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+    }
+
+    quality -= 0.1;
+    if (quality < 0.45) {
+      quality = 0.82;
+      width = Math.max(900, Math.round(width * 0.85));
+      height = Math.max(900, Math.round(height * 0.85));
+    }
+    attempts += 1;
+  }
+
+  throw new Error("A imagem ainda ficou acima de 5MB. Escolha uma foto menor.");
+};
+
+const getAvatarPath = (userId: string, file: File) => {
+  const extension = file.type === "image/png" ? "png" : "jpg";
+  return `${userId}/avatar.${extension}`;
+};
 
 const OnboardingPage = () => {
   const { user } = useAuth();
@@ -57,13 +134,23 @@ const OnboardingPage = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (!file.type.startsWith("image/")) { toast.error("Selecione uma imagem válida"); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Imagem muito grande (máx 5MB)"); return; }
 
     setUploading(true);
     try {
-      const filePath = `${user.id}/avatar.png`;
-      await supabase.storage.from("avatars").remove([filePath]);
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true, contentType: file.type });
+      const preparedFile = await compressAvatarIfNeeded(file);
+      const filePath = getAvatarPath(user.id, preparedFile);
+
+      await supabase.storage.from("avatars").remove([
+        `${user.id}/avatar.png`,
+        `${user.id}/avatar.jpg`,
+        `${user.id}/avatar.jpeg`,
+        `${user.id}/avatar.webp`,
+      ]);
+
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, preparedFile, {
+        upsert: true,
+        contentType: preparedFile.type,
+      });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
@@ -71,17 +158,18 @@ const OnboardingPage = () => {
       setProfile((p) => ({ ...p, avatar_url: avatarUrl }));
       await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("user_id", user.id);
       toast.success("Foto enviada!");
-    } catch {
-      toast.error("Erro ao enviar foto");
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao enviar foto");
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande (máx 10MB)"); return; }
+    if (file.size > MAX_DOC_SIZE) { toast.error("Arquivo muito grande (máx 10MB)"); return; }
     setExtractingFile(true);
     try {
       const text = await extractFileText(file);
@@ -329,7 +417,7 @@ const StepPhotoAndText = ({
 
     {/* Avatar + Handle row */}
     <div className="flex items-center gap-4">
-      <div className="relative group cursor-pointer shrink-0" onClick={() => fileInputRef.current?.click()}>
+      <label htmlFor="onboarding-avatar-upload" className="relative group cursor-pointer shrink-0 block">
         <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-primary/40 bg-card flex items-center justify-center transition-all group-hover:border-primary">
           {profile.avatar_url ? (
             <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
@@ -350,8 +438,8 @@ const StepPhotoAndText = ({
             <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />
           </div>
         )}
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={onAvatarUpload} className="hidden" />
-      </div>
+        <input id="onboarding-avatar-upload" ref={fileInputRef} type="file" accept="image/*" onChange={onAvatarUpload} className="hidden" />
+      </label>
 
       <div className="flex-1 space-y-2">
         <div className="space-y-1">
@@ -366,6 +454,7 @@ const StepPhotoAndText = ({
             />
           </div>
         </div>
+        <p className="text-[10px] text-muted-foreground">JPG, PNG ou WEBP. Se passar de 5MB, eu reduzo automaticamente.</p>
       </div>
     </div>
 
@@ -390,11 +479,13 @@ const StepPhotoAndText = ({
 
       {/* Upload arquivo */}
       <div className="pt-2 border-t border-primary/10">
-        <button
-          type="button"
-          onClick={() => docFileInputRef.current?.click()}
-          disabled={extractingFile || parsing}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+        <label
+          htmlFor="onboarding-doc-upload"
+          aria-disabled={extractingFile || parsing}
+          onClick={(e) => {
+            if (extractingFile || parsing) e.preventDefault();
+          }}
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-dashed border-primary/30 transition-colors text-xs ${extractingFile || parsing ? "opacity-50 cursor-not-allowed text-muted-foreground" : "cursor-pointer text-muted-foreground hover:text-foreground hover:border-primary/60 hover:bg-primary/5"}`}
         >
           {extractingFile ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Extraindo texto…</>
@@ -403,14 +494,16 @@ const StepPhotoAndText = ({
           ) : (
             <><Upload className="w-3.5 h-3.5" /> Ou envie um arquivo (.pdf, .docx, .txt, .md)</>
           )}
-        </button>
+        </label>
         <input
+          id="onboarding-doc-upload"
           ref={docFileInputRef}
           type="file"
           accept=".pdf,.docx,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown"
           onChange={onDocUpload}
           className="hidden"
         />
+        <p className="mt-2 text-[10px] text-muted-foreground">Arquivos de texto, PDF e DOCX até 10MB.</p>
       </div>
     </div>
 
