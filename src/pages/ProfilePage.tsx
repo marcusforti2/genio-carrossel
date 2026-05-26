@@ -26,6 +26,7 @@ interface ProfileData {
   hooks: string;
   avatar_url: string;
   knowledge_base: string;
+  whatsapp_number: string;
 }
 
 const ProfilePage = () => {
