@@ -415,7 +415,8 @@ const ExportButtons = ({ carousel, caption, showLabel }: ExportButtonsProps) => 
       a.click();
       URL.revokeObjectURL(url);
       toast.success(`PDF exportado! (${sizeMB}MB, qualidade ${Math.round(quality * 100)}%)`);
-      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, pdfName, "application/pdf", "Carrossel exportado em PDF 🎉");
+      const waMsgPdf = caption?.trim() ? `Carrossel exportado em PDF 🎉\n\n${caption}` : "Carrossel exportado em PDF 🎉";
+      const wa = await sendExportToWhatsAppIfEnabled(pdfBlob, pdfName, "application/pdf", waMsgPdf);
       if (wa.sent) toast.success("Enviado pro seu WhatsApp 📲");
       else if (wa.error) toast.error("WhatsApp: " + wa.error);
     } catch (e) {
