@@ -81,6 +81,28 @@ Deno.serve(async (req) => {
     const instance = settings.evolution_instance;
     const apiKey = settings.evolution_api_key;
 
+    const sendText = async (text: string) => {
+      try {
+        const r = await fetch(`${baseUrl}/message/sendText/${instance}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: apiKey },
+          body: JSON.stringify({ number, text }),
+        });
+        if (!r.ok) console.error("[send-whatsapp-export] sendText failed", r.status, (await r.text()).slice(0, 300));
+        return r.ok;
+      } catch (e) {
+        console.error("[send-whatsapp-export] sendText error", (e as Error).message);
+        return false;
+      }
+    };
+
+    // Intro message — present as the user's AI agent "GENIUS"
+    const userName = (user.user_metadata?.full_name || user.user_metadata?.name || "").toString().split(" ")[0];
+    const greeting = userName ? `Olá, ${userName}! ` : "Olá! ";
+    await sendText(
+      `${greeting}Aqui é o *GENIUS*, seu agente de IA do Gênio Carrossel ✨\n\nAcabei de finalizar a exportação do seu carrossel. Segue abaixo o arquivo e a legenda pronta pra postar 👇`
+    );
+
     const results: Array<{ filename: string; ok: boolean; status?: number; error?: string }> = [];
 
     for (const f of body.files) {
