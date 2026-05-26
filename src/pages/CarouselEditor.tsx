@@ -420,7 +420,7 @@ const CarouselEditor = () => {
               Gerar IA
             </Button>
             <CaptionButton carousel={carousel} caption={caption} onCaptionChange={setCaption} showLabel />
-            <ExportButtons carousel={carousel} showLabel />
+            <ExportButtons carousel={carousel} caption={caption} showLabel />
           </div>
 
           {/* Bottom actions */}
