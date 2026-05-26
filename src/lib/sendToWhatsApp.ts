@@ -22,8 +22,14 @@ export async function sendExportToWhatsAppIfEnabled(
       .upload(path, blob, { contentType: mimetype, upsert: true });
     if (upErr) return { sent: false, error: "Upload: " + upErr.message };
 
-    const { data: pub } = supabase.storage.from("whatsapp-exports").getPublicUrl(path);
-    const url = pub.publicUrl;
+    // Bucket is private — generate a signed URL valid for 1 hour for Evolution API to fetch
+    const { data: signed, error: signErr } = await supabase.storage
+      .from("whatsapp-exports")
+      .createSignedUrl(path, 60 * 60);
+    if (signErr || !signed?.signedUrl) {
+      return { sent: false, error: "Signed URL: " + (signErr?.message || "unknown") };
+    }
+    const url = signed.signedUrl;
 
     const { data, error } = await supabase.functions.invoke("send-whatsapp-export", {
       body: {
