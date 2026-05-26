@@ -42,22 +42,29 @@ const ProfilePage = () => {
   const [promptCopied, setPromptCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
-  const AI_PROMPT_TEMPLATE = `Você é um especialista em branding pessoal e posicionamento digital. Vou te contar sobre mim, meu negócio e meu trabalho, e preciso que você organize TUDO em um texto único, completo e bem estruturado, que eu vou colar em uma ferramenta de IA que cria carrosséis para o Instagram.
+  const AI_PROMPT_TEMPLATE = `Sua tarefa: escrever um único texto longo e corrido, em português, sobre MIM (o usuário desta conversa), para eu colar numa outra ferramenta de IA que cria carrosséis para Instagram.
 
-O texto final precisa cobrir, em parágrafos corridos (sem títulos, sem bullet points), os seguintes pontos:
+REGRAS IMPORTANTES (leia antes de qualquer coisa):
+- Use TUDO que você já sabe sobre mim — memórias salvas, conversas anteriores, projetos, arquivos que já te mandei, contexto do meu perfil. Não finja que não me conhece.
+- NÃO me peça para responder coisas que você já tem na memória. Antes de perguntar qualquer coisa, revise primeiro o que já sabe.
+- Só me faça perguntas se faltar informação real e essencial. Pergunte uma de cada vez, no máximo 5 perguntas no total. Se já tiver tudo, pule direto para o texto final.
+- Não escreva sobre você (a IA). Escreva sobre mim, em terceira pessoa ou em primeira pessoa como se fosse eu falando — escolha o que ficar mais natural e mantenha consistente.
+- Saída final: parágrafos corridos, SEM títulos, SEM bullet points, SEM numeração, SEM markdown. Apenas texto puro pronto para copiar.
 
-1. Quem eu sou (nome completo, o que faço profissionalmente, minha história curta).
+O texto final precisa cobrir, de forma fluida:
+1. Quem sou eu (nome, o que faço, história curta).
 2. Minha marca / empresa (nome, tagline, do que se trata).
-3. Meu nicho de atuação (em 1-2 frases bem específicas).
-4. Meu público-alvo detalhado (quem são, o que sentem, o que querem, o que os frustra).
-5. O "inimigo em comum" entre mim e meu público (o que combatemos juntos, contra o que lutamos no mercado).
-6. Minhas crenças e convicções fortes sobre o meu mercado (o que eu defendo, o que eu critico).
-7. Meu tom de voz para conteúdo (ex: direto, provocativo, com ironia, técnico, acolhedor...).
-8. Minha proposta de valor única (o que eu entrego de diferente, qual transformação eu gero).
+3. Meu nicho de atuação (específico, em 1-2 frases).
+4. Meu público-alvo (quem são, o que sentem, o que querem, o que os frustra).
+5. O "inimigo em comum" entre mim e meu público (contra o que lutamos juntos no mercado).
+6. Minhas crenças e convicções fortes sobre o meu mercado (o que defendo, o que critico).
+7. Meu tom de voz para conteúdo (ex: direto, provocativo, técnico, acolhedor...).
+8. Minha proposta de valor única (a transformação que eu gero).
 
-Antes de escrever, me faça TODAS as perguntas que precisar para entender bem cada um desses pontos. Depois, gere o texto final, em português, em tom profissional mas humano, pronto para eu copiar e colar.
+Formato da sua resposta agora:
+- Se você já tem informação suficiente sobre mim: comece direto pelo texto final, sem comentários antes nem depois.
+- Se faltar algo essencial: liste primeiro (em 1 frase) o que você JÁ sabe sobre mim, depois faça apenas as perguntas que faltam. Quando eu responder, gere o texto final.`;
 
-Comece agora me perguntando sobre o item 1.`;
 
   const handleCopyPrompt = async () => {
     try {
