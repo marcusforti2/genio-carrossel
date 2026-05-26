@@ -172,9 +172,14 @@ serve(async (req) => {
       });
       if (createErr) return json({ error: createErr.message }, 400);
 
-      // Update profile display_name if provided
-      if (display_name && created.user) {
-        await supabaseAdmin.from("profiles").update({ display_name }).eq("user_id", created.user.id);
+      // Update profile display_name and whatsapp_number
+      if (created.user) {
+        const updates: Record<string, string> = {};
+        if (display_name) updates.display_name = display_name;
+        if (whatsapp) updates.whatsapp_number = whatsapp.startsWith("55") ? whatsapp : `55${whatsapp}`;
+        if (Object.keys(updates).length > 0) {
+          await supabaseAdmin.from("profiles").update(updates).eq("user_id", created.user.id);
+        }
       }
 
       // Try sending credentials via WhatsApp if number provided + admin settings configured
