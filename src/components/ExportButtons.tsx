@@ -437,18 +437,28 @@ const ExportButtons = ({ carousel, caption, showLabel }: ExportButtonsProps) => 
           {showLabel ? "Exportar" : <span className="hidden sm:inline">Exportar</span>}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
+      <DropdownMenuContent align="end" className="w-64">
+        <div className="px-2 py-1.5 text-[10px] text-muted-foreground border-b mb-1 leading-relaxed">
+          📄 <strong>PDF</strong>: ideal para postar no <strong>LinkedIn</strong>.<br />
+          🗂️ <strong>ZIP</strong>: imagens para carrossel no <strong>Instagram</strong>.
+        </div>
         <DropdownMenuItem onClick={downloadAll} className="gap-2 text-xs cursor-pointer">
-          <FileArchive className="w-3.5 h-3.5" />
-          Baixar tudo (.zip)
+          <FileArchive className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex flex-col">
+            <span>Baixar tudo (.zip)</span>
+            <span className="text-[9px] text-muted-foreground">Carrossel do Instagram</span>
+          </div>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={hasVideo ? undefined : downloadPdf}
           disabled={hasVideo}
           className="gap-2 text-xs cursor-pointer"
         >
-          <FileText className="w-3.5 h-3.5" />
-          Baixar PDF
+          <FileText className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex flex-col">
+            <span>Baixar PDF</span>
+            <span className="text-[9px] text-muted-foreground">Post do LinkedIn</span>
+          </div>
           {hasVideo && <span className="text-[9px] text-muted-foreground ml-auto">(tem vídeo)</span>}
         </DropdownMenuItem>
         {carousel.slides.map((_, i) => (
