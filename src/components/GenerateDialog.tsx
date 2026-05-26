@@ -9,6 +9,7 @@ import { Sparkles, Loader2, LayoutTemplate, Type, ALargeSmall, Sun, Moon, Palett
 import RealisticSlidePreview from "@/components/RealisticSlidePreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import {
   SlideData, DesignStyle, CarouselTheme,
   DESIGN_TEMPLATES, FONT_FAMILIES, TITLE_SIZES, BODY_SIZES, ACCENT_PRESETS,
@@ -50,6 +51,7 @@ const fetchPexelsImage = async (query: string, topic: string, imageQuery?: strin
 
 const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, currentTheme }: GenerateDialogProps) => {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [topic, setTopic] = useState("");
   const [mediaType, setMediaType] = useState<"image" | "video">("image");
   const [style, setStyle] = useState("tribunal");
@@ -314,7 +316,13 @@ const GenerateDialog = ({ open, onOpenChange, onGenerated, currentDesignStyle, c
                   <span className={`text-xs font-semibold ${mediaType === "image" ? "text-primary" : "text-muted-foreground"}`}>Imagens</span>
                 </button>
                 <button
-                  onClick={() => setMediaType("video")}
+                  onClick={() => {
+                    if (!isAdmin) {
+                      toast.info("Vídeos em breve!", { description: "Funcionalidade ainda não liberada para sua conta." });
+                      return;
+                    }
+                    setMediaType("video");
+                  }}
                   className={`flex-1 py-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
                     mediaType === "video"
                       ? "border-primary bg-primary/10"
