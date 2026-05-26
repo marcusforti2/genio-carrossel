@@ -303,7 +303,13 @@ const SlideEditorPanel = ({ slide, onUpdate, onDelete, canDelete, carousel }: Sl
             size="sm"
             className="gap-1.5 text-[10px] h-8"
             disabled={searchingVideo}
-            onClick={() => searchPexelsVideos(slide.title)}
+            onClick={() => {
+              if (!isAdmin) {
+                toast.info("Vídeos em breve!", { description: "Esse recurso ainda não está liberado. Em breve disponível para todos." });
+                return;
+              }
+              searchPexelsVideos(slide.title);
+            }}
           >
             {searchingVideo ? <Loader2 className="w-3 h-3 animate-spin" /> : <Video className="w-3 h-3" />}
             Buscar Vídeo
