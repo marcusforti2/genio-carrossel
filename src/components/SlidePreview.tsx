@@ -272,7 +272,7 @@ const CoverSlide = memo(({ slide, carousel, styles, fontFam, titleScale, avatarN
       <img src={slide.imageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
     ) : null}
     <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to bottom, ${styles.overlayFrom}, ${styles.overlayTo})` }} />
-    <div style={{ position: "relative", zIndex: 10, padding: "0 75px 120px", textAlign: "left" }}>
+    <div style={{ position: "relative", zIndex: 10, padding: "0 75px 180px", textAlign: "left" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 24, marginBottom: 40 }}>
         {avatarNode}
         <div>
