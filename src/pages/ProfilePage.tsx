@@ -42,22 +42,29 @@ const ProfilePage = () => {
   const [promptCopied, setPromptCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
-  const AI_PROMPT_TEMPLATE = `Você é um especialista em branding pessoal e posicionamento digital. Vou te contar sobre mim, meu negócio e meu trabalho, e preciso que você organize TUDO em um texto único, completo e bem estruturado, que eu vou colar em uma ferramenta de IA que cria carrosséis para o Instagram.
+  const AI_PROMPT_TEMPLATE = `Sua tarefa: escrever um único texto longo e corrido, em português, sobre MIM (o usuário desta conversa), para eu colar numa outra ferramenta de IA que cria carrosséis para Instagram.
 
-O texto final precisa cobrir, em parágrafos corridos (sem títulos, sem bullet points), os seguintes pontos:
+REGRAS IMPORTANTES (leia antes de qualquer coisa):
+- Use TUDO que você já sabe sobre mim — memórias salvas, conversas anteriores, projetos, arquivos que já te mandei, contexto do meu perfil. Não finja que não me conhece.
+- NÃO me peça para responder coisas que você já tem na memória. Antes de perguntar qualquer coisa, revise primeiro o que já sabe.
+- Só me faça perguntas se faltar informação real e essencial. Pergunte uma de cada vez, no máximo 5 perguntas no total. Se já tiver tudo, pule direto para o texto final.
+- Não escreva sobre você (a IA). Escreva sobre mim, em terceira pessoa ou em primeira pessoa como se fosse eu falando — escolha o que ficar mais natural e mantenha consistente.
+- Saída final: parágrafos corridos, SEM títulos, SEM bullet points, SEM numeração, SEM markdown. Apenas texto puro pronto para copiar.
 
-1. Quem eu sou (nome completo, o que faço profissionalmente, minha história curta).
+O texto final precisa cobrir, de forma fluida:
+1. Quem sou eu (nome, o que faço, história curta).
 2. Minha marca / empresa (nome, tagline, do que se trata).
-3. Meu nicho de atuação (em 1-2 frases bem específicas).
-4. Meu público-alvo detalhado (quem são, o que sentem, o que querem, o que os frustra).
-5. O "inimigo em comum" entre mim e meu público (o que combatemos juntos, contra o que lutamos no mercado).
-6. Minhas crenças e convicções fortes sobre o meu mercado (o que eu defendo, o que eu critico).
-7. Meu tom de voz para conteúdo (ex: direto, provocativo, com ironia, técnico, acolhedor...).
-8. Minha proposta de valor única (o que eu entrego de diferente, qual transformação eu gero).
+3. Meu nicho de atuação (específico, em 1-2 frases).
+4. Meu público-alvo (quem são, o que sentem, o que querem, o que os frustra).
+5. O "inimigo em comum" entre mim e meu público (contra o que lutamos juntos no mercado).
+6. Minhas crenças e convicções fortes sobre o meu mercado (o que defendo, o que critico).
+7. Meu tom de voz para conteúdo (ex: direto, provocativo, técnico, acolhedor...).
+8. Minha proposta de valor única (a transformação que eu gero).
 
-Antes de escrever, me faça TODAS as perguntas que precisar para entender bem cada um desses pontos. Depois, gere o texto final, em português, em tom profissional mas humano, pronto para eu copiar e colar.
+Formato da sua resposta agora:
+- Se você já tem informação suficiente sobre mim: comece direto pelo texto final, sem comentários antes nem depois.
+- Se faltar algo essencial: liste primeiro (em 1 frase) o que você JÁ sabe sobre mim, depois faça apenas as perguntas que faltam. Quando eu responder, gere o texto final.`;
 
-Comece agora me perguntando sobre o item 1.`;
 
   const handleCopyPrompt = async () => {
     try {
@@ -486,12 +493,13 @@ Comece agora me perguntando sobre o item 1.`;
               {showGuide && (
                 <div className="px-3 pb-3 space-y-3 border-t border-primary/20">
                   <ol className="text-[11px] text-muted-foreground space-y-1.5 mt-3 list-decimal list-inside">
-                    <li>Copie o prompt abaixo no botão.</li>
-                    <li>Abra o <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> e cole numa conversa nova.</li>
-                    <li>Responda as perguntas que a IA te fizer (vai ser uma conversa guiada).</li>
-                    <li>No fim, ela vai gerar um texto completo. Copie esse texto.</li>
+                    <li>Clique em <strong className="text-foreground">Copiar prompt</strong>.</li>
+                    <li>Abra o <strong className="text-foreground">ChatGPT</strong> ou <strong className="text-foreground">Claude</strong> (de preferência logado, pra ele usar a memória que já tem de você).</li>
+                    <li>Cole numa conversa nova. Ele vai usar o que já sabe e só perguntar o que faltar.</li>
+                    <li>Responda as poucas perguntas (se houver) e copie o texto final que ele gerar.</li>
                     <li>Volte aqui, cole no campo abaixo e clique em <strong className="text-foreground">Preencher perfil com IA</strong>.</li>
                   </ol>
+
 
                   <div className="relative">
                     <pre className="text-[10px] leading-relaxed bg-secondary/60 border border-border/50 rounded-md p-3 pr-10 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-muted-foreground">
@@ -670,8 +678,12 @@ Comece agora me perguntando sobre o item 1.`;
             💡 Dica: adicione transcrições de aulas, posts antigos que funcionaram, frases que você usa muito, livros que te inspiram.
           </p>
         </section>
+
+        {/* Trocar senha */}
+        <ChangePasswordSection />
       </div>
     </div>
+
 
   );
 };
@@ -693,5 +705,48 @@ const FieldArea = ({ label, value, onChange, placeholder, required }: { label: s
     <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={3} className={`bg-secondary border-border/50 resize-none ${!value?.trim() && required ? 'border-destructive/40' : ''}`} />
   </div>
 );
+
+const ChangePasswordSection = () => {
+  const [pwd, setPwd] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pwd.length < 6) return toast.error("A senha precisa ter pelo menos 6 caracteres.");
+    if (pwd !== confirm) return toast.error("As senhas não conferem.");
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: pwd });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Senha atualizada!");
+    setPwd("");
+    setConfirm("");
+  };
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center gap-2">
+        <h2 className="text-lg font-bold font-display">Trocar senha</h2>
+      </div>
+      <form onSubmit={handleChange} className="rounded-xl border border-border/50 bg-card/40 p-4 space-y-3">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Nova senha</Label>
+            <Input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} placeholder="••••••••" minLength={6} className="bg-secondary border-border/50" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Confirmar senha</Label>
+            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" minLength={6} className="bg-secondary border-border/50" />
+          </div>
+        </div>
+        <Button type="submit" size="sm" disabled={saving || !pwd || !confirm} className="gap-1.5">
+          {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+          Atualizar senha
+        </Button>
+      </form>
+    </section>
+  );
+};
 
 export default ProfilePage;
